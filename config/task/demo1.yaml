@@ -1,4 +1,4 @@
-dataset_version:    ''
+dataset_version:    'graphcast.2.37'
 input_variables:    ['T', 'U', 'V',  'H', 'QV', 'SLP', 'FRLAND' ]
 target_variables:   ['T', 'U', 'V',  'H', 'QV', 'SLP' ]
 forcing_variables:  [ 'SWNETTOA' ]
