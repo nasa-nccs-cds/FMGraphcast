@@ -31,7 +31,7 @@ norm_data: Dict[str,xa.Dataset] = datasetMgr.load_norm_data()
 
 print("Loaded Norm Data:")
 for vname, ndset in norm_data.items():
-	print( f" {vname}.norm: shape={ndset.data_vars['norm'].shape}")
+	print( f" {vname}.mean: shape={ndset.data_vars['mean'].shape}")
 	print( f" {vname}.std:  shape={ndset.data_vars['std'].shape}")
 
 train_inputs, train_targets, train_forcings = data_utils.extract_inputs_targets_forcings(
