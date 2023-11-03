@@ -11,11 +11,12 @@ import haiku as hk
 from graphcast.graphcast import ModelConfig, TaskConfig, GraphCast
 from fmgraphcast.config import config_model, config_task, cfg
 from typing import Any, Dict, List, Tuple, Type, Optional, Union
-from fmbase.source.merra2.model import MERRA2DataInterface
+from fmbase.source.merra2.model import MERRA2DataInterface, YearMonth
 from fmbase.util.config import configure
 import jax, functools, xarray as xa
 hydra.initialize( version_base=None, config_path="../config" )
 configure( 'explore-test1' )
+
 
 params = None
 state = {}
@@ -25,10 +26,23 @@ train_steps = cfg().task.train_steps
 input_steps = cfg().task.input_steps
 eval_steps  = cfg().task.eval_steps
 dts         = cfg().task.data_timestep
+coords = dict( z="level" )
+start = YearMonth(2000,0)
+end = YearMonth(2000,1)
 
 datasetMgr = MERRA2DataInterface()
-example_batch: xa.Dataset = datasetMgr.load_batch()
+example_batch: xa.Dataset = datasetMgr.load_batch( start, end, coords=coords )
+
+print("Loaded Batch:")
+for vname, dvar in example_batch.data_vars.items():
+	print( f" {vname}{list(dvar.dims)}: shape={dvar.shape}")
+
 norm_data: Dict[str,xa.Dataset] = datasetMgr.load_norm_data()
+
+print("Loaded Norm Data:")
+for vname, ndset in norm_data.items():
+	for nname, ndata in ndset.data_vars.items():
+		print( f" {vname}.{nname}: shape={ndata.shape}")
 
 train_inputs, train_targets, train_forcings = data_utils.extract_inputs_targets_forcings(
     example_batch, target_lead_times=slice(f"{dts}h", f"{train_steps*dts}h"), **dataclasses.asdict(tconfig) )

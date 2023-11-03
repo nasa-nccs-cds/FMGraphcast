@@ -17,11 +17,12 @@ train_steps = cfg().task.train_steps
 input_steps = cfg().task.input_steps
 eval_steps  = cfg().task.eval_steps
 dts         = cfg().task.data_timestep
+coords = dict( z="level" )
 start = YearMonth(2000,0)
 end = YearMonth(2000,1)
 
 datasetMgr = MERRA2DataInterface()
-example_batch: xa.Dataset = datasetMgr.load_batch(start,end)
+example_batch: xa.Dataset = datasetMgr.load_batch( start, end, coords=coords )
 
 print("Loaded Batch:")
 for vname, dvar in example_batch.data_vars.items():
