@@ -1,12 +1,11 @@
 from graphcast import data_utils
 import dataclasses
 from graphcast.graphcast import ModelConfig, TaskConfig, GraphCast
-from fmgraphcast.config import config_model, config_task, cfg, config_path
+from fmgraphcast.config import config_model, config_task, cfg, configure
 from typing import Any, Dict, List, Tuple, Type, Optional, Union
 from fmbase.source.merra2.model import MERRA2DataInterface, YearMonth
-from fmbase.util.config import configure
 import functools, xarray as xa
-configure( 'explore-test1', config_path() )
+configure( 'explore-test1' )
 
 params = None
 state = {}
