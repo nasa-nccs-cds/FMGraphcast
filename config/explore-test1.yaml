@@ -1,0 +1,4 @@
+defaults:
+  - platform: explore
+  - model: demo1
+  - task: demo1

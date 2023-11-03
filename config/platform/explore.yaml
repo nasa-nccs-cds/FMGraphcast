@@ -1,0 +1,4 @@
+root:   "/explore/nobackup/projects/ilab/cache/FMF/"
+results:   "{root}/results"
+cache:     "{root}/cache"
+processed: '{root}/processed'

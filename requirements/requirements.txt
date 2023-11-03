@@ -1,0 +1,20 @@
+python
+fmbase
+omegaconf
+numpy
+xarray
+dask
+matplotlib
+scipy
+netCDF4
+hydra-core
+cartopy
+chex
+colabtools
+dm-haiku
+jax jraph
+pandas
+rtree
+tree
+trimesh
+typing_extensions
