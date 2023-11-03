@@ -6,7 +6,7 @@ from typing import Any, Dict, List, Tuple, Type, Optional, Union
 from fmbase.source.merra2.model import MERRA2DataInterface, YearMonth
 from fmbase.util.config import configure
 import functools, xarray as xa
-configure( 'explore-test1' )
+configure( 'explore-test1', "../config" )
 
 params = None
 state = {}
