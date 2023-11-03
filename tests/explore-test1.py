@@ -6,7 +6,7 @@ from graphcast import normalization
 from graphcast import xarray_jax
 from graphcast import xarray_tree
 from graphcast import data_utils
-import dataclasses
+import hydra, dataclasses
 import haiku as hk
 from graphcast.graphcast import ModelConfig, TaskConfig, GraphCast
 from fmgraphcast.config import config_model, config_task, cfg
@@ -14,6 +14,7 @@ from typing import Any, Dict, List, Tuple, Type, Optional, Union
 from fmbase.source.merra2.model import MERRA2DataInterface
 from fmbase.util.config import configure
 import jax, functools, xarray as xa
+hydra.initialize( version_base=None, config_path="../config" )
 configure( 'explore-test1' )
 
 params = None

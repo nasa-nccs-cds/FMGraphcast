@@ -1,10 +1,11 @@
 from graphcast import data_utils
-import dataclasses
+import hydra, dataclasses
 from graphcast.graphcast import ModelConfig, TaskConfig, GraphCast
 from fmgraphcast.config import config_model, config_task, cfg, configure
 from typing import Any, Dict, List, Tuple, Type, Optional, Union
 from fmbase.source.merra2.model import MERRA2DataInterface, YearMonth
 import functools, xarray as xa
+hydra.initialize( version_base=None, config_path="../config" )
 configure( 'explore-test1' )
 
 params = None

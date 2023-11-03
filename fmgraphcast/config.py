@@ -34,7 +34,7 @@ class Configuration:
     _instantiated = None
 
     def __init__(self, config_name: str, config_path: str ):
-        hydra.initialize( version_base=None, config_path=config_path )
+
         self.cfg: DictConfig = hydra.compose( config_name, return_hydra_config=True )
 
     @classmethod
