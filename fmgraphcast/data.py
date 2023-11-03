@@ -242,7 +242,7 @@ class FMGDataManager(MERRA2Base):
         years: List[int] = list(range(*cfg().task.year_range))
         months: List[int] = list(range(*cfg().task.month_range))
         varlist: List[str] = input_vars + forcing_vars
-        levels: List[float] = list(cfg().task.z_levels)
+        levels: List[float] = list(cfg().task.levels)
         training_data: Dict[str,xa.DataArray] = {}
 
         for vname in varlist:

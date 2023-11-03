@@ -18,7 +18,7 @@ def config_task( **kwargs) -> TaskConfig:
 	    input_variables=    kwargs.get('input_variables',    cfg().task.input_variables),
 	    target_variables=   kwargs.get('target_variables',   cfg().task.target_variables),
 	    forcing_variables=  kwargs.get('forcing_variables',  cfg().task.forcing_variables),
-	    pressure_levels=    kwargs.get('z_levels',           cfg().task.z_levels),
+	    pressure_levels=    kwargs.get('levels',             cfg().task.levels),
 	    input_duration=     kwargs.get('input_duration',     f"{cfg().task.input_steps*dts}h" ) )
 	return TaskConfig(**opts)
 
