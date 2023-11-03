@@ -31,8 +31,8 @@ norm_data: Dict[str,xa.Dataset] = datasetMgr.load_norm_data()
 
 print("Loaded Norm Data:")
 for vname, ndset in norm_data.items():
-	print( f" {vname}.mean: shape={ndset.data_vars['mean'].shape}")
-	print( f" {vname}.std:  shape={ndset.data_vars['std'].shape}")
+	for nname, ndata in ndset.data_vars.items():
+		print( f" {vname}.{nname}: shape={ndata.shape}")
 
 train_inputs, train_targets, train_forcings = data_utils.extract_inputs_targets_forcings(
     example_batch, target_lead_times=slice(f"{dts}h", f"{train_steps*dts}h"), **dataclasses.asdict(tconfig) )
