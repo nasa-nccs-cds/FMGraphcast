@@ -1,5 +1,6 @@
 from graphcast.graphcast import ModelConfig, TaskConfig, GraphCast
 from fmbase.util.config import cfg
+from pathlib import Path
 def config_model( **kwargs ) -> ModelConfig:
 	opts = dict(
 		resolution=     kwargs.get('resolution',    cfg().model.resolution),
@@ -19,3 +20,7 @@ def config_task( **kwargs) -> TaskConfig:
 	    pressure_levels=    kwargs.get('z_levels',           cfg().task.z_levels),
 	    input_duration=     kwargs.get('input_duration',     f"{cfg().task.input_steps*dts}h" ) )
 	return TaskConfig(**opts)
+
+def config_path() -> str:
+	root = Path(__file__).parent.parent.absolute()
+	return str( Path( root, Path('config') ) )
