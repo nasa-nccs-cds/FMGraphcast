@@ -1,4 +1,4 @@
-from graphcast import data_utils
+import fmbase.util.data as data_utils
 import hydra, dataclasses
 from graphcast.graphcast import ModelConfig, TaskConfig, GraphCast
 from fmgraphcast.config import config_model, config_task
