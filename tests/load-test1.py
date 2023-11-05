@@ -20,6 +20,8 @@ dts         = cfg().task.data_timestep
 coords = dict( z="level" )
 start = YearMonth(2000,0)
 end = YearMonth(2000,1)
+target_lead_times = [ f"{iS*dts}h" for iS in range(1,train_steps+1) ]
+eval_lead_times =   [ f"{iS*dts}h" for iS in range(1,eval_steps+1) ]
 
 datasetMgr = MERRA2DataInterface()
 example_batch: xa.Dataset = datasetMgr.load_batch( start, end, coords=coords )
@@ -35,11 +37,11 @@ for vname, ndset in norm_data.items():
 	for nname, ndata in ndset.data_vars.items():
 		print( f" {vname}.{nname}: shape={ndata.shape}")
 
-train_inputs, train_targets, train_forcings = data_utils.extract_inputs_targets_forcings(
-    example_batch, target_lead_times=slice(f"{dts}h", f"{train_steps*dts}h"), **dataclasses.asdict(tconfig) )
+train_inputs, train_targets, train_forcings = \
+	data_utils.extract_inputs_targets_forcings( example_batch, target_lead_times=target_lead_times, **dataclasses.asdict(tconfig) )
 
-eval_inputs, eval_targets, eval_forcings = data_utils.extract_inputs_targets_forcings(
-    example_batch, target_lead_times=slice(f"{dts}h", f"{eval_steps*dts}h"), **dataclasses.asdict(tconfig) )
+eval_inputs, eval_targets, eval_forcings = \
+	data_utils.extract_inputs_targets_forcings( example_batch, target_lead_times=eval_lead_times, **dataclasses.asdict(tconfig) )
 
 print("All Examples:  ", example_batch.dims.mapping)
 print("Train Inputs:  ", train_inputs.dims.mapping)
