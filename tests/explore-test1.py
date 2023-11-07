@@ -59,7 +59,7 @@ print("Eval Inputs:   ", eval_inputs.dims.mapping)
 print("Eval Targets:  ", eval_targets.dims.mapping)
 print("Eval Forcings: ", eval_forcings.dims.mapping)
 
-def construct_wrapped_graphcast( model_config: ModelConfig, task_config: TaskConfig, **kwargs) -> Predictor:
+def construct_wrapped_graphcast( model_config: ModelConfig, task_config: TaskConfig, **kwargs ) -> Predictor:
 	gcast = graphcast.GraphCast(model_config, task_config)
 	predictor: Predictor = casting.Bfloat16Cast(gcast)
 #           Modify inputs/outputs to `casting.Bfloat16Cast` so the casting to/from BFloat16 happens after applying normalization to the inputs/targets.
