@@ -3,12 +3,12 @@ from fmbase.util.config import cfg
 
 def config_model( **kwargs ) -> ModelConfig:
 	opts = dict(
-		resolution=     kwargs.get('resolution',    cfg().model.resolution),
-		mesh_size=      kwargs.get('mesh_size',     cfg().model.mesh_size),
-		latent_size=    kwargs.get('latent_size',   cfg().model.latent_size),
-		gnn_msg_steps=  kwargs.get('gnn_msg_steps', cfg().model.gnn_msg_steps),
-		hidden_layers=  kwargs.get('hidden_layers', cfg().model.hidden_layers),
-		radius_query_fraction_edge_length= kwargs.get('radius_query_fraction_edge_length', cfg().model.radius_query_fraction_edge_length) )
+		resolution=     kwargs.get( 'resolution',    cfg().model.resolution      ),
+		mesh_size=      kwargs.get( 'mesh_size',     cfg().model.mesh_size       ),
+		latent_size=    kwargs.get( 'latent_size',   cfg().model.latent_size     ),
+		gnn_msg_steps=  kwargs.get( 'gnn_msg_steps', cfg().model.gnn_msg_steps   ),
+		hidden_layers=  kwargs.get( 'hidden_layers', cfg().model.hidden_layers   ),
+		radius_query_fraction_edge_length= kwargs.get( 'radius_query_fraction_edge_length', cfg().model.radius_query_fraction_edge_length ) )
 	return ModelConfig(**opts)
 
 def config_task( **kwargs) -> TaskConfig:
