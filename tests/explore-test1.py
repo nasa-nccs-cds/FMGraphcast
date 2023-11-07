@@ -62,7 +62,7 @@ def construct_wrapped_graphcast( model_config: ModelConfig, task_config: TaskCon
 	gcast = graphcast.GraphCast(model_config, task_config)
 	predictor: Predictor = casting.Bfloat16Cast(gcast)
 #           Modify inputs/outputs to `casting.Bfloat16Cast` so the casting to/from BFloat16 happens after applying normalization to the inputs/targets.
-	npredictor = normalization.InputsAndResiduals( predictor, diffs_stddev_by_level=norm_data['std'], mean_by_level=norm_data['mean'], stddev_by_level=norm_data['std'])
+	npredictor = normalization.InputsAndResiduals( predictor, diffs_stddev_by_level=norm_data['std_diff'], mean_by_level=norm_data['mean'], stddev_by_level=norm_data['std'])
 #           Wraps everything so the one-step model can produce trajectories.
 	apredictor = autoregressive.Predictor(npredictor, gradient_checkpointing=True)
 	return apredictor
