@@ -25,7 +25,7 @@ train_steps = cfg().task.train_steps
 input_steps = cfg().task.input_steps
 eval_steps  = cfg().task.eval_steps
 dts         = cfg().task.data_timestep
-coords = dict( z="level" )
+coords = dict( z="level", x="lon", y="lat" )
 start = YearMonth(2000,0)
 end = YearMonth(2000,1)
 target_lead_times = [ f"{iS*dts}h" for iS in range(1,train_steps+1) ]
@@ -63,7 +63,7 @@ def construct_wrapped_graphcast( model_config: ModelConfig, task_config: TaskCon
 	gcast = graphcast.GraphCast(model_config, task_config)
 	predictor: Predictor = casting.Bfloat16Cast(gcast)
 #           Modify inputs/outputs to `casting.Bfloat16Cast` so the casting to/from BFloat16 happens after applying normalization to the inputs/targets.
-	npredictor = normalization.InputsAndResiduals( predictor, mean_by_level=norm_data['mean'], stddev_by_level=norm_data['std'], diffs_stddev_by_level=norm_data['std'])  # TODO: diffs_stddev_by_level=norm_data['std_diff']
+	npredictor = normalization.InputsAndResiduals( predictor, mean_by_level=norm_data['mean'], stddev_by_level=norm_data['std'], diffs_stddev_by_level=norm_data['std_diff'])
 #           Wraps everything so the one-step model can produce trajectories.
 	apredictor = autoregressive.Predictor(npredictor, gradient_checkpointing=True)
 	return apredictor
