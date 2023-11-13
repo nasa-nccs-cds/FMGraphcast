@@ -35,7 +35,7 @@ def parse_file_parts(file_name):
 
 # Load the model
 
-root = cfg().platform.model
+root = cfg().platform.model.format( **cfg().platform ).format( **cfg().platform )
 params_file = cfg().task.params
 pfilepath = f"{root}/params/{params_file}.npz"
 print( f" root = ", root )
