@@ -1,1 +1,3 @@
 params: "small"
+train_steps: 1
+eval_steps: 1
