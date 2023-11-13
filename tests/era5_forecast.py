@@ -79,11 +79,11 @@ print("Eval Forcings: ", eval_forcings.dims.mapping)
 
 # Load normalization data
 
-with open("{root}/stats/diffs_stddev_by_level.nc","rb") as f:
+with open(f"{root}/stats/diffs_stddev_by_level.nc","rb") as f:
 	diffs_stddev_by_level = xarray.load_dataset(f).compute()
-with open("{root}/stats/mean_by_level.nc","rb") as f:
+with open(f"{root}/stats/mean_by_level.nc","rb") as f:
 	mean_by_level = xarray.load_dataset(f).compute()
-with open("{root}/stats/stddev_by_level.nc","rb") as f:
+with open(f"{root}/stats/stddev_by_level.nc","rb") as f:
 	stddev_by_level = xarray.load_dataset(f).compute()
 
 print( " * Loaded normalization data * ")
