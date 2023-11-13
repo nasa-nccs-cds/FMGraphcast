@@ -38,7 +38,7 @@ def parse_file_parts(file_name):
 root = cfg().platform.model
 params_file = cfg().task.params
 
-with open(f"{root}/params/{params_file.value}.npz", "rb") as f:
+with open(f"{root}/params/{params_file}.npz", "rb") as f:
 	ckpt = checkpoint.load(f, graphcast.CheckPoint)
 	params = ckpt.params
 	state = {}
@@ -83,6 +83,8 @@ with open("{root}/stats/mean_by_level.nc","rb") as f:
 	mean_by_level = xarray.load_dataset(f).compute()
 with open("{root}/stats/stddev_by_level.nc","rb") as f:
 	stddev_by_level = xarray.load_dataset(f).compute()
+
+print( " * Loaded normalization data * ")
 
 # Build jitted functions, and possibly initialize random weights
 
@@ -164,7 +166,7 @@ print("Forcings:", eval_forcings.dims.mapping)
 predictions: xarray.Dataset = rollout.chunked_prediction( run_forward_jitted, rng=jax.random.PRNGKey(0), inputs=eval_inputs,
 														        targets_template=eval_targets * np.nan, forcings=eval_forcings)
 
-print( f"Completed forecast, result variables:")
+print( f" * Completed forecast, result variables: * ")
 for vname, dvar in predictions.data_vars.items():
 	print( f" > {vname}{dvar.dims}: {dvar.shape}")
 
