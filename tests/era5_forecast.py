@@ -57,7 +57,7 @@ res,levels,steps = cfg().model.res,  cfg().model.levels,  cfg().model.steps
 year, month, day =  cfg().model.year,  cfg().model.month,  cfg().model.day
 dataset_file = f"{root}/data/era5/res-{res}_levels-{levels}_steps-{steps:0>2}/{year}-{month:0>2}-{day:0>2}.nc"
 
-with open(f"dataset/{dataset_file}","rb") as f:
+with open(dataset_file,"rb") as f:
 	example_batch = xarray.load_dataset(f).compute()
 
 # Extract training and eval data
