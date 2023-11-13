@@ -37,8 +37,12 @@ def parse_file_parts(file_name):
 
 root = cfg().platform.model
 params_file = cfg().task.params
+pfilepath = f"{root}/params/{params_file}.npz"
+print( f" root = ", root )
+print( f" params_file = ", params_file )
+print( f" pfilepath = ", pfilepath )
 
-with open(f"{root}/params/{params_file}.npz", "rb") as f:
+with open(pfilepath, "rb") as f:
 	ckpt = checkpoint.load(f, graphcast.CheckPoint)
 	params = ckpt.params
 	state = {}
