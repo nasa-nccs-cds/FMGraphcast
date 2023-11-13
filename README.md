@@ -25,3 +25,7 @@ Integration of GraphCast into the ILab Foundation Model Framework
     > git clone https://github.com/google-deepmind/graphcast.git
     > cd graphcast
     > pip install .
+
+#### Workaround for shapely error:
+    > pip uninstall -y shapely
+    > pip install shapely --no-binary shapely

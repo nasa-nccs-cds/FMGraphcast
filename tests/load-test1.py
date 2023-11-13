@@ -1,8 +1,8 @@
 import fmbase.util.data as data_utils
 import hydra, dataclasses
+from fmbase.util.config import configure, cfg
 from graphcast.graphcast import ModelConfig, TaskConfig, GraphCast
 from fmgraphcast.config import config_model, config_task
-from fmbase.util.config import configure, cfg
 from typing import Any, Dict, List, Tuple, Type, Optional, Union
 from fmbase.source.merra2.model import MERRA2DataInterface, YearMonth
 import functools, xarray as xa

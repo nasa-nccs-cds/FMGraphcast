@@ -1,4 +1,5 @@
-root:   "/explore/nobackup/projects/ilab/cache/FMF/"
-results:   "{root}/results"
+root:   "/explore/nobackup/projects/ilab/data/FMF"
+model:  "{root}/model/graphcast"
+results:   "{model}/results"
 cache:     "{root}/cache"
 processed: '{root}/processed'

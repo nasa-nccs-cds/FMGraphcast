@@ -1,9 +1,7 @@
 
-# ilab-template-python-data-science/docs directory
+# FMGraphcast Resources
 
-Template for python projects tailored to scientific applications (e.g., machine learning) - docs directory
+## Params
 
-## Objectives
-
-- Directory for application documentation and supporting references
+- params-GraphCast_small: - ERA5 1979-2015 - resolution 1.0 - pressure levels 13 - mesh 2to5 - precipitation input and output
 
