@@ -63,13 +63,11 @@ with open(dataset_file,"rb") as f:
 # Extract training and eval data
 
 train_steps, eval_steps = cfg().task.train_steps, cfg().task.eval_steps
-train_inputs, train_targets, train_forcings = data_utils.extract_inputs_targets_forcings(
-    example_batch, target_lead_times=slice("6h", f"{train_steps.value*6}h"),
-    **dataclasses.asdict(task_config))
+train_inputs, train_targets, train_forcings = data_utils.extract_inputs_targets_forcings( example_batch,
+												target_lead_times=slice("6h", f"{train_steps*6}h"), **dataclasses.asdict(task_config))
 
-eval_inputs, eval_targets, eval_forcings = data_utils.extract_inputs_targets_forcings(
-    example_batch, target_lead_times=slice("6h", f"{eval_steps.value*6}h"),
-    **dataclasses.asdict(task_config))
+eval_inputs, eval_targets, eval_forcings = data_utils.extract_inputs_targets_forcings( example_batch,
+												target_lead_times=slice("6h", f"{eval_steps*6}h"), **dataclasses.asdict(task_config))
 
 print("All Examples:  ", example_batch.dims.mapping)
 print("Train Inputs:  ", train_inputs.dims.mapping)
