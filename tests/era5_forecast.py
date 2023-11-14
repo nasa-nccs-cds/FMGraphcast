@@ -28,6 +28,11 @@ def format_timedelta( td: np.timedelta64 ) -> str:
 	minutes, seconds = divmod(remainder, 60)
 	return '{:02}:{:02}:{:02}'.format(int(hours), int(minutes), int(seconds))
 
+def format_timedelta_hr( td: np.timedelta64 ) -> str:
+	s = td.astype('timedelta64[s]').astype(np.int32)
+	hours, remainder = divmod(s, 3600)
+	return f'{hours}hr'
+
 def format_timedeltas( tds: xarray.DataArray ) -> str:
 	if tds is None: return " NA "
 	return str( [format_timedelta(td) for td in tds.values] ).replace('"','')
