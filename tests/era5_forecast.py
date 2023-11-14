@@ -1,11 +1,4 @@
-import dataclasses
-import datetime
 import functools
-import math
-import re
-from typing import Optional
-
-import cartopy.crs as ccrs
 from graphcast import autoregressive
 from graphcast import casting
 from graphcast import checkpoint
@@ -15,8 +8,6 @@ from graphcast import normalization
 from graphcast import rollout
 from graphcast import xarray_jax
 from graphcast import xarray_tree
-from IPython.display import HTML
-import ipywidgets as widgets
 import haiku as hk
 import jax
 import matplotlib
@@ -26,9 +17,16 @@ import numpy as np
 import xarray
 import hydra, dataclasses
 from fmbase.util.config import configure, cfg
+from typing import List, Union, Tuple, Optional, Dict, Type
 
 hydra.initialize( version_base=None, config_path="../config" )
 configure( 'explore-era5' )
+
+def print_dict( title: str, data: Dict ):
+	print( f"\n -----> {title}:")
+	for k,v in data.items():
+		print( f"   ** {k}: {v}")
+	print("\n")
 
 def parse_file_parts(file_name):
 	return dict(part.split("-", 1) for part in file_name.split("_"))
@@ -50,8 +48,8 @@ with open(pfilepath, "rb") as f:
 	model_config = ckpt.model_config
 	task_config = ckpt.task_config
 	print("Model description:\n", ckpt.description, "\n")
-	print(f" >> model_config: {model_config}")
-	print(f" >> task_config:  {task_config}")
+	print_dict( "model_config", model_config )
+	print_dict("task_config", task_config )
 
 # Load weather data
 
@@ -76,18 +74,20 @@ print("Train Inputs:  ", train_inputs.dims.mapping)
 print("Train Targets: ", train_targets.dims.mapping)
 print("Train Forcings:", train_forcings.dims.mapping)
 
-print("Eval Inputs:   ", eval_inputs.dims.mapping)
+print("\nEval Inputs:   ", eval_inputs.dims.mapping)
 for vname, dvar in eval_inputs.data_vars.items():
 	print( f" > {vname}{dvar.dims}: {dvar.shape}")
 	if "time" in dvar.dims:
 		print(f" --> time: {dvar.coords['time'].values.tolist()}")
+	print_dict("attrs", dvar.attrs )
 
-print("Eval Targets:  ", eval_targets.dims.mapping)
+print("\nEval Targets:  ", eval_targets.dims.mapping)
 for vname, dvar in eval_targets.data_vars.items():
 	print( f" > {vname}{dvar.dims}: {dvar.shape}")
 	if "time" in dvar.dims:
 		print(f" --> time: {dvar.coords['time'].values.tolist()}")
-print("Eval Forcings: ", eval_forcings.dims.mapping)
+	print_dict("attrs", dvar.attrs)
+print("\nEval Forcings: ", eval_forcings.dims.mapping)
 
 # Load normalization data
 
