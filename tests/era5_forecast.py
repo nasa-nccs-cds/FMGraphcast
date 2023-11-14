@@ -30,7 +30,7 @@ def format_timedelta( td: np.timedelta64 ) -> str:
 
 def format_timedeltas( tds: xarray.DataArray ) -> str:
 	if tds is None: return " NA "
-	return str( [format_timedelta(td) for td in tds.values.tolist()] ).replace('"','')
+	return str( [format_timedelta(td) for td in tds.values] ).replace('"','')
 
 def print_dict( title: str, data: Dict ):
 	print( f"\n -----> {title}:")
