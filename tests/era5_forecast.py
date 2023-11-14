@@ -70,8 +70,8 @@ print("\nEval Inputs:   ", eval_inputs.dims.mapping)
 print_dict( "DSET attrs", eval_inputs.attrs )
 for vname, dvar in eval_inputs.data_vars.items():
 	ndvar: np.ndarray = dvar.values
+	print(f" > {vname}{dvar.dims}: {dvar.shape}")
 	tvar: Optional[xarray.DataArray] = dvar.coords.get('time')
-	print( f" > {vname}{dvar.dims}: {dvar.shape}")
 	print(f"   --> dtype: {dvar.dtype}, range: ({ndvar.min():.3f},{ndvar.max():.3f}), mean,std: ({ndvar.mean():.3f},{ndvar.std():.3f}), time: {format_timedeltas(tvar)}")
 
 print("\nEval Targets:  ", eval_targets.dims.mapping)
@@ -172,10 +172,11 @@ print("Forcings:", eval_forcings.dims.mapping)
 predictions: xarray.Dataset = rollout.chunked_prediction( run_forward_jitted, rng=jax.random.PRNGKey(0), inputs=eval_inputs,
 														        targets_template=eval_targets * np.nan, forcings=eval_forcings)
 
-print( f" * Completed forecast, result variables: * ")
+print( f" ***** Completed forecast, result variables:  ")
 for vname, dvar in predictions.data_vars.items():
 	print( f" > {vname}{dvar.dims}: {dvar.shape}")
-	if "time" in dvar.dims:
-		print(f" --> time: {dvar.coords['time'].values.tolist()}")
+	ndvar: np.ndarray = dvar.values
+	tvar: Optional[xarray.DataArray] = dvar.coords.get('time')
+	print(f"   --> dtype: {dvar.dtype}, range: ({ndvar.min():.3f},{ndvar.max():.3f}), mean,std: ({ndvar.mean():.3f},{ndvar.std():.3f}), time: {format_timedeltas(tvar)}")
 
 
