@@ -22,6 +22,16 @@ from typing import List, Union, Tuple, Optional, Dict, Type
 hydra.initialize( version_base=None, config_path="../config" )
 configure( 'explore-era5' )
 
+def format_timedelta( td: np.timedelta64 ) -> str:
+	s = td.astype('timedelta64[s]').astype(np.int32)
+	hours, remainder = divmod(s, 3600)
+	minutes, seconds = divmod(remainder, 60)
+	return '{:02}:{:02}:{:02}'.format(int(hours), int(minutes), int(seconds))
+
+def format_timedeltas( tds: xarray.DataArray ) -> str:
+	if tds is None: return " NA "
+	return str( [format_timedelta(td) for td in tds.values.tolist()] ).replace('"','')
+
 def print_dict( title: str, data: Dict ):
 	print( f"\n -----> {title}:")
 	for k,v in data.items():
@@ -79,14 +89,13 @@ for vname, dvar in eval_inputs.data_vars.items():
 	ndvar: np.ndarray = dvar.values
 	tvar: Optional[xarray.DataArray] = dvar.coords.get('time')
 	print( f" > {vname}{dvar.dims}: {dvar.shape}")
-	tval = f"({tvar.dtype}): {tvar.values.tolist()}" if tvar is not None else "NA"
-	print(f"   --> dtype: {dvar.dtype}, range: ({ndvar.min():.3f},{ndvar.max():.3f}), mean,std: ({ndvar.mean():.3f},{ndvar.std():.3f}), time{tval}")
+	print(f"   --> dtype: {dvar.dtype}, range: ({ndvar.min():.3f},{ndvar.max():.3f}), mean,std: ({ndvar.mean():.3f},{ndvar.std():.3f}), time: {format_timedeltas(tvar)}")
 
 print("\nEval Targets:  ", eval_targets.dims.mapping)
 for vname, dvar in eval_targets.data_vars.items():
 	print( f" > {vname}{dvar.dims}: {dvar.shape}")
 	if "time" in dvar.dims:
-		print(f"   --> time: {dvar.coords['time'].values.tolist()}")
+		print(f"   --> time: {format_timedeltas(tvar)}")
 print("\nEval Forcings: ", eval_forcings.dims.mapping)
 
 # Load normalization data
