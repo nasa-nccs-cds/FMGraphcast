@@ -50,6 +50,8 @@ with open(pfilepath, "rb") as f:
 	model_config = ckpt.model_config
 	task_config = ckpt.task_config
 	print("Model description:\n", ckpt.description, "\n")
+	print(f" >> model_config: {model_config}")
+	print(f" >> task_config:  {task_config}")
 
 # Load weather data
 
