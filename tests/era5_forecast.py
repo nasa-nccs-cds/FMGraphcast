@@ -73,8 +73,18 @@ print("All Examples:  ", example_batch.dims.mapping)
 print("Train Inputs:  ", train_inputs.dims.mapping)
 print("Train Targets: ", train_targets.dims.mapping)
 print("Train Forcings:", train_forcings.dims.mapping)
+
 print("Eval Inputs:   ", eval_inputs.dims.mapping)
+for vname, dvar in eval_inputs.data_vars.items():
+	print( f" > {vname}{dvar.dims}: {dvar.shape}")
+	if "time" in dvar.dims:
+		print(f" --> time: {dvar.coords['time'].values.tolist()}")
+
 print("Eval Targets:  ", eval_targets.dims.mapping)
+for vname, dvar in eval_targets.data_vars.items():
+	print( f" > {vname}{dvar.dims}: {dvar.shape}")
+	if "time" in dvar.dims:
+		print(f" --> time: {dvar.coords['time'].values.tolist()}")
 print("Eval Forcings: ", eval_forcings.dims.mapping)
 
 # Load normalization data
@@ -171,5 +181,7 @@ predictions: xarray.Dataset = rollout.chunked_prediction( run_forward_jitted, rn
 print( f" * Completed forecast, result variables: * ")
 for vname, dvar in predictions.data_vars.items():
 	print( f" > {vname}{dvar.dims}: {dvar.shape}")
+	if "time" in dvar.dims:
+		print(f" --> time: {dvar.coords['time'].values.tolist()}")
 
 
