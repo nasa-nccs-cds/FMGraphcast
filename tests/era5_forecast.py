@@ -22,20 +22,19 @@ from typing import List, Union, Tuple, Optional, Dict, Type
 hydra.initialize( version_base=None, config_path="../config" )
 configure( 'explore-era5' )
 
-def format_timedelta( td: np.timedelta64 ) -> str:
+def format_timedelta( td: np.timedelta64, form: str ) -> str:
 	s = td.astype('timedelta64[s]').astype(np.int32)
 	hours, remainder = divmod(s, 3600)
-	minutes, seconds = divmod(remainder, 60)
-	return '{:02}:{:02}:{:02}'.format(int(hours), int(minutes), int(seconds))
+	if form == "full":
+		minutes, seconds = divmod(remainder, 60)
+		return '{:02}:{:02}:{:02}'.format(int(hours), int(minutes), int(seconds))
+	elif form == "hr":
+		return f'{hours}hr'
+	else: raise Exception( f"format_timedelta: unknown form: {form}" )
 
-def format_timedelta_hr( td: np.timedelta64 ) -> str:
-	s = td.astype('timedelta64[s]').astype(np.int32)
-	hours, remainder = divmod(s, 3600)
-	return f'{hours}hr'
-
-def format_timedeltas( tds: xarray.DataArray ) -> str:
+def format_timedeltas( tds: xarray.DataArray, form: str = "hr" ) -> str:
 	if tds is None: return " NA "
-	return str( [format_timedelta_hr(td) for td in tds.values] ).replace('"','')
+	return str( [format_timedelta(td,form) for td in tds.values] ).replace('"','')
 
 def print_dict( title: str, data: Dict ):
 	print( f"\n -----> {title}:")
@@ -99,8 +98,8 @@ for vname, dvar in eval_inputs.data_vars.items():
 print("\nEval Targets:  ", eval_targets.dims.mapping)
 for vname, dvar in eval_targets.data_vars.items():
 	print( f" > {vname}{dvar.dims}: {dvar.shape}")
-	if "time" in dvar.dims:
-		print(f"   --> time: {format_timedeltas(tvar)}")
+	tvar: Optional[xarray.DataArray] = dvar.coords.get('time')
+	print(f"   --> time: {format_timedeltas(tvar)}")
 print("\nEval Forcings: ", eval_forcings.dims.mapping)
 
 # Load normalization data
