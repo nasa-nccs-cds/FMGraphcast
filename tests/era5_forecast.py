@@ -74,13 +74,13 @@ print("Train Targets: ", train_targets.dims.mapping)
 print("Train Forcings:", train_forcings.dims.mapping)
 
 print("\nEval Inputs:   ", eval_inputs.dims.mapping)
+print_dict( "DSET attrs", eval_inputs.attrs )
 for vname, dvar in eval_inputs.data_vars.items():
+	ndvar: np.ndarray = dvar.values
 	print( f" > {vname}{dvar.dims}: {dvar.shape}")
-	print(f" --> dvar: {dvar}")
+	print(f" --> dtype: {dvar.dtype}, range: ({ndvar.min():.3f},{ndvar.max():.3f}), std: {ndvar.std():.3f}")
 	if "time" in dvar.dims:
 		print(f" --> time: {dvar.coords['time'].values.tolist()}")
-#	print_dict("attrs", dvar.attrs )
-	print(f" --> attrs: {dvar.attrs}" )
 
 print("\nEval Targets:  ", eval_targets.dims.mapping)
 for vname, dvar in eval_targets.data_vars.items():
