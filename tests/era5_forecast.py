@@ -26,7 +26,6 @@ def print_dict( title: str, data: Dict ):
 	print( f"\n -----> {title}:")
 	for k,v in data.items():
 		print( f"   ** {k}: {v}")
-	print("\n")
 
 def parse_file_parts(file_name):
 	return dict(part.split("-", 1) for part in file_name.split("_"))
@@ -77,16 +76,17 @@ print("Train Forcings:", train_forcings.dims.mapping)
 print("\nEval Inputs:   ", eval_inputs.dims.mapping)
 for vname, dvar in eval_inputs.data_vars.items():
 	print( f" > {vname}{dvar.dims}: {dvar.shape}")
+	print(f" --> dvar: {dvar}")
 	if "time" in dvar.dims:
 		print(f" --> time: {dvar.coords['time'].values.tolist()}")
-	print_dict("attrs", dvar.attrs )
+#	print_dict("attrs", dvar.attrs )
+	print(f" --> attrs: {dvar.attrs}" )
 
 print("\nEval Targets:  ", eval_targets.dims.mapping)
 for vname, dvar in eval_targets.data_vars.items():
 	print( f" > {vname}{dvar.dims}: {dvar.shape}")
 	if "time" in dvar.dims:
 		print(f" --> time: {dvar.coords['time'].values.tolist()}")
-	print_dict("attrs", dvar.attrs)
 print("\nEval Forcings: ", eval_forcings.dims.mapping)
 
 # Load normalization data
