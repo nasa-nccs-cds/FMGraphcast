@@ -1,7 +1,6 @@
 from typing import Any, Mapping, Sequence, Tuple, Union
 from fmbase.source.merra2.model import MERRA2DataInterface
 from typing import Any, Dict, List, Tuple, Type, Optional, Union
-from  fmbase.source.merra2.base import MERRA2Base
 from fmbase.util.config import cfg
 import pandas as pd
 import numpy as np
@@ -22,7 +21,7 @@ TargetLeadTimes = Union[TimedeltaLike, Sequence[TimedeltaLike], slice]  # slice 
       final input timestep, and should be positive.
 """
 
-class FMGDataManager(MERRA2Base):
+class FMGDataManager:
     SEC_PER_HOUR = 3600
     HOUR_PER_DAY = 24
     SEC_PER_DAY = SEC_PER_HOUR * HOUR_PER_DAY
