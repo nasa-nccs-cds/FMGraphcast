@@ -81,7 +81,6 @@ for vname, dvar in eval_targets.data_vars.items():
 		print(f" --> time: {dvar.coords['time'].values.tolist()}")
 print("Eval Forcings: ", eval_forcings.dims.mapping)
 
-
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Load MERRA2 Data
 #-----------------
@@ -96,13 +95,13 @@ target_lead_times = [ f"{iS*dts}h" for iS in range(1,train_steps+1) ]
 eval_lead_times =   [ f"{iS*dts}h" for iS in range(1,eval_steps+1) ]
 
 print( "  --------------------- MERRA2 ---------------------")
-example_batch: xa.Dataset = load_batch( start, end, coords=coords )
+example_batch: xa.Dataset = load_batch( start, end, cfg().task, coords=coords )
 
 print("Loaded Batch:")
 for vname, dvar in example_batch.data_vars.items():
 	print( f" {vname}{list(dvar.dims)}: shape={dvar.shape}")
 
-norm_data: Dict[str,xa.Dataset] = load_norm_data()
+norm_data: Dict[str,xa.Dataset] = load_norm_data( cfg().task.dataset_version )
 
 print("Loaded Norm Data:")
 for vname, ndset in norm_data.items():

@@ -12,7 +12,8 @@ from graphcast.graphcast import ModelConfig, TaskConfig, GraphCast
 from fmgraphcast.config import config_model, config_task
 from fmbase.util.config import configure, cfg
 from typing import Any, Dict, List, Tuple, Type, Optional, Union
-from fmbase.source.merra2.model import MERRA2DataInterface, YearMonth
+from fmbase.source.merra2.model import YearMonth, load_batch
+from fmbase.source.merra2.preprocess import load_norm_data
 import functools, xarray as xa
 hydra.initialize( version_base=None, config_path="../config" )
 configure( 'explore-test1' )
@@ -31,14 +32,13 @@ end = YearMonth(2000,1)
 target_lead_times = [ f"{iS*dts}h" for iS in range(1,train_steps+1) ]
 eval_lead_times =   [ f"{iS*dts}h" for iS in range(1,eval_steps+1) ]
 
-datasetMgr = MERRA2DataInterface()
-example_batch: xa.Dataset = datasetMgr.load_batch( start, end, coords=coords )
+example_batch: xa.Dataset = load_batch( start, end, cfg().task, coords=coords )
 
 print("Loaded Batch:")
 for vname, dvar in example_batch.data_vars.items():
 	print( f" {vname}{list(dvar.dims)}: shape={dvar.shape}")
 
-norm_data: Dict[str,xa.Dataset] = datasetMgr.load_norm_data()
+norm_data: Dict[str,xa.Dataset] = load_norm_data( cfg().task.dataset_version )
 
 print("Loaded Norm Data:")
 for vname, ndset in norm_data.items():
