@@ -6,12 +6,12 @@ from graphcast import normalization
 from graphcast import xarray_jax
 from graphcast import xarray_tree
 import jax, haiku as hk
-import fmbase.util.data as data_utils
+import source.merra2.contrib.data as data_utils
 import hydra, dataclasses
-from graphcast.graphcast import ModelConfig, TaskConfig, GraphCast
+from graphcast.graphcast import ModelConfig, TaskConfig
 from fmgraphcast.config import config_model, config_task
 from fmbase.util.config import configure, cfg
-from typing import Any, Dict, List, Tuple, Type, Optional, Union
+from typing import Dict
 from fmbase.source.merra2.model import YearMonth, load_batch
 from fmbase.source.merra2.preprocess import load_norm_data
 import functools, xarray as xa

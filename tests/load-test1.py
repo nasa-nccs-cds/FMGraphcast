@@ -1,12 +1,12 @@
-import fmbase.util.data as data_utils
+import source.merra2.contrib.data as data_utils
 import hydra, dataclasses
 from fmbase.util.config import configure, cfg
-from graphcast.graphcast import ModelConfig, TaskConfig, GraphCast
+from graphcast.graphcast import ModelConfig, TaskConfig
 from fmgraphcast.config import config_model, config_task
-from typing import Any, Dict, List, Tuple, Type, Optional, Union
+from typing import Dict
 from fmbase.source.merra2.model import YearMonth, load_batch
 from fmbase.source.merra2.preprocess import load_norm_data
-import functools, xarray as xa
+import xarray as xa
 hydra.initialize( version_base=None, config_path="../config" )
 configure( 'explore-test1' )
 

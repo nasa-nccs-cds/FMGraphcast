@@ -1,5 +1,4 @@
 from typing import Any, Mapping, Sequence, Tuple, Union
-from fmbase.source.merra2.model import MERRA2DataInterface
 from typing import Any, Dict, List, Tuple, Type, Optional, Union
 from fmbase.util.config import cfg
 import pandas as pd
@@ -29,9 +28,6 @@ class FMGDataManager:
     AVG_SEC_PER_YEAR = SEC_PER_DAY * AVG_DAY_PER_YEAR
     DAY_PROGRESS = "day_progress"
     YEAR_PROGRESS = "year_progress"
-
-    def __init__(self):
-        MERRA2Base.__init__(self)
 
     @classmethod
     def get_year_progress(cls, seconds_since_epoch: np.ndarray) -> np.ndarray:

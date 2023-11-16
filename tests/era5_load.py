@@ -1,4 +1,4 @@
-from graphcast import data_utils
+from fmgraphcast import data_utils
 from fmgraphcast.config import config_files
 from fmgraphcast.config import dataset_path
 import xarray as xa

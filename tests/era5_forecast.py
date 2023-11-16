@@ -2,7 +2,7 @@ import functools
 from graphcast import autoregressive
 from graphcast import casting
 from graphcast import checkpoint
-from graphcast import data_utils
+from fmgraphcast import data_utils
 from graphcast import graphcast
 from graphcast import normalization
 from graphcast import rollout
