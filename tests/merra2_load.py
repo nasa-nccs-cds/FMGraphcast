@@ -2,7 +2,7 @@ import functools
 from typing import Optional, Dict
 from fmbase.source.merra2.model import YearMonth, load_batch
 from fmbase.source.merra2.preprocess import load_norm_data
-from fmbase.util.config import config_files
+from fmgraphcast.config import config_files
 from graphcast import autoregressive
 from graphcast import casting
 from graphcast import checkpoint

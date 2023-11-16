@@ -1,5 +1,5 @@
 from graphcast import data_utils
-from fmbase.util.config import config_files
+from fmgraphcast.config import config_files
 from fmgraphcast.config import dataset_path
 import xarray as xa
 import hydra, dataclasses
