@@ -2,6 +2,7 @@ import functools
 from typing import Optional, Dict
 from fmbase.source.merra2.model import YearMonth, load_batch
 from fmbase.source.merra2.preprocess import load_norm_data
+from fmbase.util.config import config_files
 from graphcast import autoregressive
 from graphcast import casting
 from graphcast import checkpoint
@@ -27,6 +28,7 @@ def parse_file_parts(file_name):
 res,levels,steps = cfg().model.res,  cfg().model.levels,  cfg().model.steps
 year, month, day =  cfg().model.year,  cfg().model.month,  cfg().model.day
 train_steps, eval_steps = cfg().task.train_steps, cfg().task.eval_steps
+(model_config,task_config) = config_files()
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Load MERRA2 Data

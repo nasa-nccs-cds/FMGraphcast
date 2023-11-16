@@ -1,19 +1,6 @@
-import functools
-from typing import Optional, Dict
-from fmbase.source.merra2.model import YearMonth, load_batch
-from fmbase.source.merra2.preprocess import load_norm_data
-from graphcast import autoregressive
-from graphcast import casting
-from graphcast import checkpoint
 from graphcast import data_utils
-from graphcast import graphcast
-from graphcast import normalization
-from graphcast import rollout
-from graphcast import xarray_jax
-from graphcast import xarray_tree
-import haiku as hk
-import jax
-import numpy as np
+from fmbase.util.config import config_files
+from fmgraphcast.config import dataset_path
 import xarray as xa
 import hydra, dataclasses
 from fmbase.util.config import configure, cfg
@@ -29,28 +16,8 @@ def parse_file_parts(file_name):
 #-----------------
 
 print( "  --------------------- ERA5 ---------------------")
-root = cfg().platform.model.format( **cfg().platform ).format( **cfg().platform )
-params_file = cfg().task.params
-pfilepath = f"{root}/params/{params_file}.npz"
-print( f" root = ", root )
-print( f" params_file = ", params_file )
-print( f" pfilepath = ", pfilepath )
-
-with open(pfilepath, "rb") as f:
-	ckpt = checkpoint.load(f, graphcast.CheckPoint)
-	params = ckpt.params
-	state = {}
-
-	model_config = ckpt.model_config
-	task_config = ckpt.task_config
-	print("Model description:\n", ckpt.description, "\n")
-	print(f" >> model_config: {model_config}")
-	print(f" >> task_config:  {task_config}")
-
-res,levels,steps = cfg().model.res,  cfg().model.levels,  cfg().model.steps
-year, month, day =  cfg().model.year,  cfg().model.month,  cfg().model.day
-dataset_file = f"{root}/data/era5/res-{res}_levels-{levels}_steps-{steps:0>2}/{year}-{month:0>2}-{day:0>2}.nc"
-
+(model_config,task_config) = config_files()
+dataset_file = dataset_path()
 with open(dataset_file,"rb") as f:
 	example_batch = xa.load_dataset(f).compute()
 
