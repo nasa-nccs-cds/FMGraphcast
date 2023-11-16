@@ -31,15 +31,15 @@ def dataset_path() -> str:
 	return f"{root}/data/era5/res-{res}_levels-{levels}_steps-{steps:0>2}/{year}-{month:0>2}-{day:0>2}.nc"
 
 def config_files() -> Tuple[ModelConfig,TaskConfig]:
-    root = fmbdir('model')
-    params_file = cfg().task.params
-    pfilepath = f"{root}/params/{params_file}.npz"
-    with open(pfilepath, "rb") as f:
-        ckpt = checkpoint.load(f, CheckPoint)
-        model_config = ckpt.model_config
-        task_config = ckpt.task_config
-        print("Model description:\n", ckpt.description, "\n")
-        print(f" >> model_config: {model_config}")
-        print(f" >> task_config:  {task_config}")
-    return model_config, task_config
+	root = fmbdir('model')
+	params_file = cfg().task.params
+	pfilepath = f"{root}/params/{params_file}.npz"
+	with open(pfilepath, "rb") as f:
+		ckpt = checkpoint.load(f, CheckPoint)
+		model_config = ckpt.model_config
+		task_config = ckpt.task_config
+		print("Model description:\n", ckpt.description, "\n")
+		print(f" >> model_config: {model_config}")
+		print(f" >> task_config:  {task_config}")
+	return model_config, task_config
 
