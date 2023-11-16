@@ -126,21 +126,18 @@ def add_derived_vars(data: xarray.Dataset) -> None:
     if coord not in data.coords:
       raise ValueError(f"'{coord}' must be in `data` coordinates.")
 
+  print( f" ***** datetime coord: {data.coords['datetime']}")
+
   # Compute seconds since epoch.
   # Note `data.coords["datetime"].astype("datetime64[s]").astype(np.int64)`
   # does not work as xarrays always cast dates into nanoseconds!
-  seconds_since_epoch = (
-      data.coords["datetime"].data.astype("datetime64[s]").astype(np.int64)
-  )
+  seconds_since_epoch = ( data.coords["datetime"].data.astype("datetime64[s]").astype(np.int64) )
   batch_dim = ("batch",) if "batch" in data.dims else ()
+  print(f" *****>>> seconds_since_epoch: {seconds_since_epoch}")
 
   # Add year progress features.
   year_progress = get_year_progress(seconds_since_epoch)
-  data.update(
-      featurize_progress(
-          name=YEAR_PROGRESS, dims=batch_dim + ("time",), progress=year_progress
-      )
-  )
+  data.update( featurize_progress( name=YEAR_PROGRESS, dims=batch_dim + ("time",), progress=year_progress ) )
 
   # Add day progress features.
   longitude_coord = data.coords["lon"]
