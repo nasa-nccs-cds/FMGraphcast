@@ -122,6 +122,8 @@ def add_derived_vars(data: xarray.Dataset) -> None:
     ValueError if `datetime` or `lon` are not in `data` coordinates.
   """
 
+  print(f" ***** time coord: {data.coords['time']}")
+
   for coord in ("datetime", "lon"):
     if coord not in data.coords:
       raise ValueError(f"'{coord}' must be in `data` coordinates.")
