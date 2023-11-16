@@ -24,11 +24,12 @@ def config_task( **kwargs) -> TaskConfig:
 	    input_duration=     kwargs.get('input_duration',     f"{cfg().task.input_steps*dts}h" ) )
 	return TaskConfig(**opts)
 
-def dataset_path() -> str:
+def dataset_path(**kwargs) -> str:
 	root = fmbdir('model')
-	res, levels, steps = cfg().model.res, cfg().model.levels, cfg().model.steps
-	year, month, day = cfg().model.year, cfg().model.month, cfg().model.day
-	return f"{root}/data/era5/res-{res}_levels-{levels}_steps-{steps:0>2}/{year}-{month:0>2}-{day:0>2}.nc"
+	parms = { pid: kwargs.get(pid, cfg().model.get(pid)) for pid in [ 'res', 'levels', 'steps', 'year', 'month', 'day' ] }
+	dspath = f"data/era5/res-{parms['res']}_levels-{parms['levels']}_steps-{parms['steps']:0>2}"
+	dsfile = f"{parms['year']}-{parms['month']:0>2}-{parms['day']:0>2}.nc"
+	return f"{root}/{dspath}/{dsfile}"
 
 def config_files() -> Tuple[ModelConfig,TaskConfig]:
 	root = fmbdir('model')

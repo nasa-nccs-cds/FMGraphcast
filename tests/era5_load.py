@@ -17,7 +17,7 @@ def parse_file_parts(file_name):
 
 print( "  --------------------- ERA5 ---------------------")
 (model_config,task_config) = config_files()
-dataset_file = dataset_path()
+dataset_file = dataset_path(year=2022)
 with open(dataset_file,"rb") as f:
 	example_batch = xa.load_dataset(f).compute()
 
