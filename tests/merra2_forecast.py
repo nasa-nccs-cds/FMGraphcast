@@ -83,8 +83,6 @@ for vname, dvar in eval_targets.data_vars.items():
 print("Eval Forcings: ", eval_forcings.dims.mapping)
 
 
-exit(0)
-
 # Build jitted functions, and possibly initialize random weights
 
 def construct_wrapped_graphcast( model_config: graphcast.ModelConfig, task_config: graphcast.TaskConfig):
@@ -98,11 +96,7 @@ def construct_wrapped_graphcast( model_config: graphcast.ModelConfig, task_confi
 
 	# Modify inputs/outputs to `casting.Bfloat16Cast` so the casting to/from
 	# BFloat16 happens after applying normalization to the inputs/targets.
-	predictor = normalization.InputsAndResiduals(
-	  predictor,
-	  diffs_stddev_by_level=diffs_stddev_by_level,
-	  mean_by_level=mean_by_level,
-	  stddev_by_level=stddev_by_level)
+	predictor = normalization.InputsAndResiduals( predictor, diffs_stddev_by_level=norm_data['std'], mean_by_level=norm_data['mean'], stddev_by_level=norm_data['std_diff'])
 
 	# Wraps everything so the one-step model can produce trajectories.
 	predictor = autoregressive.Predictor(predictor, gradient_checkpointing=True)
