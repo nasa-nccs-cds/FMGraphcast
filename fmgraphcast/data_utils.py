@@ -1,6 +1,6 @@
 # Adapted from code by DeepMind
 
-from typing import Any, Mapping, Sequence, Tuple, Union
+from typing import Any, Mapping, Sequence, Tuple, Union, List
 
 import numpy as np
 import pandas as pd
@@ -48,10 +48,7 @@ def get_year_progress(seconds_since_epoch: np.ndarray) -> np.ndarray:
   return np.mod(years_since_epoch, 1.0).astype(np.float32)
 
 
-def get_day_progress(
-    seconds_since_epoch: np.ndarray,
-    longitude: np.ndarray,
-) -> np.ndarray:
+def get_day_progress( seconds_since_epoch: np.ndarray, longitude: np.ndarray ) -> np.ndarray:
   """Computes day progress for times in seconds at each longitude.
 
   Args:
@@ -65,19 +62,15 @@ def get_day_progress(
   """
 
   # [0.0, 1.0) Interval.
-  day_progress_greenwich = (
-      np.mod(seconds_since_epoch, SEC_PER_DAY) / SEC_PER_DAY
-  )
+  day_progress_greenwich = ( np.mod(seconds_since_epoch, SEC_PER_DAY) / SEC_PER_DAY )
 
   # Offset the day progress to the longitude of each point on Earth.
   longitude_offsets = np.deg2rad(longitude) / (2 * np.pi)
-  day_progress = np.mod(
-      day_progress_greenwich[..., np.newaxis] + longitude_offsets, 1.0
-  )
+  day_progress = np.mod( day_progress_greenwich[..., np.newaxis] + longitude_offsets, 1.0 )
   return day_progress.astype(np.float32)
 
 
-def featurize_progress( name: str, dims: Sequence[str], progress: np.ndarray ) -> Mapping[str, xarray.Variable]:
+def featurize_progress( name: str, dims: List[str], progress: np.ndarray ) -> Mapping[str, xarray.Variable]:
   """Derives features used by ML models from the `progress` variable.
 
   Args:
@@ -94,6 +87,8 @@ def featurize_progress( name: str, dims: Sequence[str], progress: np.ndarray ) -
     ValueError if the number of feature dimensions is not equal to the number
       of data dimensions.
   """
+  try: dims.remove("batch")
+  except: pass
   if len(dims) != progress.ndim:
     raise ValueError( f"Number of dimensions in feature {name}{dims} must be equal to the number of dimensions in progress{progress.shape}." )
   else: print( f"featurize_progress: {name}{dims} --> progress{progress.shape} ")
