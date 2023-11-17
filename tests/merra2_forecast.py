@@ -52,9 +52,9 @@ for vname, dvar in example_batch.data_vars.items():
 
 norm_data: Dict[str,xa.Dataset] = load_norm_data( cfg().task.dataset_version )
 
-print("Loaded Norm Data:")
+print("\n Loaded Norm Data:")
 for vname, ndset in norm_data.items():
-	print( f"Norm dataset: {vname}:" )
+	print( f"------------ Norm dataset: {vname} ------------ " )
 	for nname, ndata in ndset.data_vars.items():
 		print( f"   ** {vname}.{nname}: shape={ndata.shape}")
 
