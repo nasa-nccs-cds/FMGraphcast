@@ -87,16 +87,15 @@ def featurize_progress( name: str, dims: Sequence[str], progress: np.ndarray ) -
     ValueError if the number of feature dimensions is not equal to the number
       of data dimensions.
   """
-  fdims: List[str] = [ d for d in dims if d != "batch"]
-  if len(fdims) != progress.ndim:
-    raise ValueError( f"Number of dimensions in feature {name}{fdims} must be equal to the number of dimensions in progress{progress.shape}." )
-  else: print( f"featurize_progress: {name}{fdims} --> progress{progress.shape} ")
+  if len(dims) != progress.ndim:
+    raise ValueError( f"Number of dimensions in feature {name}{dims} must be equal to the number of dimensions in progress{progress.shape}." )
+  else: print( f"featurize_progress: {name}{dims} --> progress{progress.shape} ")
 
   progress_phase = progress * (2 * np.pi)
   return {
-      name: xarray.Variable(fdims, progress),
-      name + "_sin": xarray.Variable(fdims, np.sin(progress_phase)),
-      name + "_cos": xarray.Variable(fdims, np.cos(progress_phase)),
+      name: xarray.Variable(dims, progress),
+      name + "_sin": xarray.Variable(dims, np.sin(progress_phase)),
+      name + "_cos": xarray.Variable(dims, np.cos(progress_phase)),
   }
 
 
@@ -135,20 +134,9 @@ def add_derived_vars(data: xarray.Dataset) -> None:
   # Add day progress features.
   longitude_coord = data.coords["lon"]
   day_progress = get_day_progress(seconds_since_epoch, longitude_coord.data)
-  data.update(
-      featurize_progress(
-          name=DAY_PROGRESS,
-          dims=batch_dim + ("time",) + longitude_coord.dims,
-          progress=day_progress,
-      )
-  )
+  data.update( featurize_progress( name=DAY_PROGRESS, dims=batch_dim + ("time",) + longitude_coord.dims, progress=day_progress ) )
 
-
-def extract_input_target_times(
-    dataset: xarray.Dataset,
-    input_duration: TimedeltaLike,
-    target_lead_times: TargetLeadTimes,
-    ) -> Tuple[xarray.Dataset, xarray.Dataset]:
+def extract_input_target_times( dataset: xarray.Dataset, input_duration: TimedeltaLike, target_lead_times: TargetLeadTimes ) -> Tuple[xarray.Dataset, xarray.Dataset]:
   """Extracts inputs and targets for prediction, from a Dataset with a time dim.
 
   The input period is assumed to be contiguous (specified by a duration), but
