@@ -70,12 +70,12 @@ def get_day_progress( seconds_since_epoch: np.ndarray, longitude: np.ndarray ) -
   return day_progress.astype(np.float32)
 
 
-def featurize_progress( name: str, dims: List[str], progress: np.ndarray ) -> Mapping[str, xarray.Variable]:
+def featurize_progress( name: str, fdims: Sequence[str], progress: np.ndarray ) -> Mapping[str, xarray.Variable]:
   """Derives features used by ML models from the `progress` variable.
 
   Args:
     name: Base variable name from which features are derived.
-    dims: List of the output feature dimensions, e.g. ("day", "lon").
+    fdims: List of the output feature dimensions, e.g. ("day", "lon").
     progress: Progress variable values.
 
   Returns:
@@ -87,8 +87,7 @@ def featurize_progress( name: str, dims: List[str], progress: np.ndarray ) -> Ma
     ValueError if the number of feature dimensions is not equal to the number
       of data dimensions.
   """
-  try: dims.remove("batch")
-  except: pass
+  dims: List[str] = [ d for d in fdims if d != "batch"]
   if len(dims) != progress.ndim:
     raise ValueError( f"Number of dimensions in feature {name}{dims} must be equal to the number of dimensions in progress{progress.shape}." )
   else: print( f"featurize_progress: {name}{dims} --> progress{progress.shape} ")
