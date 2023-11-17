@@ -38,14 +38,14 @@ def get_year_progress(seconds_since_epoch: np.ndarray) -> np.ndarray:
 
   # Start with the pure integer division, and then float at the very end.
   # We will try to keep as much precision as possible.
-  years_since_epoch = (
-      seconds_since_epoch / SEC_PER_DAY / np.float64(_AVG_DAY_PER_YEAR)
-  )
+  years_since_epoch = ( seconds_since_epoch / SEC_PER_DAY / np.float64(_AVG_DAY_PER_YEAR) )
   # Note depending on how these ops are down, we may end up with a "weak_type"
   # which can cause issues in subtle ways, and hard to track here.
   # In any case, casting to float32 should get rid of the weak type.
   # [0, 1.) Interval.
-  return np.mod(years_since_epoch, 1.0).astype(np.float32)
+  yp = np.mod(years_since_epoch, 1.0).astype(np.float32)
+  print( f" @@@@ year_progress: {yp}" )
+  return yp
 
 
 def get_day_progress( seconds_since_epoch: np.ndarray, longitude: np.ndarray ) -> np.ndarray:
