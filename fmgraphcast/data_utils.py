@@ -189,8 +189,7 @@ def extract_input_target_times( dataset: xarray.Dataset, input_duration: Timedel
       for targets the time coordinates will refer to the lead times requested.
   """
 
-  (target_lead_times, target_duration
-   ) = _process_target_lead_times_and_get_duration(target_lead_times)
+  ( target_lead_times, target_duration ) = _process_target_lead_times_and_get_duration(target_lead_times)
 
   # Shift the coordinates for the time axis so that a timedelta of zero
   # corresponds to the forecast reference time. That is, the final timestep
@@ -250,6 +249,9 @@ def extract_inputs_targets_forcings(
     ) -> Tuple[xarray.Dataset, xarray.Dataset, xarray.Dataset]:
   """Extracts inputs, targets and forcings according to requirements."""
   dataset = dataset.sel(level=list(pressure_levels))
+  print( f"\nInput dataset:")
+  for vname, varray in dataset.data_vars.items():
+      print( f" *** {vname}{varray.dims}{list(varray.shape)}")
 
   # "Forcings" are derived variables and do not exist in the original ERA5 or
   # HRES datasets. Compute them if they are not in `dataset`.
