@@ -77,9 +77,7 @@ def get_day_progress(
   return day_progress.astype(np.float32)
 
 
-def featurize_progress(
-    name: str, dims: Sequence[str], progress: np.ndarray
-) -> Mapping[str, xarray.Variable]:
+def featurize_progress( name: str, dims: Sequence[str], progress: np.ndarray ) -> Mapping[str, xarray.Variable]:
   """Derives features used by ML models from the `progress` variable.
 
   Args:
@@ -97,10 +95,8 @@ def featurize_progress(
       of data dimensions.
   """
   if len(dims) != progress.ndim:
-    raise ValueError(
-        f"Number of feature dimensions ({len(dims)}) must be equal to the"
-        f" number of data dimensions: {progress.ndim}."
-    )
+    raise ValueError( f"Number of dimensions in feature {name}{dims} must be equal to the number of dimensions in progress{progress.shape}." )
+
   progress_phase = progress * (2 * np.pi)
   return {
       name: xarray.Variable(dims, progress),
