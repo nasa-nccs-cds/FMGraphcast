@@ -44,7 +44,6 @@ def get_year_progress(seconds_since_epoch: np.ndarray) -> np.ndarray:
   # In any case, casting to float32 should get rid of the weak type.
   # [0, 1.) Interval.
   yp = np.mod(years_since_epoch, 1.0).astype(np.float32)
-  print( f" @@@@ year_progress: {yp}" )
   return yp
 
 
