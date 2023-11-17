@@ -253,7 +253,7 @@ def extract_inputs_targets_forcings(
   for vname, varray in idataset.data_vars.items():
       missing_batch = ("time" in varray.dims) and ("batch" not in varray.dims)
       dvars[vname] = varray.expand_dims("batch") if missing_batch else varray
-  dataset = xarray.Dataset( dvars, attrs=idataset.attrs )
+  dataset = xarray.Dataset( dvars, coords=idataset.coords, attrs=idataset.attrs )
 
           # "Forcings" are derived variables and do not exist in the original ERA5 or
   # HRES datasets. Compute them if they are not in `dataset`.
