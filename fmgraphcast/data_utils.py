@@ -238,7 +238,7 @@ def _process_target_lead_times_and_get_duration(
 
 
 def extract_inputs_targets_forcings(
-    dataset: xarray.Dataset,
+    idataset: xarray.Dataset,
     *,
     input_variables: Tuple[str, ...],
     target_variables: Tuple[str, ...],
@@ -248,12 +248,14 @@ def extract_inputs_targets_forcings(
     target_lead_times: TargetLeadTimes,
     ) -> Tuple[xarray.Dataset, xarray.Dataset, xarray.Dataset]:
   """Extracts inputs, targets and forcings according to requirements."""
-  dataset = dataset.sel(level=list(pressure_levels))
-  print( f"\nInput dataset:")     # TODO: add batch dim to time dependent variables
-  for vname, varray in dataset.data_vars.items():
-      print( f" *** {vname}{varray.dims}{list(varray.shape)}")
+  idataset = idataset.sel(level=list(pressure_levels))
+  dvars = {}
+  for vname, varray in idataset.data_vars.items():
+      missing_batch = ("time" in varray.dims) and ("batch" not in varray.dims)
+      dvars[vname] = varray.expand_dims("batch") if missing_batch else varray
+  dataset = xarray.Dataset( dvars, attrs=idataset.attrs )
 
-  # "Forcings" are derived variables and do not exist in the original ERA5 or
+          # "Forcings" are derived variables and do not exist in the original ERA5 or
   # HRES datasets. Compute them if they are not in `dataset`.
   if not set(forcing_variables).issubset(set(dataset.data_vars)):
     add_derived_vars(dataset)
