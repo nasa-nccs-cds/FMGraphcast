@@ -249,7 +249,7 @@ def extract_inputs_targets_forcings(
     ) -> Tuple[xarray.Dataset, xarray.Dataset, xarray.Dataset]:
   """Extracts inputs, targets and forcings according to requirements."""
   dataset = dataset.sel(level=list(pressure_levels))
-  print( f"\nInput dataset:")
+  print( f"\nInput dataset:")     # TODO: add batch dim to time dependent variables
   for vname, varray in dataset.data_vars.items():
       print( f" *** {vname}{varray.dims}{list(varray.shape)}")
 
