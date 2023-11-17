@@ -96,6 +96,7 @@ def featurize_progress( name: str, dims: Sequence[str], progress: np.ndarray ) -
   """
   if len(dims) != progress.ndim:
     raise ValueError( f"Number of dimensions in feature {name}{dims} must be equal to the number of dimensions in progress{progress.shape}." )
+  else: print( f"featurize_progress: {name}{dims} --> progress{progress.shape} ")
 
   progress_phase = progress * (2 * np.pi)
   return {
