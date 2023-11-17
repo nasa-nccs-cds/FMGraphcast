@@ -70,7 +70,7 @@ def get_day_progress( seconds_since_epoch: np.ndarray, longitude: np.ndarray ) -
   return day_progress.astype(np.float32)
 
 
-def featurize_progress( name: str, fdims: Sequence[str], progress: np.ndarray ) -> Mapping[str, xarray.Variable]:
+def featurize_progress( name: str, dims: Sequence[str], progress: np.ndarray ) -> Mapping[str, xarray.Variable]:
   """Derives features used by ML models from the `progress` variable.
 
   Args:
@@ -87,16 +87,16 @@ def featurize_progress( name: str, fdims: Sequence[str], progress: np.ndarray ) 
     ValueError if the number of feature dimensions is not equal to the number
       of data dimensions.
   """
-  dims: List[str] = [ d for d in fdims if d != "batch"]
-  if len(dims) != progress.ndim:
-    raise ValueError( f"Number of dimensions in feature {name}{dims} must be equal to the number of dimensions in progress{progress.shape}." )
-  else: print( f"featurize_progress: {name}{dims} --> progress{progress.shape} ")
+  fdims: List[str] = [ d for d in dims if d != "batch"]
+  if len(fdims) != progress.ndim:
+    raise ValueError( f"Number of dimensions in feature {name}{fdims} must be equal to the number of dimensions in progress{progress.shape}." )
+  else: print( f"featurize_progress: {name}{fdims} --> progress{progress.shape} ")
 
   progress_phase = progress * (2 * np.pi)
   return {
-      name: xarray.Variable(dims, progress),
-      name + "_sin": xarray.Variable(dims, np.sin(progress_phase)),
-      name + "_cos": xarray.Variable(dims, np.cos(progress_phase)),
+      name: xarray.Variable(fdims, progress),
+      name + "_sin": xarray.Variable(fdims, np.sin(progress_phase)),
+      name + "_cos": xarray.Variable(fdims, np.cos(progress_phase)),
   }
 
 
