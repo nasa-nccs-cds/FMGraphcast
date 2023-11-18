@@ -24,6 +24,7 @@ pfilepath = f"{root}/params/{params_file}.npz"
 print( f" root = ", root )
 print( f" params_file = ", params_file )
 print( f" pfilepath = ", pfilepath )
+year = 2022
 
 with open(pfilepath, "rb") as f:
 	ckpt = checkpoint.load(f, graphcast.CheckPoint)
@@ -39,7 +40,7 @@ with open(pfilepath, "rb") as f:
 # Load weather data
 
 res,levels,steps = cfg().model.res,  cfg().model.levels,  cfg().model.steps
-year, month, day =  cfg().model.year,  cfg().model.month,  cfg().model.day
+month, day =  cfg().model.month,  cfg().model.day
 dataset_file = f"{root}/data/era5/res-{res}_levels-{levels}_steps-{steps:0>2}/{year}-{month:0>2}-{day:0>2}.nc"
 
 with open(dataset_file,"rb") as f:
