@@ -6,7 +6,7 @@ from fmgraphcast.model import run_forward, grads_fn, loss_fn
 from graphcast import rollout
 from fmbase.util.ops import format_timedeltas, print_dict
 import haiku as hk
-import jax
+import jax, time
 import numpy as np
 import xarray
 import hydra, dataclasses
@@ -25,6 +25,7 @@ print( f" root = ", root )
 print( f" params_file = ", params_file )
 print( f" pfilepath = ", pfilepath )
 year = 2022
+t0 = time.time()
 
 with open(pfilepath, "rb") as f:
 	ckpt = checkpoint.load(f, graphcast.CheckPoint)
@@ -129,5 +130,7 @@ for vname, dvar in predictions.data_vars.items():
 	ndvar: np.ndarray = dvar.values
 	tvar: Optional[xarray.DataArray] = dvar.coords.get('time')
 	print(f"   --> dtype: {dvar.dtype}, range: ({ndvar.min():.3f},{ndvar.max():.3f}), mean,std: ({ndvar.mean():.3f},{ndvar.std():.3f}), time: {format_timedeltas(tvar)}")
+
+print( f"Completed in {time.time()-t0} sec.")
 
 
