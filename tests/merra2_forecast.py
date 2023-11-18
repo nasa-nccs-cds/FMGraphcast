@@ -50,7 +50,7 @@ print("Loaded Batch:")
 for vname, dvar in example_batch.data_vars.items():
 	print( f" {vname}{list(dvar.dims)}: shape={dvar.shape}")
 
-norm_data: Dict[str,xa.Dataset] = load_norm_data( cfg().task.dataset_version )
+norm_data: Dict[str,xa.Dataset] = load_norm_data( cfg().task )
 
 print("\n Loaded Norm Data:")
 for vname, ndset in norm_data.items():
