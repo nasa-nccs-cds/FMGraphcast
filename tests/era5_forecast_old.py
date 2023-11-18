@@ -104,7 +104,7 @@ def construct_wrapped_graphcast( model_config: graphcast.ModelConfig, task_confi
 	# Modify inputs/outputs to `graphcast.GraphCast` to handle conversion to
 	# from/to float32 to/from BFloat16.
 	predictor = casting.Bfloat16Cast(predictor)
-	print( f"\n **** Norm (std) Data vars = {stddev_by_level.data_vars.keys()}")
+	print( f"\n **** Norm (std) Data vars = {list(stddev_by_level.data_vars.keys())}")
 
 	# Modify inputs/outputs to `casting.Bfloat16Cast` so the casting to/from
 	# BFloat16 happens after applying normalization to the inputs/targets.
