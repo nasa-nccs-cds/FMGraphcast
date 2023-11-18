@@ -104,6 +104,7 @@ def construct_wrapped_graphcast( model_config: graphcast.ModelConfig, task_confi
 	# Modify inputs/outputs to `graphcast.GraphCast` to handle conversion to
 	# from/to float32 to/from BFloat16.
 	predictor = casting.Bfloat16Cast(predictor)
+	print( f"\n **** Norm (std) Data vars = {stddev_by_level.data_vars.keys()}")
 
 	# Modify inputs/outputs to `casting.Bfloat16Cast` so the casting to/from
 	# BFloat16 happens after applying normalization to the inputs/targets.
@@ -121,6 +122,12 @@ def construct_wrapped_graphcast( model_config: graphcast.ModelConfig, task_confi
 @hk.transform_with_state
 def run_forward(model_config, task_config, inputs, targets_template, forcings):
 	predictor = construct_wrapped_graphcast(model_config, task_config)
+	print( f"\n Run forward-> inputs:")
+	for vn, dv in inputs.data_vars.items():
+		print(f" > {vn}{dv.dims}: {dv.shape}")
+	print( f"\n Run forward-> targets_template:")
+	for vn, dv in targets_template.data_vars.items():
+		print(f" > {vn}{dv.dims}: {dv.shape}")
 	return predictor(inputs, targets_template=targets_template, forcings=forcings)
 
 
