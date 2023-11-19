@@ -12,9 +12,3 @@ target_variables: [ '2m_temperature', 'mean_sea_level_pressure', '10m_v_componen
 forcing_variables: [ 'toa_incident_solar_radiation' ]
 statnames: { mean: "mean_by_level", std: "stddev_by_level", mean_diff: "diffs_mean_by_level", std_diff: "diffs_stddev_by_level" }
 # constant_variables: [ 'geopotential_at_surface', 'land_sea_mask' ]
-
-
-
-	  diffs_stddev_by_level=diffs_stddev_by_level,
-	  =mean_by_level,
-	  =stddev_by_level)
