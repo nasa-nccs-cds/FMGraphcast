@@ -3,25 +3,20 @@ from typing import Optional, Dict
 from fmbase.source.merra2.model import YearMonth, load_batch
 from fmbase.source.merra2.preprocess import load_norm_data
 from fmgraphcast.config import config_files
-from graphcast import autoregressive
-from graphcast import casting
 from fmgraphcast.model import run_forward, drop_state, grads_fn, loss_fn
 from fmbase.util.ops import format_timedeltas, print_dict
 from fmgraphcast import data_utils
-from graphcast import graphcast
-from graphcast import normalization
 from graphcast import rollout
-from graphcast import xarray_jax
-from graphcast import xarray_tree
 import haiku as hk
 import jax
 import numpy as np
 import xarray as xa
-import hydra, dataclasses
+import hydra, dataclasses, time
 from fmbase.util.config import configure, cfg
 
 hydra.initialize( version_base=None, config_path="../config" )
 configure( 'explore-era5' )
+t0 = time.time()
 
 def parse_file_parts(file_name):
 	return dict(part.split("-", 1) for part in file_name.split("_"))
@@ -93,6 +88,11 @@ def with_configs(fn):
 def with_params(fn):
 	return functools.partial(fn, params=params, state=state)
 
+# Our models aren't stateful, so the state is always empty, so just return the
+# predictions. This is requiredy by our rollout code, and generally simpler.
+def drop_state(fn):
+	return lambda **kw: fn(**kw)[0]
+
 init_jitted = jax.jit(with_configs(run_forward.init))
 
 if params is None:
@@ -111,7 +111,8 @@ print("Inputs:  ", eval_inputs.dims.mapping)
 print("Targets: ", eval_targets.dims.mapping)
 print("Forcings:", eval_forcings.dims.mapping)
 
-predictions: xa.Dataset = rollout.chunked_prediction( run_forward_jitted, rng=jax.random.PRNGKey(0), inputs=eval_inputs, targets_template=eval_targets * np.nan, forcings=eval_forcings )
+predictions: xa.Dataset = rollout.chunked_prediction( run_forward_jitted, rng=jax.random.PRNGKey(0), inputs=eval_inputs,
+														        targets_template=eval_targets * np.nan, forcings=eval_forcings)
 
 print( f" ***** Completed forecast, result variables:  ")
 for vname, dvar in predictions.data_vars.items():
@@ -120,6 +121,6 @@ for vname, dvar in predictions.data_vars.items():
 	tvar: Optional[xa.DataArray] = dvar.coords.get('time')
 	print(f"   --> dtype: {dvar.dtype}, range: ({ndvar.min():.3f},{ndvar.max():.3f}), mean,std: ({ndvar.mean():.3f},{ndvar.std():.3f}), time: {format_timedeltas(tvar)}")
 
-
+print( f"Completed in {time.time()-t0} sec.")
 
 
