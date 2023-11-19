@@ -7,7 +7,7 @@ train_steps:        2
 eval_steps:         2
 input_steps:        2
 data_timestep:      3
-
+statnames: { mean: "mean_by_level", std: "stddev_by_level", mean_diff: "diffs_mean_by_level", std_diff: "diffs_stddev_by_level" }
 
 # preprocessed: ['T', 'U', 'V', 'OMEGA', 'H', 'QV','SLP', 'T2M', 'V10M', 'U10M', 'TQI', 'TQL', 'TQV', 'PRECLS', 'SWNETTOA'}
 # const: [ 'PHIS', 'FRACI', 'FRLAKE', 'FRLAND', 'FRLANDICE', 'FROCEAN']
