@@ -38,13 +38,13 @@ def run_forward(model_config, task_config, inputs: xa.Dataset, targets_template:
 	predictor = construct_wrapped_graphcast(model_config, task_config, norm_data)
 	print( f"\n Run forward-> inputs:")
 	for vn, dv in inputs.data_vars.items():
-		print(f" > {vn}{dv.dims}: {dv.shape}, std={dv.values.std()}")
+		print(f" > {vn}{dv.dims}: {dv.shape}")
 	print( f"\n Run forward-> targets_template:")
 	for vn, dv in targets_template.data_vars.items():
-		print(f" > {vn}{dv.dims}: {dv.shape}, std={dv.values.std()}")
+		print(f" > {vn}{dv.dims}: {dv.shape}")
 	print( f"\n Run forward-> targets_template:")
 	for vn, dv in targets_template.data_vars.items():
-		print(f" > {vn}{dv.dims}: {dv.shape}, std={dv.values.std()}")
+		print(f" > {vn}{dv.dims}: {dv.shape}")
 	return predictor(inputs, targets_template=targets_template, forcings=forcings)
 
 
