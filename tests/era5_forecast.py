@@ -123,14 +123,14 @@ print("Forcings:", eval_forcings.dims.mapping)
 
 predictions: xarray.Dataset = rollout.chunked_prediction( run_forward_jitted, rng=jax.random.PRNGKey(0), inputs=eval_inputs,
 														        targets_template=eval_targets * np.nan, forcings=eval_forcings)
-
-print( f" ***** Completed forecast, result variables:  ")
-for vname, dvar in predictions.data_vars.items():
-	print( f" > {vname}{dvar.dims}: {dvar.shape}")
-	ndvar: np.ndarray = dvar.values
-	tvar: Optional[xarray.DataArray] = dvar.coords.get('time')
-	print(f"   --> dtype: {dvar.dtype}, range: ({ndvar.min():.3f},{ndvar.max():.3f}), mean,std: ({ndvar.mean():.3f},{ndvar.std():.3f}), time: {format_timedeltas(tvar)}")
-
-print( f"Completed in {time.time()-t0} sec.")
-
-
+#
+# print( f" ***** Completed forecast, result variables:  ")
+# for vname, dvar in predictions.data_vars.items():
+# 	print( f" > {vname}{dvar.dims}: {dvar.shape}")
+# 	ndvar: np.ndarray = dvar.values
+# 	tvar: Optional[xarray.DataArray] = dvar.coords.get('time')
+# 	print(f"   --> dtype: {dvar.dtype}, range: ({ndvar.min():.3f},{ndvar.max():.3f}), mean,std: ({ndvar.mean():.3f},{ndvar.std():.3f}), time: {format_timedeltas(tvar)}")
+#
+# print( f"Completed in {time.time()-t0} sec.")
+#
+#

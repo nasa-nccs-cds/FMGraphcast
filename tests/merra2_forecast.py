@@ -48,11 +48,11 @@ for vname, dvar in example_batch.data_vars.items():
 
 norm_data: Dict[str,xa.Dataset] = load_norm_data( cfg().task )
 
-print("\n Loaded Norm Data:")
-for vname, ndset in norm_data.items():
-	print( f"------------ Norm dataset: {vname} ------------ " )
-	for nname, ndata in ndset.data_vars.items():
-		print( f"   ** {vname}.{nname}: shape={ndata.shape}")
+# print("\n Loaded Norm Data:")
+# for vname, ndset in norm_data.items():
+# 	print( f"------------ Norm dataset: {vname} ------------ " )
+# 	for nname, ndata in ndset.data_vars.items():
+# 		print( f"   ** {vname}.{nname}: shape={ndata.shape}")
 
 train_inputs, train_targets, train_forcings = \
 	data_utils.extract_inputs_targets_forcings( example_batch, target_lead_times=target_lead_times, **dataclasses.asdict(task_config) )
@@ -114,13 +114,13 @@ print("Forcings:", eval_forcings.dims.mapping)
 predictions: xa.Dataset = rollout.chunked_prediction( run_forward_jitted, rng=jax.random.PRNGKey(0), inputs=eval_inputs,
 														        targets_template=eval_targets * np.nan, forcings=eval_forcings)
 
-print( f" ***** Completed forecast, result variables:  ")
-for vname, dvar in predictions.data_vars.items():
-	print( f" > {vname}{dvar.dims}: {dvar.shape}")
-	ndvar: np.ndarray = dvar.values
-	tvar: Optional[xa.DataArray] = dvar.coords.get('time')
-	print(f"   --> dtype: {dvar.dtype}, range: ({ndvar.min():.3f},{ndvar.max():.3f}), mean,std: ({ndvar.mean():.3f},{ndvar.std():.3f}), time: {format_timedeltas(tvar)}")
-
-print( f"Completed in {time.time()-t0} sec.")
+# print( f" ***** Completed forecast, result variables:  ")
+# for vname, dvar in predictions.data_vars.items():
+# 	print( f" > {vname}{dvar.dims}: {dvar.shape}")
+# 	ndvar: np.ndarray = dvar.values
+# 	tvar: Optional[xa.DataArray] = dvar.coords.get('time')
+# 	print(f"   --> dtype: {dvar.dtype}, range: ({ndvar.min():.3f},{ndvar.max():.3f}), mean,std: ({ndvar.mean():.3f},{ndvar.std():.3f}), time: {format_timedeltas(tvar)}")
+#
+# print( f"Completed in {time.time()-t0} sec.")
 
 
