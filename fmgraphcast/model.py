@@ -26,8 +26,8 @@ def construct_wrapped_graphcast( model_config: graphcast.ModelConfig, task_confi
 
 	# Modify inputs/outputs to `casting.Bfloat16Cast` so the casting to/from
 	# BFloat16 happens after applying normalization to the inputs/targets.
-	print( f"\n **** Norm (std) Data vars = {list(norm_data['std'].data_vars.keys())}")
-	predictor = normalization.InputsAndResiduals( predictor, diffs_stddev_by_level=norm_data['std'], mean_by_level=norm_data['mean'], stddev_by_level=norm_data['std_diff'])
+	print( f"\n **** Norm (std) Data vars = {list(norm_data['stddev_by_level'].data_vars.keys())}")
+	predictor = normalization.InputsAndResiduals( predictor, **norm_data )
 
 	# Wraps everything so the one-step model can produce trajectories.
 	predictor = autoregressive.Predictor(predictor, gradient_checkpointing=True)
@@ -38,10 +38,13 @@ def run_forward(model_config, task_config, inputs: xa.Dataset, targets_template:
 	predictor = construct_wrapped_graphcast(model_config, task_config, norm_data)
 	print( f"\n Run forward-> inputs:")
 	for vn, dv in inputs.data_vars.items():
-		print(f" > {vn}{dv.dims}: {dv.shape}, std={dv.std()}")
+		print(f" > {vn}{dv.dims}: {dv.shape}, std={dv.values.std()}")
 	print( f"\n Run forward-> targets_template:")
 	for vn, dv in targets_template.data_vars.items():
-		print(f" > {vn}{dv.dims}: {dv.shape}, std={dv.std()}")
+		print(f" > {vn}{dv.dims}: {dv.shape}, std={dv.values.std()}")
+	print( f"\n Run forward-> targets_template:")
+	for vn, dv in targets_template.data_vars.items():
+		print(f" > {vn}{dv.dims}: {dv.shape}, std={dv.values.std()}")
 	return predictor(inputs, targets_template=targets_template, forcings=forcings)
 
 

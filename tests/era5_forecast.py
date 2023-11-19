@@ -78,14 +78,14 @@ print("\nEval Forcings: ", eval_forcings.dims.mapping)
 
 # Load normalization data
 
+norm_data = {}
 with open(f"{root}/stats/diffs_stddev_by_level.nc","rb") as f:
-	diffs_stddev_by_level = xarray.load_dataset(f).compute()
+	norm_data['diffs_stddev_by_level'] = xarray.load_dataset(f).compute()
 with open(f"{root}/stats/mean_by_level.nc","rb") as f:
-	mean_by_level = xarray.load_dataset(f).compute()
+	norm_data['mean_by_level'] = xarray.load_dataset(f).compute()
 with open(f"{root}/stats/stddev_by_level.nc","rb") as f:
-	stddev_by_level = xarray.load_dataset(f).compute()
+	norm_data['stddev_by_level'] = xarray.load_dataset(f).compute()
 
-norm_data = dict( std=stddev_by_level, mean=mean_by_level, std_diff=diffs_stddev_by_level )
 print( " * Loaded normalization data * ")
 
 # Jax doesn't seem to like passing configs as args through the jit. Passing it
