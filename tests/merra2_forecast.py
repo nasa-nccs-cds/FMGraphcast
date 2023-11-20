@@ -33,14 +33,13 @@ train_steps, eval_steps = cfg().task.train_steps, cfg().task.eval_steps
 params = None
 state = {}
 dts         = cfg().task.data_timestep
-coords = dict( z="level", x="lon", y="lat" )
 start = YearMonth(year,month)
 end = YearMonth(year,month+1)
 target_lead_times = [ f"{iS*dts}h" for iS in range(1,train_steps+1) ]
 eval_lead_times =   [ f"{iS*dts}h" for iS in range(1,eval_steps+1) ]
 
 print( "  --------------------- MERRA2 ---------------------")
-example_batch: xa.Dataset = load_batch( start, end, cfg().task, coords=coords )
+example_batch: xa.Dataset = load_batch( start, end, cfg().task )
 
 print("Loaded Batch:")
 for vname, dvar in example_batch.data_vars.items():

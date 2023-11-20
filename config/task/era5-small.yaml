@@ -5,7 +5,7 @@ eval_steps: 1
 data_timestep: 6
 levels:  [50, 100, 150, 200, 250, 300, 400, 500, 600, 700, 850, 925, 1000]
 
-dims: { x: "lon", y: "lat", z: "level" }
+coords: { x: "lon", y: "lat", z: "level" }
 statnames: { mean: "mean_by_level", std: "stddev_by_level", mean_diff: "diffs_mean_by_level", std_diff: "diffs_stddev_by_level" }
 
 input_variables: { 2m_temperature: 'T2M', mean_sea_level_pressure: 'SLP', 10m_v_component_of_wind: 'V10M', 10m_u_component_of_wind: 'U10M',
