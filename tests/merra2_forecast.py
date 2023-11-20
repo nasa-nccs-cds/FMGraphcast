@@ -105,7 +105,7 @@ run_forward_jitted = drop_state(with_params(jax.jit(with_configs(run_forward.app
 # Autoregressive rollout (loop in python)
 
 assert model_config.resolution in (0, 360. / eval_inputs.sizes["lon"]), (
-  "Model resolution doesn't match the data resolution. You likely want to re-filter the dataset list, and download the correct data.")
+  f"Model resolution doesn't match the data resolution. model_config.resolution = {model_config.resolution}, eval_inputs.sizes[lon] = {eval_inputs.sizes['lon']}")
 
 print("Inputs:  ", eval_inputs.dims.mapping)
 print("Targets: ", eval_targets.dims.mapping)
