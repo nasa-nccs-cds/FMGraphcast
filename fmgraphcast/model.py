@@ -46,17 +46,17 @@ def run_forward(model_config, task_config, inputs: xa.Dataset, targets_template:
 
 
 @hk.transform_with_state
-def loss_fn(model_config, task_config, inputs, targets, forcings, norm_data: Dict[str,xa.Dataset]):
+def loss_fn(model_config, task_config, inputs: xa.Dataset, targets: xa.Dataset, forcings: xa.Dataset, norm_data: Dict[str,xa.Dataset]):
 	predictor = construct_wrapped_graphcast(model_config, task_config, norm_data)
 	loss, diagnostics = predictor.loss(inputs, targets, forcings)
 	return xarray_tree.map_structure(
 	  lambda x: xarray_jax.unwrap_data(x.mean(), require_jax=True), (loss, diagnostics))
 
-def grads_fn(params, state, model_config, task_config, inputs, targets, forcings):
-	def _aux(params, state, i, t, f):
-		(loss, diagnostics), next_state = loss_fn.apply(  params, state, jax.random.PRNGKey(0), model_config, task_config, i, t, f)
+def grads_fn(params, state, model_config, task_config, inputs: xa.Dataset, targets: xa.Dataset, forcings: xa.Dataset, norm_data: Dict[str,xa.Dataset] ):
+	def _aux(params, state, i, t, f, n):
+		(loss, diagnostics), next_state = loss_fn.apply(  params, state, jax.random.PRNGKey(0), model_config, task_config, i, t, f, n)
 		return loss, (diagnostics, next_state)
-	(loss, (diagnostics, next_state)), grads = jax.value_and_grad( _aux, has_aux=True)(params, state, inputs, targets, forcings)
+	(loss, (diagnostics, next_state)), grads = jax.value_and_grad( _aux, has_aux=True)(params, state, inputs, targets, forcings, norm_data)
 	return loss, diagnostics, next_state, grads
 
 
