@@ -138,11 +138,7 @@ print("Inputs:  ", train_inputs.dims.mapping)
 print("Targets: ", train_targets.dims.mapping)
 print("Forcings:", train_forcings.dims.mapping)
 
-predictions = run_forward_jitted(
-    rng=jax.random.PRNGKey(0),
-    inputs=train_inputs,
-    targets_template=train_targets * np.nan,
-    forcings=train_forcings)
+predictions = run_forward_jitted( rng=jax.random.PRNGKey(0), inputs=train_inputs, targets_template=train_targets * np.nan, forcings=train_forcings)
 
 print( f"Completed Autoregressive rollout in {time.time()-t1} sec.")
 
