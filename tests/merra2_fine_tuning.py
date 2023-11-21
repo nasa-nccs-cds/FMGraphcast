@@ -117,8 +117,41 @@ for vname, dvar in predictions.data_vars.items():
 	tvar: Optional[xa.DataArray] = dvar.coords.get('time')
 	print(f"   --> dtype: {dvar.dtype}, range: ({ndvar.min():.3f},{ndvar.max():.3f}), mean,std: ({ndvar.mean():.3f},{ndvar.std():.3f}), time: {format_timedeltas(tvar)}")
 
-print( f"Completed in {time.time()-t0} sec.")
+t1 = time.time()
+print( f"Completed forecast in {t1-t0} sec.")
 
+
+#  Loss computation (autoregressive loss over multiple steps)
+
+loss, diagnostics = loss_fn_jitted(
+    rng=jax.random.PRNGKey(0),
+    inputs=train_inputs,
+    targets=train_targets,
+    forcings=train_forcings)
+print("Loss:", float(loss))
+
+#  Gradient computation (backprop through time)
+
+loss, diagnostics, next_state, grads = grads_fn_jitted(
+    inputs=train_inputs,
+    targets=train_targets,
+    forcings=train_forcings)
+mean_grad = np.mean(jax.tree_util.tree_flatten(jax.tree_util.tree_map(lambda x: np.abs(x).mean(), grads))[0])
+print(f"Loss: {loss:.4f}, Mean |grad|: {mean_grad:.6f}")
+
+# Autoregressive rollout (keep the loop in JAX)
+
+print("Inputs:  ", train_inputs.dims.mapping)
+print("Targets: ", train_targets.dims.mapping)
+print("Forcings:", train_forcings.dims.mapping)
+
+predictions = run_forward_jitted(
+    rng=jax.random.PRNGKey(0),
+    inputs=train_inputs,
+    targets_template=train_targets * np.nan,
+    forcings=train_forcings)
+
+print( f"Completed Autoregressive rollout in {time.time()-t1} sec.")
 
 
 
