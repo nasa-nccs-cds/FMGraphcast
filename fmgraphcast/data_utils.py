@@ -32,6 +32,7 @@ def load_predef_norm_data() -> Dict[str,xarray.Dataset]:
     with open(f"{root}/stats/diffs_stddev_by_level.nc", "rb") as f:
         dset: xarray.Dataset = xarray.load_dataset(f)
         drop_vars = [ vname for vname in dset.data_vars.keys() if vname not in predef_norms ]
+        print( f" @@@@ load_predef_norm_data: drop_vars = {drop_vars}")
         norms['diffs_stddev_by_level']: xarray.Dataset = dset.drop_vars( drop_vars ).compute()
     with open(f"{root}/stats/mean_by_level.nc", "rb") as f:
         norms['mean_by_level']: xarray.Dataset = xarray.load_dataset(f, drop_variables=drop_vars).compute()
@@ -42,6 +43,9 @@ def load_predef_norm_data() -> Dict[str,xarray.Dataset]:
 def load_merra2_norm_data() -> Dict[str,xarray.Dataset]:
     from fmbase.source.merra2.preprocess import load_norm_data
     predef_norm_data: Dict[str,xarray.Dataset] = load_predef_norm_data()
+    print( f"--- predef_norm_data: ---")
+    for key, ndset in predef_norm_data.items():
+        print( f" ** {key}: {list(ndset.data_vars.keys())}")
     m2_norm_data: Dict[str, xarray.Dataset] = load_norm_data( cfg().task )
     return { nnorm: xarray.merge( [ predef_norm_data[nnorm], m2_norm_data[nnorm] ] ) for nnorm in m2_norm_data.keys() }
 
