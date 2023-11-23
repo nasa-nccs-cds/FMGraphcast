@@ -47,9 +47,6 @@ def load_predef_norm_data() -> Dict[str,xarray.Dataset]:
 def load_merra2_norm_data() -> Dict[str,xarray.Dataset]:
     from fmbase.source.merra2.preprocess import load_norm_data
     predef_norm_data: Dict[str,xarray.Dataset] = load_predef_norm_data()
-    print( f"--- predef_norm_data: ---")
-    for key, ndset in predef_norm_data.items():
-        print( f" ** {key}: {list(ndset.data_vars.keys())}")
     m2_norm_data: Dict[str, xarray.Dataset] = load_norm_data( cfg().task )
     return { nnorm: xarray.merge( [ predef_norm_data[nnorm], m2_norm_data[nnorm] ] ) for nnorm in m2_norm_data.keys() }
 
