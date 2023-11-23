@@ -132,8 +132,8 @@ loss1, diagnostics1, next_state, grads = grads_fn_jitted( inputs=train_inputs, t
 mean_grad = np.mean( jax.tree_util.tree_flatten( jax.tree_util.tree_map(lambda x: np.abs(x).mean(), grads) )[0] )
 
 print("\n----------------------------------------------------")
-print( f"Params = {params}")
-print( f"Grads = {grads}")
+print( f"Params: {type(params)}")
+print( f"Grads: {type(grads)}")
 print(f"Loss: {loss1:.4f}, Mean |grad|: {mean_grad:.6f}")
 
 # Autoregressive rollout (keep the loop in JAX)
