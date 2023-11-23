@@ -11,9 +11,7 @@ from graphcast import xarray_tree
 from fmbase.util.ops import format_timedeltas, print_dict
 import haiku as hk
 import jax, time
-import matplotlib
-import matplotlib.pyplot as plt
-from matplotlib import animation
+from fmbase.util.ops import fmbdir
 import numpy as np
 import xarray
 import hydra, dataclasses
@@ -25,7 +23,7 @@ configure( 'explore-era5' )
 
 # Load the model
 
-root = cfg().platform.model.format( **cfg().platform ).format( **cfg().platform )
+root = fmbdir('model')
 params_file = cfg().task.params
 pfilepath = f"{root}/params/{params_file}.npz"
 print( f" root = ", root )

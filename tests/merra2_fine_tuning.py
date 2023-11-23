@@ -1,7 +1,7 @@
 import functools
 from typing import Optional, Dict
 from fmbase.source.merra2.model import YearMonth, load_batch
-from fmbase.source.merra2.preprocess import load_norm_data
+from fmgraphcast.data_utils import load_merra2_norm_data
 from fmgraphcast.config import config_files
 from fmgraphcast.model import run_forward, drop_state, grads_fn, loss_fn
 from fmbase.util.ops import format_timedeltas, print_dict
@@ -45,7 +45,7 @@ print("Loaded Batch:")
 for vname, dvar in example_batch.data_vars.items():
 	print( f" {vname}{list(dvar.dims)}: shape={dvar.shape}")
 
-norm_data: Dict[str,xa.Dataset] = load_norm_data( cfg().task )
+norm_data: Dict[str,xa.Dataset] = load_merra2_norm_data()
 
 # print("\n Loaded Norm Data:")
 # for vname, ndset in norm_data.items():

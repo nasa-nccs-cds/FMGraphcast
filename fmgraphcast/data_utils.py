@@ -1,7 +1,8 @@
 # Adapted from code by DeepMind
 
-from typing import Any, Mapping, Sequence, Tuple, Union, List
-
+from typing import Any, Mapping, Sequence, Tuple, Union, List, Dict
+from fmbase.util.ops import fmbdir
+from fmbase.util.config import configure, cfg
 import numpy as np
 import pandas as pd
 import xarray
@@ -24,6 +25,24 @@ AVG_SEC_PER_YEAR = SEC_PER_DAY * _AVG_DAY_PER_YEAR
 DAY_PROGRESS = "day_progress"
 YEAR_PROGRESS = "year_progress"
 
+predef_norms = [ 'year_progress', 'year_progress_sin', 'year_progress_cos', 'day_progress', 'day_progress_sin', 'day_progress_cos' ]
+
+def load_predef_norm_data() -> Dict[str,xarray.Dataset]:
+    root, norms, drop_vars = fmbdir('model'), {}, None
+    with open(f"{root}/stats/diffs_stddev_by_level.nc", "rb") as f:
+        dset: xarray.Dataset = xarray.load_dataset(f)
+        drop_vars = [ vname for vname in dset.data_vars.keys() if vname not in predef_norms ]
+        norms['diffs_stddev_by_level']: xarray.Dataset = dset.drop_vars( drop_vars ).compute()
+    with open(f"{root}/stats/mean_by_level.nc", "rb") as f:
+        norms['mean_by_level']: xarray.Dataset = xarray.load_dataset(f, drop_variables=drop_vars).compute()
+    with open(f"{root}/stats/stddev_by_level.nc", "rb") as f:
+        norms['stddev_by_level']: xarray.Dataset = xarray.load_dataset(f, drop_variables=drop_vars).compute()
+
+def load_merra2_norm_data() -> Dict[str,xarray.Dataset]:
+    from fmbase.source.merra2.preprocess import load_norm_data
+    predef_norm_data: Dict[str,xarray.Dataset] = load_predef_norm_data()
+    m2_norm_data: Dict[str, xarray.Dataset] = load_norm_data( cfg().task )
+    return { nnorm: xarray.merge( [ predef_norm_data[nnorm], m2_norm_data[nnorm] ] ) for nnorm in m2_norm_data.keys() }
 
 def get_year_progress(seconds_since_epoch: np.ndarray) -> np.ndarray:
   """Computes year progress for times in seconds.

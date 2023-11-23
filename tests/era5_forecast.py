@@ -8,6 +8,7 @@ from fmbase.util.ops import format_timedeltas, print_dict
 import haiku as hk
 import jax, time
 import numpy as np
+from fmbase.util.ops import fmbdir
 import xarray
 import hydra, dataclasses
 from fmbase.util.config import configure, cfg
@@ -18,7 +19,7 @@ configure( 'explore-era5' )
 
 # Load the model
 
-root = cfg().platform.model.format( **cfg().platform ).format( **cfg().platform )
+root = fmbdir('model')
 params_file = cfg().task.params
 pfilepath = f"{root}/params/{params_file}.npz"
 print( f" root = ", root )
