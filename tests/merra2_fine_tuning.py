@@ -147,4 +147,25 @@ predictions = run_forward_jitted( rng=jax.random.PRNGKey(0), inputs=train_inputs
 print( f"Completed Autoregressive rollout in {(time.time()-t1)/60} min.")
 
 
+#
+# @jit
+# def update(params, batch):
+# 	grads = grad(loss)(params, batch)
+# 	return [(w - step_size * dw, b - step_size * db)
+# 		for (w, b), (dw, db) in zip(params, grads)]
+#
+# params = init_random_params(param_scale, layer_sizes)
+# for epoch in range(num_epochs):
+# 	start_time = time.time()
+# 	for _ in range(num_batches):
+# 		params = update(params, next(batches))
+# 	epoch_time = time.time() - start_time
+#
+# 	train_acc = accuracy(params, (train_images, train_labels))
+# 	test_acc = accuracy(params, (test_images, test_labels))
+# 	print(f"Epoch {epoch} in {epoch_time:0.2f} sec")
+# 	print(f"Training set accuracy {train_acc}")
+# 	print(f"Test set accuracy {test_acc}")
+#
+
 

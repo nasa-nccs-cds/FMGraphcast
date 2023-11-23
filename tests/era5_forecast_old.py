@@ -86,13 +86,14 @@ print("\nEval Forcings: ", eval_forcings.dims.mapping)
 # Load normalization data
 
 with open(f"{root}/stats/diffs_stddev_by_level.nc","rb") as f:
-	diffs_stddev_by_level = xarray.load_dataset(f).compute()
+	diffs_stddev_by_level: xarray.Dataset = xarray.load_dataset(f).compute()
 with open(f"{root}/stats/mean_by_level.nc","rb") as f:
-	mean_by_level = xarray.load_dataset(f).compute()
+	mean_by_level: xarray.Dataset = xarray.load_dataset(f).compute()
 with open(f"{root}/stats/stddev_by_level.nc","rb") as f:
-	stddev_by_level = xarray.load_dataset(f).compute()
+	stddev_by_level: xarray.Dataset = xarray.load_dataset(f).compute()
 
 print( " * Loaded normalization data * ")
+print( f" ---> mean_by_level vars: {list(mean_by_level.data_vars.keys())}")
 
 # Build jitted functions, and possibly initialize random weights
 
