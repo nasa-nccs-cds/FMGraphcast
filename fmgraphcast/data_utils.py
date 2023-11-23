@@ -37,6 +37,7 @@ def load_predef_norm_data() -> Dict[str,xarray.Dataset]:
         norms['mean_by_level']: xarray.Dataset = xarray.load_dataset(f, drop_variables=drop_vars).compute()
     with open(f"{root}/stats/stddev_by_level.nc", "rb") as f:
         norms['stddev_by_level']: xarray.Dataset = xarray.load_dataset(f, drop_variables=drop_vars).compute()
+    return norms
 
 def load_merra2_norm_data() -> Dict[str,xarray.Dataset]:
     from fmbase.source.merra2.preprocess import load_norm_data
