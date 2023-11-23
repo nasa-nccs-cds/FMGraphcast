@@ -21,6 +21,9 @@ t0 = time.time()
 def parse_file_parts(file_name):
 	return dict(part.split("-", 1) for part in file_name.split("_"))
 
+def dtypes( d: Dict ):
+	return { k: type(v) for k,v in d.items() }
+
 res,levels,steps = cfg().model.res,  cfg().model.levels,  cfg().model.steps
 year, month, day =  cfg().model.year,  cfg().model.month,  cfg().model.day
 train_steps, eval_steps = cfg().task.train_steps, cfg().task.eval_steps
@@ -132,8 +135,8 @@ loss1, diagnostics1, next_state, grads = grads_fn_jitted( inputs=train_inputs, t
 mean_grad = np.mean( jax.tree_util.tree_flatten( jax.tree_util.tree_map(lambda x: np.abs(x).mean(), grads) )[0] )
 
 print("\n----------------------------------------------------")
-print( f"Params: {type(params)}")
-print( f"Grads: {type(grads)}")
+print( f"Params: {dtypes(params)}")
+print( f"Grads: {dtypes(grads)}")
 print(f"Loss: {loss1:.4f}, Mean |grad|: {mean_grad:.6f}")
 
 # Autoregressive rollout (keep the loop in JAX)
