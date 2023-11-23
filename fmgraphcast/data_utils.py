@@ -27,6 +27,9 @@ YEAR_PROGRESS = "year_progress"
 
 predef_norms = [ 'year_progress', 'year_progress_sin', 'year_progress_cos', 'day_progress', 'day_progress_sin', 'day_progress_cos' ]
 
+def d2xa( dvals: Dict[str,float] ) -> xarray.Dataset:
+    return xarray.Dataset( {vn: xarray.DataArray( np.array(dval) ) for vn, dval in dvals.items()} )
+
 def load_predef_norm_data() -> Dict[str,xarray.Dataset]:
     root, norms, drop_vars = fmbdir('model'), {}, None
     with open(f"{root}/stats/diffs_stddev_by_level.nc", "rb") as f:
@@ -47,10 +50,6 @@ def load_predef_norm_data() -> Dict[str,xarray.Dataset]:
             print( f"   > {vname}: dims={darray.dims}, shape={darray.shape}, coords={list(darray.coords.keys())}  ")
     return norms
 
-def d2xa( dvals: Dict[str,float] ) -> xarray.Dataset:
-    dvars = {vn: xarray.DataArray( np.array(dval) ) for vn, dval in dvals.items()}
-    return xarray.Dataset( dvars )
-
 def get_predef_norm_data() -> Dict[str, xarray.Dataset]:
     dstd  = dict( year_progress=0.0247, year_progress_sin=0.003, year_progress_cos=0.003, day_progress=0.433, day_progress_sin=1.0, day_progress_cos=1.0  )
     vmean = dict( year_progress=0.5, year_progress_sin=0.0, year_progress_cos=0.0, day_progress=0.5, day_progress_sin=0.0, day_progress_cos=0.0  )
@@ -59,7 +58,7 @@ def get_predef_norm_data() -> Dict[str, xarray.Dataset]:
 
 def load_merra2_norm_data() -> Dict[str,xarray.Dataset]:
     from fmbase.source.merra2.preprocess import load_norm_data
-    predef_norm_data: Dict[str,xarray.Dataset] = load_predef_norm_data()
+    predef_norm_data: Dict[str,xarray.Dataset] = get_predef_norm_data()
     m2_norm_data: Dict[str, xarray.Dataset] = load_norm_data( cfg().task )
     return { nnorm: xarray.merge( [ predef_norm_data[nnorm], m2_norm_data[nnorm] ] ) for nnorm in m2_norm_data.keys() }
 

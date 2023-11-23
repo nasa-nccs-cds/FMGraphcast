@@ -33,7 +33,7 @@ train_steps, eval_steps = cfg().task.train_steps, cfg().task.eval_steps
 # Load MERRA2 Data
 #-----------------
 
-params = None
+params: Dict[str,Dict] = None
 state = {}
 dts         = cfg().task.data_timestep
 start = YearMonth(year,month)
@@ -135,8 +135,12 @@ loss1, diagnostics1, next_state, grads = grads_fn_jitted( inputs=train_inputs, t
 mean_grad = np.mean( jax.tree_util.tree_flatten( jax.tree_util.tree_map(lambda x: np.abs(x).mean(), grads) )[0] )
 
 print("\n----------------------------------------------------")
-print( f"Params: {dtypes(params)}")
-print( f"Grads: {dtypes(grads)}")
+print( f"Params:")
+for k,vdict in params.items():
+	print( f" ** {k}:\t\t{dtypes(vdict)}")
+print( f"Grads:")
+for k,vdict in grads.items():
+	print( f" ** {k}:\t\t{dtypes(vdict)}")
 print(f"Loss: {loss1:.4f}, Mean |grad|: {mean_grad:.6f}")
 
 # Autoregressive rollout (keep the loop in JAX)
