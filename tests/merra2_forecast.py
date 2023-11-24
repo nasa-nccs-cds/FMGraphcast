@@ -47,35 +47,24 @@ for vname, dvar in example_batch.data_vars.items():
 
 norm_data: Dict[str,xa.Dataset] = load_merra2_norm_data()
 
-# print("\n Loaded Norm Data:")
-# for vname, ndset in norm_data.items():
-# 	print( f"------------ Norm dataset: {vname} ------------ " )
-# 	for nname, ndata in ndset.data_vars.items():
-# 		print( f"   ** {vname}.{nname}: shape={ndata.shape}")
+itf = data_utils.extract_inputs_targets_forcings( example_batch, target_lead_times=target_lead_times, **dataclasses.asdict(task_config) )
+train_inputs, train_targets, train_forcings = itf
 
-train_inputs, train_targets, train_forcings = \
-	data_utils.extract_inputs_targets_forcings( example_batch, target_lead_times=target_lead_times, **dataclasses.asdict(task_config) )
+itf = data_utils.extract_inputs_targets_forcings( example_batch, target_lead_times=eval_lead_times, **dataclasses.asdict(task_config) )
+eval_inputs, eval_targets, eval_forcings = itf
 
-eval_inputs, eval_targets, eval_forcings = \
-	data_utils.extract_inputs_targets_forcings( example_batch, target_lead_times=eval_lead_times, **dataclasses.asdict(task_config) )
-
-print("All Examples:  ", example_batch.dims.mapping)
-print("Train Inputs:  ", train_inputs.dims.mapping)
-print("Train Targets: ", train_targets.dims.mapping)
-print("Train Forcings:", train_forcings.dims.mapping)
-
-print("Eval Inputs:   ", eval_inputs.dims.mapping)
-for vname, dvar in eval_inputs.data_vars.items():
-	print( f" > {vname}{dvar.dims}: {dvar.shape}")
+print("Train Inputs:   ", train_inputs.dims.mapping)
+for vname, dvar in train_inputs.data_vars.items():
+	print( f" > {vname}{dvar.dims}{dvar.shape}, mean= {dvar.values.mean()}, std= {dvar.values.std()}")
 	if "time" in dvar.dims:
 		print(f" --> time: {dvar.coords['time'].values.tolist()}")
 
-print("Eval Targets:  ", eval_targets.dims.mapping)
-for vname, dvar in eval_targets.data_vars.items():
-	print( f" > {vname}{dvar.dims}: {dvar.shape}")
+print("Train Targets:  ", train_targets.dims.mapping)
+for vname, dvar in train_targets.data_vars.items():
+	print( f" > {vname}{dvar.dims}{dvar.shape}, mean= {dvar.values.mean()}, std= {dvar.values.std()}")
 	if "time" in dvar.dims:
 		print(f" --> time: {dvar.coords['time'].values.tolist()}")
-print("Eval Forcings: ", eval_forcings.dims.mapping)
+print("Train Forcings: ", train_forcings.dims.mapping)
 
 # Jax doesn't seem to like passing configs as args through the jit. Passing it
 # in via partial (instead of capture by closure) forces jax to invalidate the
@@ -103,9 +92,18 @@ run_forward_jitted = drop_state(with_params(jax.jit(with_configs(run_forward.app
 
 # Autoregressive rollout (loop in python)
 
-print("Inputs:  ", eval_inputs.dims.mapping)
-print("Targets: ", eval_targets.dims.mapping)
-print("Forcings:", eval_forcings.dims.mapping)
+print("Eval Inputs:   ", eval_inputs.dims.mapping)
+for vname, dvar in eval_inputs.data_vars.items():
+	print( f" > {vname}{dvar.dims}{dvar.shape}, mean= {dvar.values.mean()}, std= {dvar.values.std()}")
+	if "time" in dvar.dims:
+		print(f" --> time: {dvar.coords['time'].values.tolist()}")
+
+print("Eval Targets:  ", eval_targets.dims.mapping)
+for vname, dvar in eval_targets.data_vars.items():
+	print( f" > {vname}{dvar.dims}{dvar.shape}, mean= {dvar.values.mean()}, std= {dvar.values.std()}")
+	if "time" in dvar.dims:
+		print(f" --> time: {dvar.coords['time'].values.tolist()}")
+print("Train Forcings: ", eval_forcings.dims.mapping)
 
 predictions: xa.Dataset = rollout.chunked_prediction( run_forward_jitted, rng=jax.random.PRNGKey(0), inputs=eval_inputs,
 														        targets_template=eval_targets * np.nan, forcings=eval_forcings)

@@ -26,7 +26,7 @@ def construct_wrapped_graphcast( model_config: graphcast.ModelConfig, task_confi
 
 	# Modify inputs/outputs to `casting.Bfloat16Cast` so the casting to/from
 	# BFloat16 happens after applying normalization to the inputs/targets.
-	print( f"\n **** Norm (std) Data vars = {list(norm_data['stddev_by_level'].data_vars.keys())}")
+	# print( f"\n **** Norm (std) Data vars = {list(norm_data['stddev_by_level'].data_vars.keys())}")
 	predictor = normalization.InputsAndResiduals( predictor, **norm_data )
 
 	# Wraps everything so the one-step model can produce trajectories.

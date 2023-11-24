@@ -50,17 +50,11 @@ for vname, dvar in example_batch.data_vars.items():
 
 norm_data: Dict[str,xa.Dataset] = load_merra2_norm_data()
 
-# print("\n Loaded Norm Data:")
-# for vname, ndset in norm_data.items():
-# 	print( f"------------ Norm dataset: {vname} ------------ " )
-# 	for nname, ndata in ndset.data_vars.items():
-# 		print( f"   ** {vname}.{nname}: shape={ndata.shape}")
+itf = data_utils.extract_inputs_targets_forcings( example_batch, target_lead_times=target_lead_times, **dataclasses.asdict(task_config) )
+train_inputs, train_targets, train_forcings = itf
 
-train_inputs, train_targets, train_forcings = \
-	data_utils.extract_inputs_targets_forcings( example_batch, target_lead_times=target_lead_times, **dataclasses.asdict(task_config) )
-
-eval_inputs, eval_targets, eval_forcings = \
-	data_utils.extract_inputs_targets_forcings( example_batch, target_lead_times=eval_lead_times, **dataclasses.asdict(task_config) )
+itf = data_utils.extract_inputs_targets_forcings( example_batch, target_lead_times=eval_lead_times, **dataclasses.asdict(task_config) )
+eval_inputs, eval_targets, eval_forcings = itf
 
 print("All Examples:  ", example_batch.dims.mapping)
 print("Train Inputs:  ", train_inputs.dims.mapping)
