@@ -15,6 +15,7 @@ Integration of GraphCast into the ILab Foundation Model Framework
     > conda install -c conda-forge ipython ipywidgets numpy xarray dask matplotlib scipy netCDF4 cartopy chex dm-haiku jax jraph pandas rtree tree trimesh typing_extensions 
     > pip install hydra-core --upgrade
     > pip install dm-tree
+    > python -m ipykernel install --user --name=fmgc
 
 #### Install FMBase
     > git clone https://github.com/nasa-nccs-cds/FoundationModelBase.git
