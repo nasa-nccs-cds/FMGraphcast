@@ -28,13 +28,13 @@ res,levels,steps = cfg().model.res,  cfg().model.levels,  cfg().model.steps
 year, month, day =  cfg().model.year,  cfg().model.month,  cfg().model.day
 train_steps, eval_steps = cfg().task.train_steps, cfg().task.eval_steps
 (model_config,task_config) = config_files()
+lr = cfg().task.lr
+nepochs =  cfg().task.nepochs
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Load MERRA2 Data
 #-----------------
 
-params: Dict[str,Dict] = None
-state = {}
 dts         = cfg().task.data_timestep
 start = YearMonth(year,month)
 end = YearMonth(year,month+1)
@@ -74,78 +74,38 @@ for vname, dvar in eval_targets.data_vars.items():
 		print(f" --> time: {dvar.coords['time'].values.tolist()}")
 print("Eval Forcings: ", eval_forcings.dims.mapping)
 
-# Jax doesn't seem to like passing configs as args through the jit. Passing it
-# in via partial (instead of capture by closure) forces jax to invalidate the
-# jit cache if you change configs.
-def with_configs(fn):
-	return functools.partial( fn, model_config=model_config, task_config=task_config, norm_data=norm_data )
+
 
 # Always pass params and state, so the usage below are simpler
-def with_params(fn):
-	return functools.partial(fn, params=params, state=state)
 
-# Our models aren't stateful, so the state is always empty, so just return the
-# predictions. This is requiredy by our rollout code, and generally simpler.
-def drop_state(fn):
-	return lambda **kw: fn(**kw)[0]
 
-init_jitted = jax.jit(with_configs(run_forward.init))
-
-if params is None:
-	params, state = init_jitted( rng=jax.random.PRNGKey(0), inputs=train_inputs, targets_template=train_targets, forcings=train_forcings)
-
-loss_fn_jitted = drop_state(with_params(jax.jit(with_configs(loss_fn.apply))))
-grads_fn_jitted = with_params(jax.jit(with_configs(grads_fn)))
-run_forward_jitted = drop_state(with_params(jax.jit(with_configs(run_forward.apply))))
-
-# Autoregressive rollout (loop in python)
 
 print("Inputs:  ", eval_inputs.dims.mapping)
 print("Targets: ", eval_targets.dims.mapping)
 print("Forcings:", eval_forcings.dims.mapping)
 
-predictions: xa.Dataset = rollout.chunked_prediction( run_forward_jitted, rng=jax.random.PRNGKey(0), inputs=eval_inputs,
-														        targets_template=eval_targets * np.nan, forcings=eval_forcings)
 
-print( f" ***** Completed forecast, result variables:  ")
-for vname, dvar in predictions.data_vars.items():
-	print( f" > {vname}{dvar.dims}: {dvar.shape}")
-	ndvar: np.ndarray = dvar.values
-	tvar: Optional[xa.DataArray] = dvar.coords.get('time')
-	print(f"   --> dtype: {dvar.dtype}, range: ({ndvar.min():.3f},{ndvar.max():.3f}), mean,std: ({ndvar.mean():.3f},{ndvar.std():.3f}), time: {format_timedeltas(tvar)}")
+# def with_params(fn):
+# 	return functools.partial(fn, params=params, state=state)
+#
+# run_forward_jitted = drop_state(with_params(jax.jit(with_configs(run_forward.apply))))
+# train_predictions = run_forward_jitted( rng=jax.random.PRNGKey(0), inputs=train_inputs, targets_template=train_targets * np.nan, forcings=train_forcings)
+# eval_predictions = rollout.chunked_prediction( run_forward_jitted, rng=jax.random.PRNGKey(0), inputs=eval_inputs, targets_template=eval_targets * np.nan, forcings=eval_forcings)
+#
+#
+#
 
-t1 = time.time()
-print( f"Completed forecast in {t1-t0} sec.")
+# print( f" ***** Completed forecast, result variables:  ")
+# for vname, dvar in predictions.data_vars.items():
+# 	print( f" > {vname}{dvar.dims}: {dvar.shape}")
+# 	ndvar: np.ndarray = dvar.values
+# 	tvar: Optional[xa.DataArray] = dvar.coords.get('time')
+# 	print(f"   --> dtype: {dvar.dtype}, range: ({ndvar.min():.3f},{ndvar.max():.3f}), mean,std: ({ndvar.mean():.3f},{ndvar.std():.3f}), time: {format_timedeltas(tvar)}")
+#
+# t1 = time.time()
+# print( f"Completed forecast in {t1-t0} sec.")
+#
 
-
-#  Loss computation (autoregressive loss over multiple steps)
-
-loss0, diagnostics0 = loss_fn_jitted( rng=jax.random.PRNGKey(0), inputs=train_inputs, targets=train_targets, forcings=train_forcings)
-print("Loss:", float(loss0))
-
-#  Gradient computation (backprop through time)
-
-loss1, diagnostics1, next_state, grads = grads_fn_jitted( inputs=train_inputs, targets=train_targets, forcings=train_forcings)
-mean_grad = np.mean( jax.tree_util.tree_flatten( jax.tree_util.tree_map(lambda x: np.abs(x).mean(), grads) )[0] )
-
-print("\n----------------------------------------------------")
-print( f"Params:")
-for k,vdict in params.items():
-	print( f" ** {k}:\t\t{dtypes(vdict)}")
-print( f"Grads:")
-for k,vdict in grads.items():
-	print( f" ** {k}:\t\t{dtypes(vdict)}")
-print(f"Loss: {loss1:.4f}, Mean |grad|: {mean_grad:.6f}")
-
-# Autoregressive rollout (keep the loop in JAX)
-
-print("Inputs:  ", train_inputs.dims.mapping)
-print("Targets: ", train_targets.dims.mapping)
-print("Forcings:", train_forcings.dims.mapping)
-
-predictions = run_forward_jitted( rng=jax.random.PRNGKey(0), inputs=train_inputs, targets_template=train_targets * np.nan, forcings=train_forcings)
-
-print( f"Completed Autoregressive rollout in {(time.time()-t1)/60} min.")
 
 
 #

@@ -59,6 +59,27 @@ def grads_fn(params, state, model_config, task_config, inputs: xa.Dataset, targe
 	(loss, (diagnostics, next_state)), grads = jax.value_and_grad( _aux, has_aux=True)(params, state, inputs, targets, forcings, norm_data)
 	return loss, diagnostics, next_state, grads
 
+def with_configs(fn):
+	return functools.partial( fn, model_config=model_config, task_config=task_config, norm_data=norm_data )
+
+init_jitted = jax.jit(with_configs(run_forward.init))
+grads_fn_jitted =jax.jit(with_configs(grads_fn))
+grads_jitted = jax.jit(with_configs(grads_fn))
+
+@jax.jit
+def update_jitted( inputs: xa.Dataset, targets: xa.Dataset, forcings: xa.Dataset, **kwargs ):
+	loss1, diagnostics1, next_state, grads = grads_jitted(inputs=inputs, targets=targets, forcings=forcings,  **kwargs )
+	mean_grad = np.mean(jax.tree_util.tree_flatten(jax.tree_util.tree_map(lambda x: np.abs(x).mean(), grads))[0])
+	mean_loss = np.mean(jax.tree_util.tree_flatten(jax.tree_util.tree_map(lambda x: np.abs(x).mean(), loss1))[0])
+	next_params = jax.tree_map(  lambda p, g: p - lr * g, kwargs['params'], grads)
+	print( f" Update, mean_grad = {mean_grad}, mean_loss = {mean_loss}")
+	return next_params, next_state
+
+def train_model( inputs: xa.Dataset, targets: xa.Dataset, forcings: xa.Dataset, **kwargs ):
+	params, state = init_jitted(rng=jax.random.PRNGKey(0), inputs=inputs, targets_template=targets, forcings=forcings)
+	for epoch in range(nepochs):
+		params, state = update_jitted( inputs, targets, forcings, params=params, state=state)
+
 
 # Our models aren't stateful, so the state is always empty, so just return the
 # predictions. This is requiredy by our rollout code, and generally simpler.
