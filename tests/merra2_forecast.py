@@ -2,12 +2,10 @@ import functools
 from typing import Optional, Dict
 from fmbase.source.merra2.model import YearMonth, load_batch
 from fmgraphcast.config import config_files
-from fmgraphcast.model import run_forward, drop_state, grads_fn, loss_fn
-from fmgraphcast.data_utils import load_merra2_norm_data
-from fmbase.util.ops import format_timedeltas, print_dict
+from fmgraphcast.model import run_forward, grads_fn, loss_fn
+from fmbase.util.ops import format_timedeltas
 from fmgraphcast import data_utils
 from graphcast import rollout
-import haiku as hk
 import jax
 import numpy as np
 import xarray as xa
@@ -44,8 +42,6 @@ example_batch: xa.Dataset = load_batch( start, end, cfg().task )
 print("Loaded Batch:")
 for vname, dvar in example_batch.data_vars.items():
 	print( f" {vname}{list(dvar.dims)}: shape={dvar.shape}")
-
-norm_data: Dict[str,xa.Dataset] = load_merra2_norm_data()
 
 itf = data_utils.extract_inputs_targets_forcings( example_batch, target_lead_times=target_lead_times, **dataclasses.asdict(task_config) )
 train_inputs, train_targets, train_forcings = itf

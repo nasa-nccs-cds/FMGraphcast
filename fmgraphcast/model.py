@@ -12,13 +12,14 @@ import numpy as np
 import xarray as xa
 import hydra, dataclasses
 from fmbase.util.config import configure, cfg
+from fmgraphcast.config import model_config, task_config
 
 # Build jitted functions, and possibly initialize random weights
 
-def construct_wrapped_graphcast( model_config: graphcast.ModelConfig, task_config: graphcast.TaskConfig, norm_data: Dict[str,xa.Dataset]):
+def construct_wrapped_graphcast( mconfig: graphcast.ModelConfig, tconfig: graphcast.TaskConfig, norm_data: Dict[str,xa.Dataset]):
 	"""Constructs and wraps the GraphCast Predictor."""
 	# Deeper one-step predictor.
-	predictor = graphcast.GraphCast(model_config, task_config)
+	predictor = graphcast.GraphCast(mconfig, tconfig)
 
 	# Modify inputs/outputs to `graphcast.GraphCast` to handle conversion to
 	# from/to float32 to/from BFloat16.
@@ -68,6 +69,7 @@ grads_jitted = jax.jit(with_configs(grads_fn))
 
 @jax.jit
 def update_jitted( inputs: xa.Dataset, targets: xa.Dataset, forcings: xa.Dataset, **kwargs ):
+	lr = cfg().task.lr
 	loss1, diagnostics1, next_state, grads = grads_jitted(inputs=inputs, targets=targets, forcings=forcings,  **kwargs )
 	mean_grad = np.mean(jax.tree_util.tree_flatten(jax.tree_util.tree_map(lambda x: np.abs(x).mean(), grads))[0])
 	mean_loss = np.mean(jax.tree_util.tree_flatten(jax.tree_util.tree_map(lambda x: np.abs(x).mean(), loss1))[0])
@@ -76,6 +78,7 @@ def update_jitted( inputs: xa.Dataset, targets: xa.Dataset, forcings: xa.Dataset
 	return next_params, next_state
 
 def train_model( inputs: xa.Dataset, targets: xa.Dataset, forcings: xa.Dataset, **kwargs ):
+	nepochs = cfg().task.nepochs
 	params, state = init_jitted(rng=jax.random.PRNGKey(0), inputs=inputs, targets_template=targets, forcings=forcings)
 	for epoch in range(nepochs):
 		params, state = update_jitted( inputs, targets, forcings, params=params, state=state)

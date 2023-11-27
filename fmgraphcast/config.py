@@ -3,6 +3,8 @@ from fmbase.util.ops import fmbdir
 from graphcast import checkpoint
 from typing import Any, Mapping, Sequence, Tuple, Union, Dict
 from graphcast.graphcast import ModelConfig, TaskConfig, CheckPoint
+from fmgraphcast.data_utils import load_merra2_norm_data
+import xarray as xa
 
 def config_model( **kwargs ) -> ModelConfig:
 	opts = dict(
@@ -37,10 +39,45 @@ def config_files() -> Tuple[ModelConfig,TaskConfig]:
 	pfilepath = f"{root}/params/{params_file}.npz"
 	with open(pfilepath, "rb") as f:
 		ckpt = checkpoint.load(f, CheckPoint)
-		model_config = ckpt.model_config
-		task_config = ckpt.task_config
+		mconfig = ckpt.model_config
+		tconfig = ckpt.task_config
 		print("Model description:\n", ckpt.description, "\n")
-		print(f" >> model_config: {model_config}")
-		print(f" >> task_config:  {task_config}")
-	return model_config, task_config
+		print(f" >> model_config: {mconfig}")
+		print(f" >> task_config:  {tconfig}")
+	return mconfig, tconfig
+
+
+class ModelConfig:
+	_instance = None
+	_instantiated = None
+
+	def __init__(self):
+		cvals = config_files()
+		self.model_config: ModelConfig = cvals[0]
+		self.task_config: TaskConfig = cvals[1]
+		self.norm_data: Dict[str, xa.Dataset] = load_merra2_norm_data()
+
+	@classmethod
+	def init(cls):
+		if cls._instance is None:
+			inst = cls()
+			cls._instance = inst
+			cls._instantiated = cls
+
+	@classmethod
+	def instance(cls) -> "ModelConfig":
+		cls.init()
+		return cls._instance
+
+def model_config() -> ModelConfig:
+	mc = ModelConfig.instance()
+	return mc.model_config
+
+def task_config() -> TaskConfig:
+	mc = ModelConfig.instance()
+	return mc.task_config
+
+def norm_data() -> Dict[str, xa.Dataset]:
+	mc = ModelConfig.instance()
+	return mc.norm_data
 
