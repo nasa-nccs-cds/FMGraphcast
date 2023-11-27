@@ -21,10 +21,10 @@ def config_model( **kwargs ) -> ModelConfig:
 def config_task( **kwargs) -> TaskConfig:
 	dts = cfg().task.data_timestep
 	opts = dict(
-	    input_variables=    kwargs.get('input_variables',    cfg().task.input_variables),
-	    target_variables=   kwargs.get('target_variables',   cfg().task.target_variables),
-	    forcing_variables=  kwargs.get('forcing_variables',  cfg().task.forcing_variables),
-	    pressure_levels=    kwargs.get('levels',             cfg().task.levels),
+	    input_variables=    kwargs.get('input_variables',    dict(cfg().task.input_variables)),
+	    target_variables=   kwargs.get('target_variables',   list(cfg().task.target_variables)),
+	    forcing_variables=  kwargs.get('forcing_variables',  list(cfg().task.forcing_variables)),
+	    pressure_levels=    kwargs.get('levels',             list(cfg().task.levels)),
 	    input_duration=     kwargs.get('input_duration',     f"{cfg().task.input_steps*dts}h" ) )
 	ctypes = { k:type(v) for k,v in opts.items() }
 	print(f"\n --->> config_task ctypes: {ctypes}")
