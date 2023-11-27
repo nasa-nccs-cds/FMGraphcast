@@ -76,8 +76,9 @@ print("Forcings:", eval_forcings.dims.mapping)
 (mconfig, tconfig)   = config_files( checkpoint=False )
 for tc in [ ctconfig, tconfig ]:
 	iv = [ type(i) for i in tconfig.input_variables ]
-	tv = [ type(i) for i in tconfig.target_variables ]
-	print( f"\n Config types : {iv}, {tv}")
+	fv = [ type(i) for i in tconfig.forcing_variables ]
+	print( f"\n Config types  iv: {iv}")
+	print( f"                 fv: {fv}")
 
 train_model( train_inputs, train_targets, train_forcings )
 
