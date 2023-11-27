@@ -81,3 +81,7 @@ def norm_data() -> Dict[str, xa.Dataset]:
 	mc = ModelConfig.instance()
 	return mc.norm_data
 
+def cparms()-> Dict:
+	mc = ModelConfig.instance()
+	return dict( model_config=mc.model_config, task_config=mc.task_config, norm_data=mc.norm_data )
+

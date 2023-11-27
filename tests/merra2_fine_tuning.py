@@ -3,13 +3,8 @@ from typing import Optional, Dict
 from fmbase.source.merra2.model import YearMonth, load_batch
 from fmgraphcast.data_utils import load_merra2_norm_data
 from fmgraphcast.config import config_files
-from fmgraphcast.model import run_forward, drop_state, grads_fn, loss_fn
-from fmbase.util.ops import format_timedeltas, print_dict
+from fmgraphcast.model import train_model
 from fmgraphcast import data_utils
-from graphcast import rollout
-import haiku as hk
-import jax
-import numpy as np
 import xarray as xa
 import hydra, dataclasses, time
 from fmbase.util.config import configure, cfg
@@ -73,14 +68,11 @@ for vname, dvar in eval_targets.data_vars.items():
 print("Eval Forcings: ", eval_forcings.dims.mapping)
 
 
-
-# Always pass params and state, so the usage below are simpler
-
-
-
 print("Inputs:  ", eval_inputs.dims.mapping)
 print("Targets: ", eval_targets.dims.mapping)
 print("Forcings:", eval_forcings.dims.mapping)
+
+train_model( train_inputs, train_targets, train_forcings )
 
 
 # def with_params(fn):
