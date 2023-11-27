@@ -14,6 +14,7 @@ def config_model( **kwargs ) -> ModelConfig:
 		gnn_msg_steps=  kwargs.get( 'gnn_msg_steps', cfg().model.gnn_msg_steps   ),
 		hidden_layers=  kwargs.get( 'hidden_layers', cfg().model.hidden_layers   ),
 		radius_query_fraction_edge_length= kwargs.get( 'radius_query_fraction_edge_length', cfg().model.radius_query_fraction_edge_length ) )
+	print( f"\n --- config_model: {opts}")
 	return ModelConfig(**opts)
 
 def config_task( **kwargs) -> TaskConfig:
@@ -24,6 +25,7 @@ def config_task( **kwargs) -> TaskConfig:
 	    forcing_variables=  kwargs.get('forcing_variables',  cfg().task.forcing_variables),
 	    pressure_levels=    kwargs.get('levels',             cfg().task.levels),
 	    input_duration=     kwargs.get('input_duration',     f"{cfg().task.input_steps*dts}h" ) )
+	print(f"\n --- config_task: {opts}")
 	return TaskConfig(**opts)
 
 def dataset_path(**kwargs) -> str:
