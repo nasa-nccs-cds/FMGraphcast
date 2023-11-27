@@ -15,7 +15,7 @@ def config_model( **kwargs ) -> ModelConfig:
 		hidden_layers=  kwargs.get( 'hidden_layers', cfg().model.hidden_layers   ),
 		radius_query_fraction_edge_length= kwargs.get( 'radius_query_fraction_edge_length', cfg().model.radius_query_fraction_edge_length ) )
 	ctypes = {k: type(v) for k, v in opts.items()}
-	print( f"\n --- config_model: {ctypes}")
+	print( f"\n --->> config_model ctypes: {ctypes}")
 	return ModelConfig(**opts)
 
 def config_task( **kwargs) -> TaskConfig:
@@ -27,7 +27,7 @@ def config_task( **kwargs) -> TaskConfig:
 	    pressure_levels=    kwargs.get('levels',             cfg().task.levels),
 	    input_duration=     kwargs.get('input_duration',     f"{cfg().task.input_steps*dts}h" ) )
 	ctypes = { k:type(v) for k,v in opts.items() }
-	print(f"\n --- config_task: {ctypes}")
+	print(f"\n --->> config_task ctypes: {ctypes}")
 	return TaskConfig(**opts)
 
 def dataset_path(**kwargs) -> str:
