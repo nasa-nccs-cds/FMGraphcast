@@ -73,9 +73,9 @@ def update_fn( inputs: xa.Dataset, targets: xa.Dataset, forcings: xa.Dataset, **
 
 def train_model( inputs: xa.Dataset, targets: xa.Dataset, forcings: xa.Dataset ):
 	nepochs = cfg().task.nepochs
-	params, state = run_forward.init(rng=jax.random.PRNGKey(0), inputs=inputs, targets_template=targets, forcings=forcings)
+	params, state = run_forward.init(rng=jax.random.PRNGKey(0), inputs=inputs, targets_template=targets, forcings=forcings, **cparms())
 	for epoch in range(nepochs):
-		params, state = update_fn( inputs, targets, forcings, params=params, state=state, **cparms() )
+		params, state = update_fn( inputs, targets, forcings, params=params, state=state, **cparms())
 
 
 # Our models aren't stateful, so the state is always empty, so just return the
