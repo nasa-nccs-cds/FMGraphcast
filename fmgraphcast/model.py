@@ -19,7 +19,7 @@ from fmgraphcast.config import model_config, task_config, norm_data, cparms
 def construct_wrapped_graphcast( **kwargs ):
 	"""Constructs and wraps the GraphCast Predictor."""
 	# Deeper one-step predictor.
-	predictor = graphcast.GraphCast( kwargs['mc'], kwargs['tc'])
+	predictor = graphcast.GraphCast( kwargs['model_config'], kwargs['task_config'])
 
 	# Modify inputs/outputs to `graphcast.GraphCast` to handle conversion to
 	# from/to float32 to/from BFloat16.
@@ -28,7 +28,7 @@ def construct_wrapped_graphcast( **kwargs ):
 	# Modify inputs/outputs to `casting.Bfloat16Cast` so the casting to/from
 	# BFloat16 happens after applying normalization to the inputs/targets.
 	# print( f"\n **** Norm (std) Data vars = {list(norm_data['stddev_by_level'].data_vars.keys())}")
-	predictor = normalization.InputsAndResiduals( predictor, **kwargs['nd'] )
+	predictor = normalization.InputsAndResiduals( predictor, **kwargs['norm_data'] )
 
 	# Wraps everything so the one-step model can produce trajectories.
 	predictor = autoregressive.Predictor(predictor, gradient_checkpointing=True)
