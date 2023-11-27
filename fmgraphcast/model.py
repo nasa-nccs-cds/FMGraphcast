@@ -75,6 +75,7 @@ def train_model( inputs: xa.Dataset, targets: xa.Dataset, forcings: xa.Dataset )
 	nepochs = cfg().task.nepochs
 	params, state = run_forward.init(rng=jax.random.PRNGKey(0), inputs=inputs, targets_template=targets, forcings=forcings, **cparms())
 	for epoch in range(nepochs):
+		print( f"train_model, params={type(params)}, state={type(state)}")
 		params, state = update_fn( inputs, targets, forcings, params=params, state=state, **cparms())
 
 
