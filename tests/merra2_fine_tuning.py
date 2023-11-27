@@ -72,7 +72,12 @@ print("Inputs:  ", eval_inputs.dims.mapping)
 print("Targets: ", eval_targets.dims.mapping)
 print("Forcings:", eval_forcings.dims.mapping)
 
-(mconfig, tconfig) = config_files( checkpoint=True )
+(cmconfig, ctconfig) = config_files( checkpoint=True )
+(mconfig, tconfig)   = config_files( checkpoint=False )
+for tc in [ ctconfig, tconfig ]:
+	iv = [ type(i) for i in tconfig.input_variables ]
+	tv = [ type(i) for i in tconfig.target_variables ]
+	print( f"\n Config types : {iv}, {tv}")
 
 train_model( train_inputs, train_targets, train_forcings )
 
