@@ -33,21 +33,23 @@ def dataset_path(**kwargs) -> str:
 	dsfile = f"{parms['year']}-{parms['month']:0>2}-{parms['day']:0>2}.nc"
 	return f"{root}/{dspath}/{dsfile}"
 
-def config_files() -> Tuple[ModelConfig,TaskConfig]:
-	root = fmbdir('model')
-	params_file = cfg().task.params
-	pfilepath = f"{root}/params/{params_file}.npz"
-	with open(pfilepath, "rb") as f:
-		ckpt = checkpoint.load(f, CheckPoint)
-		mconfig = ckpt.model_config
-		tconfig = ckpt.task_config
-		print("Model description:\n", ckpt.description, "\n")
-		print(f" >> model_config: {mconfig}")
-		print(f" >> task_config:  {tconfig}")
-	return mconfig, tconfig
+def config_files(**kwargs) -> Tuple[ModelConfig,TaskConfig]:
+	if kwargs.get('checkpoint',False):
+		root = fmbdir('model')
+		params_file = cfg().task.params
+		pfilepath = f"{root}/params/{params_file}.npz"
+		with open(pfilepath, "rb") as f:
+			ckpt = checkpoint.load(f, CheckPoint)
+			mconfig = ckpt.model_config
+			tconfig = ckpt.task_config
+			print("Model description:\n", ckpt.description, "\n")
+			print(f" >> model_config: {mconfig}")
+			print(f" >> task_config:  {tconfig}")
+		return mconfig, tconfig
+	else:
+		return config_model(**kwargs), config_task(**kwargs)
 
-
-class ModelConfig:
+class ModelConfiguration:
 	_instance = None
 	_instantiated = None
 
@@ -65,23 +67,23 @@ class ModelConfig:
 			cls._instantiated = cls
 
 	@classmethod
-	def instance(cls) -> "ModelConfig":
+	def instance(cls) -> "ModelConfiguration":
 		cls.init()
 		return cls._instance
 
 def model_config() -> ModelConfig:
-	mc = ModelConfig.instance()
+	mc = ModelConfiguration.instance()
 	return mc.model_config
 
 def task_config() -> TaskConfig:
-	mc = ModelConfig.instance()
+	mc = ModelConfiguration.instance()
 	return mc.task_config
 
 def norm_data() -> Dict[str, xa.Dataset]:
-	mc = ModelConfig.instance()
+	mc = ModelConfiguration.instance()
 	return mc.norm_data
 
 def cparms()-> Dict:
-	mc = ModelConfig.instance()
+	mc = ModelConfiguration.instance()
 	return dict( model_config=mc.model_config, task_config=mc.task_config, norm_data=mc.norm_data )
 
