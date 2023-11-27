@@ -1,5 +1,6 @@
 dataset_version: 'graphcast.era5.small'
 params: "small"
+input_steps: 2
 train_steps: 1
 eval_steps: 1
 data_timestep: 6
