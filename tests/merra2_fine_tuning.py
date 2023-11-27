@@ -10,7 +10,7 @@ import hydra, dataclasses, time
 from fmbase.util.config import configure, cfg
 
 hydra.initialize( version_base=None, config_path="../config" )
-configure( 'explore-era5' )
+configure( 'merra2-small' )
 t0 = time.time()
 
 def parse_file_parts(file_name):
