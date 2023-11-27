@@ -72,6 +72,8 @@ print("Inputs:  ", eval_inputs.dims.mapping)
 print("Targets: ", eval_targets.dims.mapping)
 print("Forcings:", eval_forcings.dims.mapping)
 
+(mconfig, tconfig) = config_files( checkpoint=True )
+
 train_model( train_inputs, train_targets, train_forcings )
 
 

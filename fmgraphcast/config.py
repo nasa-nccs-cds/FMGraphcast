@@ -49,6 +49,8 @@ def config_files(**kwargs) -> Tuple[ModelConfig,TaskConfig]:
 			print("Model description:\n", ckpt.description, "\n")
 			print(f" >> model_config: {mconfig}")
 			print(f" >> task_config:  {tconfig}")
+			print(f" >> forcing_variables:  {tconfig.forcing_variables}")
+
 		return mconfig, tconfig
 	else:
 		return config_model(**kwargs), config_task(**kwargs)
