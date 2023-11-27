@@ -21,7 +21,7 @@ def config_model( **kwargs ) -> ModelConfig:
 def config_task( **kwargs) -> TaskConfig:
 	dts = cfg().task.data_timestep
 	opts = dict(
-	    input_variables=    kwargs.get('input_variables',    dict(cfg().task.input_variables)),
+	    input_variables=    kwargs.get('input_variables',    list(cfg().task.input_variables.keys())),
 	    target_variables=   kwargs.get('target_variables',   list(cfg().task.target_variables)),
 	    forcing_variables=  kwargs.get('forcing_variables',  list(cfg().task.forcing_variables)),
 	    pressure_levels=    kwargs.get('levels',             list(cfg().task.levels)),
