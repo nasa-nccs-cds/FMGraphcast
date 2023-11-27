@@ -14,7 +14,7 @@ input_variables: { 2m_temperature: 'T2M', mean_sea_level_pressure: 'SLP', 10m_v_
                    temperature: 'T', geopotential: 'H', u_component_of_wind: 'U', v_component_of_wind: 'V', vertical_velocity: 'OMEGA', total_precipitation_6hr: 'PRECLS',
                    specific_humidity: 'QV', geopotential_at_surface: 'PHIS', land_sea_mask: 'FRLAND', toa_incident_solar_radiation: 'SWNETTOA' }
 target_variables: [ '2m_temperature', 'mean_sea_level_pressure', '10m_v_component_of_wind', '10m_u_component_of_wind', 'total_precipitation_6hr', 'temperature',
-                    'geopotential', 'u_component_of_wind', 'v_component_of_wind', 'vertical_velocity', 'specific_humidity', 'geopotential_at_surface']
-forcing_variables: [ 'toa_incident_solar_radiation' ]
+                    'geopotential', 'u_component_of_wind', 'v_component_of_wind', 'vertical_velocity', 'specific_humidity' ]
+forcing_variables: [ 'toa_incident_solar_radiation', 'geopotential_at_surface' ]
 
 
