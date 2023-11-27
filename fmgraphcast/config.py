@@ -26,7 +26,7 @@ def config_task( **kwargs) -> TaskConfig:
 	    forcing_variables=  kwargs.get('forcing_variables',  list(cfg().task.forcing_variables)),
 	    pressure_levels=    kwargs.get('levels',             list(cfg().task.levels)),
 	    input_duration=     kwargs.get('input_duration',     f"{cfg().task.input_steps*dts}h" ) )
-	ctypes = { k:type(v) for k,v in opts.items() }
+	ctypes = { k: (type(v), v) for k,v in opts.items() }
 	print(f"\n --->> config_task ctypes: {ctypes}")
 	return TaskConfig(**opts)
 
