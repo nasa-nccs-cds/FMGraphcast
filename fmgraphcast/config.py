@@ -8,7 +8,7 @@ import xarray as xa
 
 def config_model( **kwargs ) -> ModelConfig:
 	opts = dict(
-		resolution=     kwargs.get( 'resolution',    cfg().model.resolution      ),
+		resolution=     kwargs.get( 'res',    cfg().model.resolution      ),
 		mesh_size=      kwargs.get( 'mesh_size',     cfg().model.mesh_size       ),
 		latent_size=    kwargs.get( 'latent_size',   cfg().model.latent_size     ),
 		gnn_msg_steps=  kwargs.get( 'gnn_msg_steps', cfg().model.gnn_msg_steps   ),
