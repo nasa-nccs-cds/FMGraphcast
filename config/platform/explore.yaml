@@ -2,4 +2,4 @@ root:   "/explore/nobackup/projects/ilab/data/FMF"
 model:  "{root}/models/graphcast"
 results:   "{model}/results"
 cache:     "{root}/cache"
-processed: '{root}/processed/merra2'
+processed: '{root}/processed'
