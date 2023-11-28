@@ -30,11 +30,12 @@ def parse_file_parts(file_name):
 def dtypes( d: Dict ):
 	return { k: type(v) for k,v in d.items() }
 
-params = None
+params, state = None, None
 res,levels,steps = cfg().model.res,  cfg().model.levels,  cfg().model.steps
 year, month, day =  cfg().model.year,  cfg().model.month,  cfg().model.day
 train_steps, eval_steps = cfg().task.train_steps, cfg().task.eval_steps
 (model_config,task_config) = config_files()
+lr = cfg().task.lr
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Load MERRA2 Data
@@ -79,18 +80,9 @@ for vname, dvar in eval_targets.data_vars.items():
 		print(f" --> time: {dvar.coords['time'].values.tolist()}")
 print("Eval Forcings: ", eval_forcings.dims.mapping)
 
-
 print("Inputs:  ", eval_inputs.dims.mapping)
 print("Targets: ", eval_targets.dims.mapping)
 print("Forcings:", eval_forcings.dims.mapping)
-
-(cmconfig, ctconfig) = config_files( checkpoint=True )
-(mconfig, tconfig)   = config_files( checkpoint=False )
-for tc in [ ctconfig, tconfig ]:
-	iv = [ type(i) for i in tconfig.input_variables ]
-	fv = [ type(i) for i in tconfig.forcing_variables ]
-	print( f"\n Config types  iv: {iv}")
-	print( f"                 fv: {fv}")
 
 def construct_wrapped_graphcast( model_config: graphcast.ModelConfig, task_config: graphcast.TaskConfig):
 	"""Constructs and wraps the GraphCast Predictor."""
@@ -174,17 +166,24 @@ print("Inputs:  ", eval_inputs.dims.mapping)
 print("Targets: ", eval_targets.dims.mapping)
 print("Forcings:", eval_forcings.dims.mapping)
 
-predictions: xarray.Dataset = rollout.chunked_prediction( run_forward_jitted, rng=jax.random.PRNGKey(0), inputs=eval_inputs,
-														        targets_template=eval_targets * np.nan, forcings=eval_forcings)
+nepochs = cfg().task.nepochs
+for epoch in range(nepochs):
+	loss, diagnostics, next_state, grads = grads_fn_jitted( inputs=train_inputs, targets=train_targets, forcings=train_forcings )
+	mean_grad = np.mean( jax.tree_util.tree_flatten( jax.tree_util.tree_map( lambda x: np.abs(x).mean(), grads ) )[0] )
+	print(f" EPOCH {epoch}: Loss= {loss:.4f}, Mean |grad|= {mean_grad:.6f}")
+	params = jax.tree_map(  lambda p, g: p - lr * g, params, grads)
 
-print( f" ***** Completed forecast, result variables:  ")
-for vname, dvar in predictions.data_vars.items():
-	print( f" > {vname}{dvar.dims}: {dvar.shape}")
-	ndvar: np.ndarray = dvar.values
-	tvar: Optional[xarray.DataArray] = dvar.coords.get('time')
-	print(f"   --> dtype: {dvar.dtype}, range: ({ndvar.min():.3f},{ndvar.max():.3f}), mean,std: ({ndvar.mean():.3f},{ndvar.std():.3f}), time: {format_timedeltas(tvar)}")
-
-
-print( f"Completed in {time.time()-t0} sec.")
-
-
+# predictions: xarray.Dataset = rollout.chunked_prediction( run_forward_jitted, rng=jax.random.PRNGKey(0), inputs=eval_inputs,
+# 														        targets_template=eval_targets * np.nan, forcings=eval_forcings)
+#
+# print( f" ***** Completed forecast, result variables:  ")
+# for vname, dvar in predictions.data_vars.items():
+# 	print( f" > {vname}{dvar.dims}: {dvar.shape}")
+# 	ndvar: np.ndarray = dvar.values
+# 	tvar: Optional[xarray.DataArray] = dvar.coords.get('time')
+# 	print(f"   --> dtype: {dvar.dtype}, range: ({ndvar.min():.3f},{ndvar.max():.3f}), mean,std: ({ndvar.mean():.3f},{ndvar.std():.3f}), time: {format_timedeltas(tvar)}")
+#
+#
+# print( f"Completed in {time.time()-t0} sec.")
+#
+#
