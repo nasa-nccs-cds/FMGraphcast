@@ -61,10 +61,17 @@ def grads_fn(inputs: xa.Dataset, targets: xa.Dataset, forcings: xa.Dataset, **kw
 	(loss, (diagnostics, next_state)), grads = jax.value_and_grad( _aux, has_aux=True)(inputs, targets, forcings, **kwargs)
 	return loss, diagnostics, next_state, grads
 
+def with_configs(fn):
+	return functools.partial( fn, model_config=model_config, task_config=task_config, norm_data=norm_data )
+
+# Always pass params and state, so the usage below are simpler
+def with_params(fn):
+	return functools.partial(fn, params=params, state=state)
 @jax.jit
 def update_fn( inputs: xa.Dataset, targets: xa.Dataset, forcings: xa.Dataset, **kwargs ):
 	lr = cfg().task.lr
-	loss1, diagnostics1, next_state, grads = grads_fn(inputs=inputs, targets=targets, forcings=forcings,  **kwargs )
+	grads_fn_jitted = with_params(jax.jit(with_configs(grads_fn)))
+	loss1, diagnostics1, next_state, grads = grads_fn_jitted(inputs=inputs,targets=targets,forcings=forcings)
 	mean_grad = np.mean(jax.tree_util.tree_flatten(jax.tree_util.tree_map(lambda x: np.abs(x).mean(), grads))[0])
 	mean_loss = np.mean(jax.tree_util.tree_flatten(jax.tree_util.tree_map(lambda x: np.abs(x).mean(), loss1))[0])
 	next_params = jax.tree_map(  lambda p, g: p - lr * g, kwargs['params'], grads)
