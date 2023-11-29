@@ -66,20 +66,13 @@ print("Train Inputs:  ", train_inputs.dims.mapping)
 print("Train Targets: ", train_targets.dims.mapping)
 print("Train Forcings:", train_forcings.dims.mapping)
 
-print("\nEval Inputs:   ", eval_inputs.dims.mapping)
-print_dict( "DSET attrs", eval_inputs.attrs )
-for vname, dvar in eval_inputs.data_vars.items():
-	ndvar: np.ndarray = dvar.values
-	print(f" > {vname}{dvar.dims}: {dvar.shape}")
-	tvar: Optional[xarray.DataArray] = dvar.coords.get('time')
-	print(f"   --> dtype: {dvar.dtype}, range: ({ndvar.min():.3f},{ndvar.max():.3f}), mean,std: ({ndvar.mean():.3f},{ndvar.std():.3f}), time: {format_timedeltas(tvar)}")
+for (title,dset) in [ ('train',train_inputs), ('targets',train_targets), ('forcings',train_forcings) ]:
+	print(f"\n{title} inputs:   ", dset.dims.mapping)
+	print_dict( " -- DSET attrs", dset.attrs )
+	for vname, dvar in dset.data_vars.items():
+		ndvar: np.ndarray = dvar.values
+		print(f" > {vname}{dvar.dims}: shape: {dvar.shape}, dtype: {dvar.dtype}, range: ({ndvar.min():.3f},{ndvar.max():.3f}), mean,std: ({ndvar.mean():.3f},{ndvar.std():.3f})")
 
-print("\nEval Targets:  ", eval_targets.dims.mapping)
-for vname, dvar in eval_targets.data_vars.items():
-	print( f" > {vname}{dvar.dims}: {dvar.shape}")
-	tvar: Optional[xarray.DataArray] = dvar.coords.get('time')
-	print(f"   --> time: {format_timedeltas(tvar)}")
-print("\nEval Forcings: ", eval_forcings.dims.mapping)
 
 # Load normalization data
 
@@ -90,8 +83,9 @@ with open(f"{root}/stats/mean_by_level.nc","rb") as f:
 with open(f"{root}/stats/stddev_by_level.nc","rb") as f:
 	stddev_by_level: xarray.Dataset = xarray.load_dataset(f).compute()
 
-print( " * Loaded normalization data * ")
-print( f" ---> mean_by_level vars: {list(mean_by_level.data_vars.keys())}")
+print( "\n * Normalization data: mean_by_level * ")
+for k,v in mean_by_level.data_vars.items():
+	print( f" ** {k}[{v.size}]")
 
 coords = train_inputs.data_vars['temperature'].coords
 
