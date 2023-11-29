@@ -78,7 +78,7 @@ for (title,dset) in [ ('train',train_inputs), ('target',train_targets), ('forcin
 	print(f"\n{title} inputs:   ")
 	for vname, dvar in dset.data_vars.items():
 		ndvar: np.ndarray = dvar.values
-		nfeatures = nfeatures + (1 if ndvar.ndim == 4 else ndvar.shape[2])
+		nfeatures = nfeatures + (ndvar.shape[2] if (ndvar.ndim == 5) else 1)
 		print(f" > {vname}{dvar.dims}: shape: {dvar.shape}, dtype: {dvar.dtype}, range: ({ndvar.min():.3f},{ndvar.max():.3f}), mean,std: ({ndvar.mean():.3f},{ndvar.std():.3f})")
 	print( f" ---------- N Features: {nfeatures}  ---------- ")
 
