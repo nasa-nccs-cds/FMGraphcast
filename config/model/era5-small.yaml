@@ -4,9 +4,9 @@ year: 2021
 month: 1
 day: 1
 
-mesh_size: 4
-gnn_msg_steps: 4
-latent_size: 28
-hidden_layers: 13
-res: 1.0
+mesh_size: 5
+gnn_msg_steps: 16
+latent_size: 512
+hidden_layers: 1
+res: 2.0
 radius_query_fraction_edge_length: 0.6
