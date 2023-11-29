@@ -35,6 +35,20 @@ train_steps, eval_steps = cfg().task.train_steps, cfg().task.eval_steps
 (model_config,task_config) = config_files()
 lr = cfg().task.lr
 
+print( "\n -- TaskConfig --")
+print( f" * input_variables   = {task_config.input_variables}")
+print( f" * target_variables  = {task_config.target_variables}")
+print( f" * forcing_variables = {task_config.forcing_variables}")
+print( f" * pressure_levels   = {task_config.pressure_levels}")
+
+print( "\n -- ModelConfig --")
+print( f" * mesh_size      = {model_config.mesh_size}")
+print( f" * gnn_msg_steps  = {model_config.gnn_msg_steps}")
+print( f" * latent_size    = {model_config.latent_size}")
+print( f" * hidden_layers  = {model_config.hidden_layers}")
+print( f" * resolution     = {model_config.resolution}")
+print( f" * radius_qfel    = {model_config.radius_query_fraction_edge_length}")
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Load MERRA2 Data
 #-----------------

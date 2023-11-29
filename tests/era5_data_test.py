@@ -67,6 +67,13 @@ print( f" * target_variables  = {task_config.target_variables}")
 print( f" * forcing_variables = {task_config.forcing_variables}")
 print( f" * pressure_levels   = {task_config.pressure_levels}")
 
+print( "\n -- ModelConfig --")
+print( f" * mesh_size      = {model_config.mesh_size}")
+print( f" * gnn_msg_steps  = {model_config.gnn_msg_steps}")
+print( f" * latent_size    = {model_config.latent_size}")
+print( f" * hidden_layers  = {model_config.hidden_layers}")
+print( f" * resolution     = {model_config.resolution}")
+print( f" * radius_qfel    = {model_config.radius_query_fraction_edge_length}")
 
 print("\nAll Examples:  ", example_batch.dims.mapping)
 print("Train Inputs:  ", train_inputs.dims.mapping)
