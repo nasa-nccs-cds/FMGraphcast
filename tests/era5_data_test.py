@@ -100,3 +100,32 @@ print( f"\n ---> Lat:   {coords['lat'].values.tolist()}")
 print( f"\n ---> Lon:   {coords['lon'].values.tolist()}")
 print( f"\n ---> Level: {coords['level'].values.tolist()}")
 
+def with_configs(fn):
+	return functools.partial( fn, model_config=model_config, task_config=task_config )
+
+def with_params(fn):
+	return functools.partial(fn, params=params, state=state)
+
+def construct_wrapped_graphcast( modelconfig: graphcast.ModelConfig, taskconfig: graphcast.TaskConfig):
+	predictor = graphcast.GraphCast(modelconfig, taskconfig)
+	predictor = casting.Bfloat16Cast(predictor)
+	predictor = normalization.InputsAndResiduals( predictor, diffs_stddev_by_level=diffs_stddev_by_level, mean_by_level=mean_by_level, stddev_by_level=stddev_by_level)
+	predictor = autoregressive.Predictor(predictor, gradient_checkpointing=True)
+	return predictor
+
+@hk.transform_with_state
+def run_forward(modelconfig, taskconfig, inputs, targets_template, forcings):
+	predictor = construct_wrapped_graphcast(modelconfig, taskconfig)
+	print( f"\n Run forward-> inputs:")
+	for vn, dv in inputs.data_vars.items():
+		print(f" > {vn}{dv.dims}: {dv.shape}")
+	print( f"\n Run forward-> targets_template:")
+	for vn, dv in targets_template.data_vars.items():
+		print(f" > {vn}{dv.dims}: {dv.shape}")
+	return predictor(inputs, targets_template=targets_template, forcings=forcings)
+
+init_jitted = jax.jit(with_configs(run_forward.init))
+
+if params is None:
+	params, state = init_jitted( rng=jax.random.PRNGKey(0), inputs=train_inputs, targets_template=train_targets, forcings=train_forcings)
+
