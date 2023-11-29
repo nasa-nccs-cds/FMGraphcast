@@ -96,6 +96,7 @@ print( f" ---> mean_by_level vars: {list(mean_by_level.data_vars.keys())}")
 coords = train_inputs.data_vars['temperature'].coords
 
 print( f"\n Coords: ")
-print( f"\n ---> Lat: {coords['lat'].values.tolist()}")
-print( f"\n ---> Lon: {coords['lon'].values.tolist()}")
+print( f"\n ---> Lat:   {coords['lat'].values.tolist()}")
+print( f"\n ---> Lon:   {coords['lon'].values.tolist()}")
+print( f"\n ---> Level: {coords['level'].values.tolist()}")
 
