@@ -98,7 +98,7 @@ print( f"\n ---> Lon:   {coords['lon'].values.tolist()}")
 print( f"\n ---> Level: {coords['level'].values.tolist()}")
 
 def with_configs(fn):
-	return functools.partial( fn, model_config=model_config, task_config=task_config )
+	return functools.partial( fn, modelconfig=model_config, taskconfig=task_config )
 
 def with_params(fn):
 	return functools.partial(fn, params=params, state=state)
