@@ -129,5 +129,5 @@ init_jitted = jax.jit(with_configs(run_forward.init))
 if params is None:
 	params, state = init_jitted( rng=jax.random.PRNGKey(0), inputs=train_inputs, targets_template=train_targets, forcings=train_forcings)
 
-print( params )
-
+pspec = { k: v['w'].shape for k,v in params.items() }
+print( f"Weights: {pspec}" )
