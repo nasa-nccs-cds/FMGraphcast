@@ -73,14 +73,14 @@ print("Train Inputs:  ", train_inputs.dims.mapping)
 print("Train Targets: ", train_targets.dims.mapping)
 print("Train Forcings:", train_forcings.dims.mapping)
 
-for (title,dset) in [ ('train',train_inputs), ('targets',train_targets), ('forcings',train_forcings) ]:
-	print(f"\n{title} inputs:   ", dset.dims.mapping)
-	print_dict( " -- DSET attrs", dset.attrs )
+for (title,dset) in [ ('train',train_inputs), ('target',train_targets), ('forcing',train_forcings) ]:
+	nfeatures = 0
+	print(f"\n{title} inputs:   ")
 	for vname, dvar in dset.data_vars.items():
 		ndvar: np.ndarray = dvar.values
+		nfeatures = nfeatures + (1 if ndvar.ndim == 4 else ndvar.shape[2])
 		print(f" > {vname}{dvar.dims}: shape: {dvar.shape}, dtype: {dvar.dtype}, range: ({ndvar.min():.3f},{ndvar.max():.3f}), mean,std: ({ndvar.mean():.3f},{ndvar.std():.3f})")
-
-# Load normalization data
+	print( f" ---------- N Features: {nfeatures}  ---------- ")
 
 with open(f"{root}/stats/diffs_stddev_by_level.nc","rb") as f:
 	diffs_stddev_by_level: xarray.Dataset = xarray.load_dataset(f).compute()
