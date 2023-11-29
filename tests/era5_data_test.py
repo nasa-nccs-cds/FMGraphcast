@@ -61,7 +61,14 @@ train_inputs, train_targets, train_forcings = data_utils.extract_inputs_targets_
 eval_inputs, eval_targets, eval_forcings = data_utils.extract_inputs_targets_forcings( example_batch,
 												target_lead_times=slice("6h", f"{eval_steps*6}h"), **dataclasses.asdict(task_config))
 
-print("All Examples:  ", example_batch.dims.mapping)
+print( "\n -- TaskConfig --")
+print( f" * input_variables   = {task_config.input_variables}")
+print( f" * target_variables  = {task_config.target_variables}")
+print( f" * forcing_variables = {task_config.forcing_variables}")
+print( f" * pressure_levels   = {task_config.pressure_levels}")
+
+
+print("\nAll Examples:  ", example_batch.dims.mapping)
 print("Train Inputs:  ", train_inputs.dims.mapping)
 print("Train Targets: ", train_targets.dims.mapping)
 print("Train Forcings:", train_forcings.dims.mapping)
@@ -72,7 +79,6 @@ for (title,dset) in [ ('train',train_inputs), ('targets',train_targets), ('forci
 	for vname, dvar in dset.data_vars.items():
 		ndvar: np.ndarray = dvar.values
 		print(f" > {vname}{dvar.dims}: shape: {dvar.shape}, dtype: {dvar.dtype}, range: ({ndvar.min():.3f},{ndvar.max():.3f}), mean,std: ({ndvar.mean():.3f},{ndvar.std():.3f})")
-
 
 # Load normalization data
 
@@ -119,6 +125,8 @@ def run_forward(modelconfig, taskconfig, inputs, targets_template, forcings):
 	return predictor(inputs, targets_template=targets_template, forcings=forcings)
 
 init_jitted = jax.jit(with_configs(run_forward.init))
+
+task_config.
 
 if params is None:
 	params, state = init_jitted( rng=jax.random.PRNGKey(0), inputs=train_inputs, targets_template=train_targets, forcings=train_forcings)
