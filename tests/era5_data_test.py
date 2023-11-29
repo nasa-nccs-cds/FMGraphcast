@@ -126,8 +126,6 @@ def run_forward(modelconfig, taskconfig, inputs, targets_template, forcings):
 
 init_jitted = jax.jit(with_configs(run_forward.init))
 
-task_config.
-
 if params is None:
 	params, state = init_jitted( rng=jax.random.PRNGKey(0), inputs=train_inputs, targets_template=train_targets, forcings=train_forcings)
 
