@@ -43,7 +43,10 @@ with open(pfilepath, "rb") as f:
 	print_dict( "model_config", model_config )
 	print_dict("task_config", task_config )
 
-# Load weather data
+print( f"Checkpoint Weights:" )
+for k,v in params.items():
+	if 'w' in v.keys():
+		print( f" >> {k}: {v['w'].shape}")
 
 res,levels,steps = cfg().model.res,  cfg().model.levels,  cfg().model.steps
 month, day =  cfg().model.month,  cfg().model.day
@@ -136,7 +139,7 @@ init_jitted = jax.jit(with_configs(run_forward.init))
 if params is None:
 	params, state = init_jitted( rng=jax.random.PRNGKey(0), inputs=train_inputs, targets_template=train_targets, forcings=train_forcings)
 
-print( f"Weights:" )
+print( f"Post-Init Weights:" )
 for k,v in params.items():
 	if 'w' in v.keys():
 		print( f" >> {k}: {v['w'].shape}")
