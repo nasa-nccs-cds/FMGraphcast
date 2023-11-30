@@ -19,6 +19,6 @@ input_variables: { 2m_temperature: 'T2M', mean_sea_level_pressure: 'SLP', 10m_v_
 target_variables: [ '2m_temperature', 'mean_sea_level_pressure', '10m_v_component_of_wind', '10m_u_component_of_wind', 'total_precipitation_6hr',
                     'temperature', 'geopotential', 'u_component_of_wind', 'v_component_of_wind', 'vertical_velocity', 'specific_humidity' ]
 forcing_variables: [ 'toa_incident_solar_radiation', 'year_progress_sin', 'year_progress_cos', 'day_progress_sin', 'day_progress_cos' ]
-constants: [ 'geopotential_at_surface', 'land_sea_mask' ]
+constants: [ 'land_sea_mask', 'geopotential_at_surface' ]
 
 
