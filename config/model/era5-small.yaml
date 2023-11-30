@@ -8,5 +8,5 @@ mesh_size: 5
 gnn_msg_steps: 16
 latent_size: 512
 hidden_layers: 1
-res: 2.0
+res: 1.0
 radius_query_fraction_edge_length: 0.6

@@ -1,6 +1,6 @@
 levels: 13
 steps: 1
-year: 1985
+year: 1990
 month: 1
 day: 1
 
@@ -8,5 +8,5 @@ mesh_size: 5
 gnn_msg_steps: 16
 latent_size: 512
 hidden_layers: 1
-res: 2.0
+res: 1.0
 radius_query_fraction_edge_length: 0.6
