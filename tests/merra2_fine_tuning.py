@@ -1,16 +1,27 @@
-import functools
-from typing import Optional, Dict
 from fmbase.source.merra2.model import YearMonth, load_batch
 from fmgraphcast.data_utils import load_merra2_norm_data
 from fmgraphcast.config import config_files
-from fmgraphcast.model import train_model
-from fmgraphcast import data_utils
 import xarray as xa
-import hydra, dataclasses, time
+import functools
+from graphcast import autoregressive
+from graphcast import casting
+from fmgraphcast import data_utils
+from graphcast import graphcast
+from graphcast import normalization
+from graphcast import rollout
+from graphcast import xarray_jax
+from graphcast import xarray_tree
+from fmbase.util.ops import format_timedeltas, print_dict
+import haiku as hk
+import jax, time
+import numpy as np
+import xarray
+import hydra, dataclasses
 from fmbase.util.config import configure, cfg
+from typing import List, Union, Tuple, Optional, Dict, Type
 
 hydra.initialize( version_base=None, config_path="../config" )
-configure( 'merra2-small' )
+configure( 'merra2-finetuning' )
 t0 = time.time()
 
 def parse_file_parts(file_name):
@@ -19,10 +30,12 @@ def parse_file_parts(file_name):
 def dtypes( d: Dict ):
 	return { k: type(v) for k,v in d.items() }
 
+params, state = None, None
 res,levels,steps = cfg().model.res,  cfg().model.levels,  cfg().model.steps
 year, month, day =  cfg().model.year,  cfg().model.month,  cfg().model.day
 train_steps, eval_steps = cfg().task.train_steps, cfg().task.eval_steps
 (model_config,task_config) = config_files()
+lr = cfg().task.lr
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Load MERRA2 Data
@@ -67,64 +80,110 @@ for vname, dvar in eval_targets.data_vars.items():
 		print(f" --> time: {dvar.coords['time'].values.tolist()}")
 print("Eval Forcings: ", eval_forcings.dims.mapping)
 
+print("Inputs:  ", eval_inputs.dims.mapping)
+print("Targets: ", eval_targets.dims.mapping)
+print("Forcings:", eval_forcings.dims.mapping)
+
+def construct_wrapped_graphcast( model_config: graphcast.ModelConfig, task_config: graphcast.TaskConfig):
+	"""Constructs and wraps the GraphCast Predictor."""
+	# Deeper one-step predictor.
+	predictor = graphcast.GraphCast(model_config, task_config)
+
+	# Modify inputs/outputs to `graphcast.GraphCast` to handle conversion to
+	# from/to float32 to/from BFloat16.
+	predictor = casting.Bfloat16Cast(predictor)
+#	print( f"\n **** Norm (std) Data vars = {list(stddev_by_level.data_vars.keys())}")
+
+	# Modify inputs/outputs to `casting.Bfloat16Cast` so the casting to/from
+	# BFloat16 happens after applying normalization to the inputs/targets.
+	predictor = normalization.InputsAndResiduals(
+	  predictor,
+	  diffs_stddev_by_level=norm_data['diffs_stddev_by_level'],
+	  mean_by_level=norm_data['mean_by_level'],
+	  stddev_by_level=norm_data['stddev_by_level'])
+
+	# Wraps everything so the one-step model can produce trajectories.
+	predictor = autoregressive.Predictor(predictor, gradient_checkpointing=True)
+	return predictor
+
+
+@hk.transform_with_state
+def run_forward(model_config, task_config, inputs, targets_template, forcings):
+	predictor = construct_wrapped_graphcast(model_config, task_config)
+	print( f"\n Run forward-> inputs:")
+	for vn, dv in inputs.data_vars.items():
+		print(f" > {vn}{dv.dims}: {dv.shape}")
+	print( f"\n Run forward-> targets_template:")
+	for vn, dv in targets_template.data_vars.items():
+		print(f" > {vn}{dv.dims}: {dv.shape}")
+	return predictor(inputs, targets_template=targets_template, forcings=forcings)
+
+
+@hk.transform_with_state
+def loss_fn(model_config, task_config, inputs, targets, forcings):
+	predictor = construct_wrapped_graphcast(model_config, task_config)
+	loss, diagnostics = predictor.loss(inputs, targets, forcings)
+	return xarray_tree.map_structure(
+	  lambda x: xarray_jax.unwrap_data(x.mean(), require_jax=True), (loss, diagnostics))
+
+def grads_fn(params, state, model_config, task_config, inputs, targets, forcings):
+	def _aux(params, state, i, t, f):
+		(loss, diagnostics), next_state = loss_fn.apply(  params, state, jax.random.PRNGKey(0), model_config, task_config, i, t, f)
+		return loss, (diagnostics, next_state)
+	(loss, (diagnostics, next_state)), grads = jax.value_and_grad( _aux, has_aux=True)(params, state, inputs, targets, forcings)
+	return loss, diagnostics, next_state, grads
+
+# Jax doesn't seem to like passing configs as args through the jit. Passing it
+# in via partial (instead of capture by closure) forces jax to invalidate the
+# jit cache if you change configs.
+def with_configs(fn):
+	return functools.partial( fn, model_config=model_config, task_config=task_config)
+
+# Always pass params and state, so the usage below are simpler
+def with_params(fn):
+	return functools.partial(fn, params=params, state=state)
+
+# Our models aren't stateful, so the state is always empty, so just return the
+# predictions. This is requiredy by our rollout code, and generally simpler.
+def drop_state(fn):
+	return lambda **kw: fn(**kw)[0]
+
+init_jitted = jax.jit(with_configs(run_forward.init))
+
+if params is None:
+	params, state = init_jitted( rng=jax.random.PRNGKey(0), inputs=train_inputs, targets_template=train_targets, forcings=train_forcings)
+
+loss_fn_jitted = drop_state(with_params(jax.jit(with_configs(loss_fn.apply))))
+grads_fn_jitted = with_params(jax.jit(with_configs(grads_fn)))
+run_forward_jitted = drop_state(with_params(jax.jit(with_configs(run_forward.apply))))
+
+# Autoregressive rollout (loop in python)
+
+assert model_config.resolution in (0, 360. / eval_inputs.sizes["lon"]), (
+  "Model resolution doesn't match the data resolution. You likely want to re-filter the dataset list, and download the correct data.")
 
 print("Inputs:  ", eval_inputs.dims.mapping)
 print("Targets: ", eval_targets.dims.mapping)
 print("Forcings:", eval_forcings.dims.mapping)
 
-(cmconfig, ctconfig) = config_files( checkpoint=True )
-(mconfig, tconfig)   = config_files( checkpoint=False )
-for tc in [ ctconfig, tconfig ]:
-	iv = [ type(i) for i in tconfig.input_variables ]
-	fv = [ type(i) for i in tconfig.forcing_variables ]
-	print( f"\n Config types  iv: {iv}")
-	print( f"                 fv: {fv}")
+nepochs = cfg().task.nepochs
+for epoch in range(nepochs):
+	loss, diagnostics, next_state, grads = grads_fn_jitted( inputs=train_inputs, targets=train_targets, forcings=train_forcings )
+	mean_grad = np.mean( jax.tree_util.tree_flatten( jax.tree_util.tree_map( lambda x: np.abs(x).mean(), grads ) )[0] )
+	print(f" EPOCH {epoch}: Loss= {loss:.4f}, Mean |grad|= {mean_grad:.6f}")
+	params = jax.tree_map(  lambda p, g: p - lr * g, params, grads)
 
-train_model( train_inputs, train_targets, train_forcings )
-
-
-# def with_params(fn):
-# 	return functools.partial(fn, params=params, state=state)
+# predictions: xarray.Dataset = rollout.chunked_prediction( run_forward_jitted, rng=jax.random.PRNGKey(0), inputs=eval_inputs,
+# 														        targets_template=eval_targets * np.nan, forcings=eval_forcings)
 #
-# run_forward_jitted = drop_state(with_params(jax.jit(with_configs(run_forward.apply))))
-# train_predictions = run_forward_jitted( rng=jax.random.PRNGKey(0), inputs=train_inputs, targets_template=train_targets * np.nan, forcings=train_forcings)
-# eval_predictions = rollout.chunked_prediction( run_forward_jitted, rng=jax.random.PRNGKey(0), inputs=eval_inputs, targets_template=eval_targets * np.nan, forcings=eval_forcings)
-#
-#
-#
-
 # print( f" ***** Completed forecast, result variables:  ")
 # for vname, dvar in predictions.data_vars.items():
 # 	print( f" > {vname}{dvar.dims}: {dvar.shape}")
 # 	ndvar: np.ndarray = dvar.values
-# 	tvar: Optional[xa.DataArray] = dvar.coords.get('time')
+# 	tvar: Optional[xarray.DataArray] = dvar.coords.get('time')
 # 	print(f"   --> dtype: {dvar.dtype}, range: ({ndvar.min():.3f},{ndvar.max():.3f}), mean,std: ({ndvar.mean():.3f},{ndvar.std():.3f}), time: {format_timedeltas(tvar)}")
 #
-# t1 = time.time()
-# print( f"Completed forecast in {t1-t0} sec.")
 #
-
-
-
+# print( f"Completed in {time.time()-t0} sec.")
 #
-# @jit
-# def update(params, batch):
-# 	grads = grad(loss)(params, batch)
-# 	return [(w - step_size * dw, b - step_size * db)
-# 		for (w, b), (dw, db) in zip(params, grads)]
 #
-# params = init_random_params(param_scale, layer_sizes)
-# for epoch in range(num_epochs):
-# 	start_time = time.time()
-# 	for _ in range(num_batches):
-# 		params = update(params, next(batches))
-# 	epoch_time = time.time() - start_time
-#
-# 	train_acc = accuracy(params, (train_images, train_labels))
-# 	test_acc = accuracy(params, (test_images, test_labels))
-# 	print(f"Epoch {epoch} in {epoch_time:0.2f} sec")
-# 	print(f"Training set accuracy {train_acc}")
-# 	print(f"Test set accuracy {test_acc}")
-#
-
-

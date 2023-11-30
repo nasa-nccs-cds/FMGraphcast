@@ -17,7 +17,7 @@ from fmbase.util.config import configure, cfg
 from typing import List, Union, Tuple, Optional, Dict, Type
 
 hydra.initialize( version_base=None, config_path="../config" )
-configure( 'merra2-test' )
+configure( 'merra2-finetuning' )
 t0 = time.time()
 
 def parse_file_parts(file_name):
