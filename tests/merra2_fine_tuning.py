@@ -42,13 +42,12 @@ lr = cfg().task.lr
 #-----------------
 
 dts         = cfg().task.data_timestep
-start = YearMonth(year,month)
-end = YearMonth(year,month+1)
+ndays = 10
 target_lead_times = [ f"{iS*dts}h" for iS in range(1,train_steps+1) ]
 eval_lead_times =   [ f"{iS*dts}h" for iS in range(1,eval_steps+1) ]
 
 print( "  --------------------- MERRA2 ---------------------")
-example_batch: xa.Dataset = load_batch( start, end, cfg().task )
+example_batch: xa.Dataset = load_batch( year, month, day, ndays, cfg().task )
 
 print("Loaded Batch:")
 for vname, dvar in example_batch.data_vars.items():

@@ -33,7 +33,7 @@ year, month, day =  cfg().model.year,  cfg().model.month,  cfg().model.day
 
 train_steps, eval_steps = cfg().task.train_steps, cfg().task.eval_steps
 (model_config,task_config) = config_files()
-ndays = 10
+ndays = 3
 lr = cfg().task.lr
 
 print( "\n -- TaskConfig --")
