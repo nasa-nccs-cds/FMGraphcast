@@ -89,7 +89,8 @@ print("Train Forcings:", train_forcings.dims.mapping)
 for (title,dset) in [ ('train',train_inputs), ('target',train_targets), ('forcing',train_forcings) ]:
 	nfeatures = 0
 	print(f"\n{title} inputs:   ")
-	for vname, dvar in dset.data_vars.items():
+	for vname in dset.data_vars.keys():
+		dvar = dset.data_vars[vname]
 		ndvar: np.ndarray = dvar.values
 		nfeatures = nfeatures + (ndvar.shape[2] if (ndvar.ndim == 5) else 1)
 		print(f" > {vname}{dvar.dims}: shape: {dvar.shape}, dtype: {dvar.dtype}, range: ({ndvar.min():.3f},{ndvar.max():.3f}), mean,std: ({ndvar.mean():.3f},{ndvar.std():.3f})")
