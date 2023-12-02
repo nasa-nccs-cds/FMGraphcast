@@ -10,7 +10,7 @@ from graphcast import graphcast
 from graphcast import normalization
 import haiku as hk
 import jax, time
-import numpy as np
+import numpy as np, pandas as pd
 import xarray
 import hydra, dataclasses
 from fmbase.util.config import configure, cfg
@@ -60,8 +60,10 @@ eval_lead_times =   slice("6h", f"{eval_steps*6}h") #[ f"{iS*dts}h" for iS in ra
 
 print( "  --------------------- MERRA2 ---------------------")
 example_batch: xa.Dataset = load_batch( year, month, day, ndays, cfg().task )
+vtime: List[str] = [str(pd.Timestamp(dt64)) for dt64 in example_batch.coords['time'].values.tolist()]
+print(f"\n -------> batch time: {vtime}\n")
 
-print("Loaded Batch:")
+print("\nLoaded Batch:")
 for vname, dvar in example_batch.data_vars.items():
 	print( f" {vname}{list(dvar.dims)}: shape={dvar.shape}")
 
