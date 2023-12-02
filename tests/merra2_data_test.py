@@ -60,10 +60,6 @@ eval_lead_times =   slice("6h", f"{eval_steps*6}h") #[ f"{iS*dts}h" for iS in ra
 
 print( "  --------------------- MERRA2 ---------------------")
 example_batch: xa.Dataset = load_batch( year, month, day, ndays, cfg().task )
-time: np.ndarray = example_batch.coords['time'].values
-time.sort()
-dtime: np.ndarray = (time - time[0]).astype(np.int64)/1.0e13
-print( f"\n Batch time coord({time.dtype}): {dtime.tolist()}\n")
 
 print("Loaded Batch:")
 for vname, dvar in example_batch.data_vars.items():
