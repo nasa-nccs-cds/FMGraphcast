@@ -55,8 +55,8 @@ print( f" * radius_qfel    = {model_config.radius_query_fraction_edge_length}")
 #-----------------
 
 dts         = cfg().task.data_timestep
-target_lead_times = [ f"{iS*dts}h" for iS in range(1,train_steps+1) ]
-eval_lead_times =   [ f"{iS*dts}h" for iS in range(1,eval_steps+1) ]
+target_lead_times = slice("6h", f"{train_steps*6}h") # [ f"{iS*dts}h" for iS in range(1,train_steps+1) ]
+eval_lead_times =   slice("6h", f"{eval_steps*6}h") #[ f"{iS*dts}h" for iS in range(1,eval_steps+1) ]
 
 print( "  --------------------- MERRA2 ---------------------")
 example_batch: xa.Dataset = load_batch( year, month, day, ndays, cfg().task )
