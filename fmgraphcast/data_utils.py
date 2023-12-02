@@ -232,6 +232,10 @@ def extract_input_target_times( dataset: xarray.Dataset, input_duration: Timedel
   dataset = dataset.assign_coords(time=time + target_duration - time[-1])
 
   print( f"\nSlice out targets: target_lead_times={target_lead_times}, time={dataset.coords['time'].values.tolist()}\n")
+  print( "Variables:")
+  for vname, dvar in dataset.data_vars.items():
+      print( f" --- {vname}{dvar.dims}: {dvar.shape}")
+
   targets = dataset.sel({"time": target_lead_times})
 
   input_duration = pd.Timedelta(input_duration)
