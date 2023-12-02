@@ -229,7 +229,8 @@ def extract_input_target_times( dataset: xarray.Dataset, input_duration: Timedel
   # forming the target period which needs to be predicted.
   # This means the time coordinates are now forecast lead times.
   time = dataset.coords["time"]
-  print(f"\nSlice out targets: target_lead_times={target_lead_times}, time({time.dtype})={(time.values.astype(np.int64)/1e16).tolist()}")
+  ftime = time.values.astype(np.int64)/1e15 - 47.6
+  print(f"\nSlice out targets: target_lead_times={target_lead_times}, time({time.dtype})={ftime.tolist()}")
   dataset = dataset.assign_coords(time=time + target_duration - time[-1])
   rtime: xarray.DataArray = dataset.coords["time"]
   print( f" ----> rtime({rtime.dtype})={rtime.values.tolist()}")
