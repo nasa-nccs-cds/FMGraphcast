@@ -169,7 +169,7 @@ nepochs = cfg().task.nepochs
 for epoch in range(nepochs):
 	loss, diagnostics, next_state, grads = grads_fn_jitted( inputs=train_inputs, targets=train_targets, forcings=train_forcings )
 	mean_grad = np.mean( jax.tree_util.tree_flatten( jax.tree_util.tree_map( lambda x: np.abs(x).mean(), grads ) )[0] )
-	print(f" EPOCH {epoch}: Loss= {loss:.4f}, Mean |grad|= {mean_grad:.6f}")
+	print(f" EPOCH {epoch}: Loss= {loss:.4f}, Mean |dW|= {lr*mean_grad:.6f}")
 	params = jax.tree_map(  lambda p, g: p - lr * g, params, grads)
 
 # predictions: xarray.Dataset = rollout.chunked_prediction( run_forward_jitted, rng=jax.random.PRNGKey(0), inputs=eval_inputs,
