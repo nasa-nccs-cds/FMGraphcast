@@ -55,7 +55,10 @@ dataset_file = f"{root}/data/era5/res-{res}_levels-{levels}_steps-{steps:0>2}/{y
 with open(dataset_file,"rb") as f:
 	example_batch = xarray.load_dataset(f).compute()
 
-# Extract training and eval data
+print("\nLoaded Batch:")
+for vname in example_batch.data_vars.keys():
+	dvar = example_batch.data_vars[vname]
+	print( f" {vname}{list(dvar.dims)}: shape={dvar.shape}")
 
 train_steps, eval_steps = cfg().task.train_steps, cfg().task.eval_steps
 train_inputs, train_targets, train_forcings = data_utils.extract_inputs_targets_forcings( example_batch,
@@ -99,10 +102,6 @@ with open(f"{root}/stats/mean_by_level.nc","rb") as f:
 	mean_by_level: xarray.Dataset = xarray.load_dataset(f).compute()
 with open(f"{root}/stats/stddev_by_level.nc","rb") as f:
 	stddev_by_level: xarray.Dataset = xarray.load_dataset(f).compute()
-
-print( "\n * Normalization data: mean_by_level * ")
-for k,v in mean_by_level.data_vars.items():
-	print( f" ** {k}[{v.size}]")
 
 coords = train_inputs.data_vars['temperature'].coords
 

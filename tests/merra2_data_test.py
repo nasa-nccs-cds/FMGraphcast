@@ -64,7 +64,8 @@ vtime: List[str] = [str(pd.Timestamp(dt64)) for dt64 in example_batch.coords['ti
 print(f"\n -------> batch time: {vtime}\n")
 
 print("\nLoaded Batch:")
-for vname, dvar in example_batch.data_vars.items():
+for vname in example_batch.data_vars.keys():
+	dvar = example_batch.data_vars[vname]
 	print( f" {vname}{list(dvar.dims)}: shape={dvar.shape}")
 
 norm_data: Dict[str,xa.Dataset] = load_merra2_norm_data()
@@ -101,10 +102,6 @@ norm_data: Dict[str,xa.Dataset] = load_merra2_norm_data()
 diffs_stddev_by_level: xarray.Dataset = norm_data['diffs_stddev_by_level']
 mean_by_level: xarray.Dataset =  norm_data['mean_by_level']
 stddev_by_level: xarray.Dataset =  norm_data['stddev_by_level']
-
-print( "\n * Normalization data: mean_by_level * ")
-for k,v in mean_by_level.data_vars.items():
-	print( f" ** {k}[{v.size}]")
 
 coords = train_inputs.data_vars['temperature'].coords
 
