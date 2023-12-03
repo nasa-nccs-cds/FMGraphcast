@@ -127,10 +127,12 @@ def construct_wrapped_graphcast( modelconfig: graphcast.ModelConfig, taskconfig:
 def run_forward(modelconfig, taskconfig, inputs, targets_template, forcings):
 	predictor = construct_wrapped_graphcast(modelconfig, taskconfig)
 	print( f"\n Run forward-> inputs:")
-	for vn, dv in inputs.data_vars.items():
+	for vn in inputs.data_vars.keys():
+		dv = inputs.data_vars[vn]
 		print(f" > {vn}{dv.dims}: {dv.shape}")
 	print( f"\n Run forward-> targets_template:")
-	for vn, dv in targets_template.data_vars.items():
+	for vn in targets_template.data_vars.keys():
+		dv = targets_template.data_vars[vn]
 		print(f" > {vn}{dv.dims}: {dv.shape}")
 	return predictor(inputs, targets_template=targets_template, forcings=forcings)
 
