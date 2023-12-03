@@ -43,11 +43,6 @@ with open(pfilepath, "rb") as f:
 	print_dict( "model_config", model_config )
 	print_dict("task_config", task_config )
 
-print( f"Checkpoint Weights:" )
-for k,v in params.items():
-	if 'w' in v.keys():
-		print( f" >> {k}: {v['w'].shape}")
-
 res,levels,steps = cfg().model.res,  cfg().model.levels,  cfg().model.steps
 month, day =  cfg().model.month,  cfg().model.day
 dataset_file = f"{root}/data/era5/res-{res}_levels-{levels}_steps-{steps:0>2}/{year}-{month:0>2}-{day:0>2}.nc"
