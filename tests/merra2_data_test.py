@@ -50,6 +50,9 @@ print( f" * hidden_layers  = {model_config.hidden_layers}")
 print( f" * resolution     = {model_config.resolution}")
 print( f" * radius_qfel    = {model_config.radius_query_fraction_edge_length}")
 
+print( f" input_variables.keys = {list(cfg().task.input_variables.keys())}" )
+print( f" input_variables.keys = {cfg().task.feature_list}" )
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Load MERRA2 Data
 #-----------------
