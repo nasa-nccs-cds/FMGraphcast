@@ -34,7 +34,7 @@ t0 = time.time()
 
 with open(pfilepath, "rb") as f:
 	ckpt = checkpoint.load(f, graphcast.CheckPoint)
-	params = ckpt.params
+	params = None # ckpt.params
 	state = {}
 
 	model_config = ckpt.model_config
@@ -129,10 +129,6 @@ def run_forward(modelconfig, taskconfig, inputs, targets_template, forcings):
 	print( f"\n Run forward-> inputs:")
 	for vn in inputs.data_vars.keys():
 		dv = inputs.data_vars[vn]
-		print(f" > {vn}{dv.dims}: {dv.shape}")
-	print( f"\n Run forward-> targets_template:")
-	for vn in targets_template.data_vars.keys():
-		dv = targets_template.data_vars[vn]
 		print(f" > {vn}{dv.dims}: {dv.shape}")
 	return predictor(inputs, targets_template=targets_template, forcings=forcings)
 

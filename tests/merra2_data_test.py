@@ -130,10 +130,6 @@ def run_forward(modelconfig, taskconfig, inputs, targets_template, forcings):
 	for vn in inputs.data_vars.keys():
 		dv = inputs.data_vars[vn]
 		print(f" > {vn}{dv.dims}: {dv.shape}")
-	print( f"\n Run forward-> targets_template:")
-	for vn in targets_template.data_vars.keys():
-		dv = targets_template.data_vars[vn]
-		print(f" > {vn}{dv.dims}: {dv.shape}")
 	return predictor(inputs, targets_template=targets_template, forcings=forcings)
 
 init_jitted = jax.jit(with_configs(run_forward.init))
