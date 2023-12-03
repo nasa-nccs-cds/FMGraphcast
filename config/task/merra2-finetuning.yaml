@@ -5,7 +5,7 @@ train_steps: 1
 eval_steps: 1
 data_timestep: 6
 levels:  [50, 100, 150, 200, 250, 300, 400, 500, 600, 700, 850, 925, 1000]
-lr: 0.01
+lr: 0.001
 nepochs: 5
 
 coords: { x: "lon", y: "lat", z: "level", t: "time" }
