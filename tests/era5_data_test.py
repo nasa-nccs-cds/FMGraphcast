@@ -30,7 +30,6 @@ print( f" root = ", root )
 print( f" params_file = ", params_file )
 print( f" pfilepath = ", pfilepath )
 year = 2022
-t0 = time.time()
 
 with open(pfilepath, "rb") as f:
 	ckpt = checkpoint.load(f, graphcast.CheckPoint)
@@ -55,6 +54,14 @@ for vname in example_batch.data_vars.keys():
 	dvar = example_batch.data_vars[vname]
 	print( f" {vname}{list(dvar.dims)}: shape={dvar.shape}")
 
+with open(f"{root}/stats/diffs_stddev_by_level.nc","rb") as f:
+	diffs_stddev_by_level: xarray.Dataset = xarray.load_dataset(f).compute()
+with open(f"{root}/stats/mean_by_level.nc","rb") as f:
+	mean_by_level: xarray.Dataset = xarray.load_dataset(f).compute()
+with open(f"{root}/stats/stddev_by_level.nc","rb") as f:
+	stddev_by_level: xarray.Dataset = xarray.load_dataset(f).compute()
+
+t0 = time.time()
 train_steps, eval_steps = cfg().task.train_steps, cfg().task.eval_steps
 train_inputs, train_targets, train_forcings = data_utils.extract_inputs_targets_forcings( example_batch,
 												target_lead_times=slice("6h", f"{train_steps*6}h"), **dataclasses.asdict(task_config))
@@ -91,13 +98,6 @@ for (title,dset) in [ ('train',train_inputs), ('target',train_targets), ('forcin
 		print(f" > {vname}{dvar.dims}: shape: {dvar.shape}, dtype: {dvar.dtype}, range: ({ndvar.min():.3f},{ndvar.max():.3f}), mean,std: ({ndvar.mean():.3f},{ndvar.std():.3f})")
 	print( f" ---------- N Features: {nfeatures}  ---------- ")
 
-with open(f"{root}/stats/diffs_stddev_by_level.nc","rb") as f:
-	diffs_stddev_by_level: xarray.Dataset = xarray.load_dataset(f).compute()
-with open(f"{root}/stats/mean_by_level.nc","rb") as f:
-	mean_by_level: xarray.Dataset = xarray.load_dataset(f).compute()
-with open(f"{root}/stats/stddev_by_level.nc","rb") as f:
-	stddev_by_level: xarray.Dataset = xarray.load_dataset(f).compute()
-
 coords = train_inputs.data_vars['temperature'].coords
 
 print( f"\n Coords: ")
@@ -127,12 +127,13 @@ def run_forward(model_config, task_config, inputs, targets_template, forcings):
 		print(f" > {vn}{dv.dims}: {dv.shape}")
 	return predictor(inputs, targets_template=targets_template, forcings=forcings)
 
+t1 = time.time()
 init_jitted = jax.jit(with_configs(run_forward.init))
 
 if params is None:
 	params, state = init_jitted( rng=jax.random.PRNGKey(0), inputs=train_inputs, targets_template=train_targets, forcings=train_forcings)
 
-print( f"Post-Init Weights:" )
+print( f"Computed Weights in {(time.time()-t1):.2f} {(t1-t0):.2f} sec:" )
 for k,v in params.items():
 	if 'w' in v.keys():
 		print( f" >> {k}: {v['w'].shape}")

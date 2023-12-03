@@ -70,6 +70,7 @@ for vname in example_batch.data_vars.keys():
 
 norm_data: Dict[str,xa.Dataset] = load_merra2_norm_data()
 
+t0 = time.time()
 itf = data_utils.extract_inputs_targets_forcings( example_batch, target_lead_times=target_lead_times, **dataclasses.asdict(task_config) )
 train_inputs, train_targets, train_forcings = itf
 
@@ -132,12 +133,14 @@ def run_forward(modelconfig, taskconfig, inputs, targets_template, forcings):
 		print(f" > {vn}{dv.dims}: {dv.shape}")
 	return predictor(inputs, targets_template=targets_template, forcings=forcings)
 
+t1 = time.time()
+
 init_jitted = jax.jit(with_configs(run_forward.init))
 
 if params is None:
 	params, state = init_jitted( rng=jax.random.PRNGKey(0), inputs=train_inputs, targets_template=train_targets, forcings=train_forcings)
 
-print( f"Weights:" )
+print( f"Computed Weights in {(time.time()-t1):.2f} {(t1-t0):.2f} sec:" )
 for k,v in params.items():
 	if 'w' in v.keys():
 		print( f" >> {k}: {v['w'].shape}")
