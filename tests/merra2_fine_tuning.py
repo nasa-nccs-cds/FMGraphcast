@@ -1,6 +1,6 @@
 from fmbase.source.merra2.model import YearMonth, load_batch
 from fmgraphcast.data_utils import load_merra2_norm_data
-from fmgraphcast.config import config_files
+from fmgraphcast.config import config_files, load_era5_params
 import xarray as xa
 import functools
 from graphcast import autoregressive
@@ -8,14 +8,13 @@ from graphcast import casting
 from fmgraphcast import data_utils
 from graphcast import graphcast
 from graphcast import normalization
-from graphcast import rollout
+from graphcast import checkpoint
+from fmbase.util.ops import fmbdir
 from graphcast import xarray_jax
 from graphcast import xarray_tree
-from fmbase.util.ops import format_timedeltas, print_dict
 import haiku as hk
 import jax, time
 import numpy as np
-import xarray
 import hydra, dataclasses
 from fmbase.util.config import configure, cfg
 from typing import List, Union, Tuple, Optional, Dict, Type
@@ -30,12 +29,12 @@ def parse_file_parts(file_name):
 def dtypes( d: Dict ):
 	return { k: type(v) for k,v in d.items() }
 
-params, state = None, None
 res,levels,steps = cfg().model.res,  cfg().model.levels,  cfg().model.steps
 year, month, day =  cfg().model.year,  cfg().model.month,  cfg().model.day
 train_steps, eval_steps = cfg().task.train_steps, cfg().task.eval_steps
 (model_config,task_config) = config_files()
 lr = cfg().task.lr
+params, state = load_era5_params()
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Load MERRA2 Data

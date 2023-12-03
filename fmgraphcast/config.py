@@ -35,6 +35,16 @@ def dataset_path(**kwargs) -> str:
 	dsfile = f"{parms['year']}-{parms['month']:0>2}-{parms['day']:0>2}.nc"
 	return f"{root}/{dspath}/{dsfile}"
 
+def load_era5_params() -> Tuple[Dict,Dict]:
+	root = fmbdir('model')
+	params_file = cfg().task.params
+	pfilepath = f"{root}/params/{params_file}.npz"
+	with open(pfilepath, "rb") as f:
+		ckpt = checkpoint.load(f, CheckPoint)
+		params = ckpt.params
+		state = {}
+		return params, state
+
 def config_files(**kwargs) -> Tuple[ModelConfig,TaskConfig]:
 	if kwargs.get('checkpoint',False):
 		root = fmbdir('model')
