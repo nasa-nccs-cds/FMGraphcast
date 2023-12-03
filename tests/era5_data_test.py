@@ -119,8 +119,8 @@ def construct_wrapped_graphcast( modelconfig: graphcast.ModelConfig, taskconfig:
 	return predictor
 
 @hk.transform_with_state
-def run_forward(modelconfig, taskconfig, inputs, targets_template, forcings):
-	predictor = construct_wrapped_graphcast(modelconfig, taskconfig)
+def run_forward(model_config, task_config, inputs, targets_template, forcings):
+	predictor = construct_wrapped_graphcast(model_config, task_config)
 	print( f"\n Run forward-> inputs:")
 	for vn in inputs.data_vars.keys():
 		dv = inputs.data_vars[vn]
