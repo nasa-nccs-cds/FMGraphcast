@@ -289,11 +289,6 @@ def extract_inputs_targets_forcings(
       dvars[vname] = varray.expand_dims("batch") if missing_batch else varray
   dataset = xarray.Dataset( dvars, coords=idataset.coords, attrs=idataset.attrs )
 
-          # "Forcings" are derived variables and do not exist in the original ERA5 or
-  # HRES datasets. Compute them if they are not in `dataset`.
-  if not set(forcing_variables).issubset(set(dataset.data_vars)):
-    add_derived_vars(dataset)
-
   # `datetime` is needed by add_derived_vars but breaks autoregressive rollouts.
   dataset = dataset.drop_vars("datetime")
 
