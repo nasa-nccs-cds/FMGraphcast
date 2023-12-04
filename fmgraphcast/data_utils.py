@@ -35,19 +35,19 @@ class FMCheckPoint:
   model_config: ModelConfig
   task_config: TaskConfig
 
-def cpfilepath() -> str:
-    pdir = f"{fmbdir('results')}/params"
+def cpfilepath(runid: str) -> str:
+    pdir = f"{fmbdir('results')}/{runid}"
     os.makedirs( pdir, mode=0o777, exist_ok=True )
     params_file =  f"{cfg().task.dataset_version}.{cfg().task.params}.npz"
     return f"{pdir}/{params_file}"
 
-def load_params() -> Tuple[Dict,ModelConfig,TaskConfig]:
-    with open(cpfilepath(), "rb") as f:
+def load_params(runid: str) -> Tuple[Dict,ModelConfig,TaskConfig]:
+    with open(cpfilepath(runid), "rb") as f:
         ckpt: FMCheckPoint = checkpoint.load(f, FMCheckPoint)
         return ckpt.params, ckpt.model_config, ckpt.task_config
 
-def save_params(params: Dict, model_config: ModelConfig, task_config: TaskConfig):
-    pfile = cpfilepath()
+def save_params( runid: str, params: Dict, model_config: ModelConfig, task_config: TaskConfig ):
+    pfile = cpfilepath(runid)
     with open(pfile,"wb") as f:
         ckpt: FMCheckPoint = FMCheckPoint( params=params, model_config=model_config, task_config=task_config )
         checkpoint.dump( f, ckpt )
