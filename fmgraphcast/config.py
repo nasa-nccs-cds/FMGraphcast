@@ -43,9 +43,9 @@ class FMCheckPoint:
 	task_config: TaskConfig
 
 def cpfilepath(runid: str) -> str:
-	pdir = f"{fmbdir('results')}/{runid}"
+	pdir = f"{fmbdir('results')}/params"
 	os.makedirs( pdir, mode=0o777, exist_ok=True )
-	params_file =  f"{cfg().task.dataset_version}.{cfg().task.params}.npz"
+	params_file =  f"{cfg().task.dataset_version}.{runid}.npz"
 	return f"{pdir}/{params_file}"
 
 def load_merra2_params(runid: str) -> Tuple[Dict,ModelConfig,TaskConfig]:
