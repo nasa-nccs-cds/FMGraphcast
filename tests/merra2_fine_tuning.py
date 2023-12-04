@@ -152,10 +152,8 @@ if params is None:
 	params, state = init_jitted( rng=jax.random.PRNGKey(0), inputs=train_inputs, targets_template=train_targets, forcings=train_forcings)
 
 loss_fn_jitted = drop_state(with_params(jax.jit(with_configs(loss_fn.apply))))
-
+grads_fn_jitted = jax.jit(with_configs(grads_fn))
 run_forward_jitted = drop_state(with_params(jax.jit(with_configs(run_forward.apply))))
-
-# Autoregressive rollout (loop in python)
 
 assert model_config.resolution in (0, 360. / eval_inputs.sizes["lon"]), (
   "Model resolution doesn't match the data resolution. You likely want to re-filter the dataset list, and download the correct data.")
@@ -167,13 +165,11 @@ print("Forcings:", eval_forcings.dims.mapping)
 nepochs = cfg().task.nepochs
 for epoch in range(nepochs):
 	te= time.time()
-	grads_fn_jitted = with_params(jax.jit(with_configs(grads_fn)))
-	t1= time.time()
-	loss, diagnostics, next_state, grads = grads_fn_jitted( inputs=train_inputs, targets=train_targets, forcings=train_forcings )
+	loss, diagnostics, next_state, grads = with_params(grads_fn_jitted)( inputs=train_inputs, targets=train_targets, forcings=train_forcings )
 	mean_grad = np.mean( jax.tree_util.tree_flatten( jax.tree_util.tree_map( lambda x: np.abs(x).mean(), grads ) )[0] )
 	max_grad = np.mean(jax.tree_util.tree_flatten(jax.tree_util.tree_map(lambda x: np.abs(x).max(), grads))[0])
 	params = jax.tree_map(  lambda p, g: p - lr * g, params, grads)
-	print(f" EPOCH {epoch}: Loss= {loss:.6f}, Mean/Max |dW|= {lr*mean_grad:.6f} / {lr*max_grad:.6f}, comptime= {time.time()-te:.1f} ({t1-te:.2f})sec")
+	print(f"\n ****** EPOCH {epoch}: Loss= {loss:.6f}, Mean/Max |dW|= {lr*mean_grad:.6f} / {lr*max_grad:.6f}, comptime= {time.time()-te:.1f} sec")
 
 # predictions: xarray.Dataset = rollout.chunked_prediction( run_forward_jitted, rng=jax.random.PRNGKey(0), inputs=eval_inputs,
 # 														        targets_template=eval_targets * np.nan, forcings=eval_forcings)
