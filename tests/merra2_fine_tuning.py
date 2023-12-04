@@ -1,6 +1,6 @@
 from fmbase.source.merra2.model import YearMonth, load_batch
-from fmgraphcast.data_utils import load_merra2_norm_data, save_params, load_params
-from fmgraphcast.config import config_files, load_era5_params
+from fmgraphcast.data_utils import load_merra2_norm_data
+from fmgraphcast.config import config_files, load_era5_params, save_params, load_params
 import xarray as xa
 import functools
 from graphcast import autoregressive
@@ -31,9 +31,10 @@ res,levels,steps = cfg().model.res,  cfg().model.levels,  cfg().model.steps
 year, month, day =  cfg().model.year,  cfg().model.month,  cfg().model.day
 train_steps, eval_steps = cfg().task.train_steps, cfg().task.eval_steps
 (model_config,task_config) = config_files()
+state = {}
 lr = cfg().task.lr
-params, state = load_era5_params()
-runid = 1.0
+runid = "small"
+params, mc0, tc0 = load_params("merra2", runid )
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Load MERRA2 Data

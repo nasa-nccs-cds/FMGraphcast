@@ -29,30 +29,6 @@ YEAR_PROGRESS = "year_progress"
 
 predef_norms = [ 'year_progress', 'year_progress_sin', 'year_progress_cos', 'day_progress', 'day_progress_sin', 'day_progress_cos' ]
 
-@chex.dataclass(frozen=True, eq=True)
-class FMCheckPoint:
-  params: dict[str, Any]
-  model_config: ModelConfig
-  task_config: TaskConfig
-
-def cpfilepath(runid: str) -> str:
-    pdir = f"{fmbdir('results')}/{runid}"
-    os.makedirs( pdir, mode=0o777, exist_ok=True )
-    params_file =  f"{cfg().task.dataset_version}.{cfg().task.params}.npz"
-    return f"{pdir}/{params_file}"
-
-def load_params(runid: str) -> Tuple[Dict,ModelConfig,TaskConfig]:
-    with open(cpfilepath(runid), "rb") as f:
-        ckpt: FMCheckPoint = checkpoint.load(f, FMCheckPoint)
-        return ckpt.params, ckpt.model_config, ckpt.task_config
-
-def save_params( runid: str, params: Dict, model_config: ModelConfig, task_config: TaskConfig ):
-    pfile = cpfilepath(runid)
-    with open(pfile,"wb") as f:
-        ckpt: FMCheckPoint = FMCheckPoint( params=params, model_config=model_config, task_config=task_config )
-        checkpoint.dump( f, ckpt )
-        print( f" Saving model weights to file: {pfile}")
-
 def d2xa( dvals: Dict[str,float] ) -> xarray.Dataset:
     return xarray.Dataset( {vn: xarray.DataArray( np.array(dval) ) for vn, dval in dvals.items()} )
 

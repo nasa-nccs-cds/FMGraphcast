@@ -1,10 +1,10 @@
 from fmbase.util.config import cfg
 from fmbase.util.ops import fmbdir
 from graphcast import checkpoint
-from typing import Any, Mapping, Sequence, Tuple, Union, Dict
+from typing import Any, Mapping, Sequence, Tuple, Union, Dict, Optional
 from graphcast.graphcast import ModelConfig, TaskConfig, CheckPoint
 from fmgraphcast.data_utils import load_merra2_norm_data
-import xarray as xa
+import xarray as xa, os, chex
 
 def config_model( **kwargs ) -> ModelConfig:
 	opts = dict(
@@ -35,15 +35,43 @@ def dataset_path(**kwargs) -> str:
 	dsfile = f"{parms['year']}-{parms['month']:0>2}-{parms['day']:0>2}.nc"
 	return f"{root}/{dspath}/{dsfile}"
 
-def load_era5_params() -> Tuple[Dict,Dict]:
+
+@chex.dataclass(frozen=True, eq=True)
+class FMCheckPoint:
+	params: dict[str, Any]
+	model_config: ModelConfig
+	task_config: TaskConfig
+
+def cpfilepath(runid: str) -> str:
+	pdir = f"{fmbdir('results')}/{runid}"
+	os.makedirs( pdir, mode=0o777, exist_ok=True )
+	params_file =  f"{cfg().task.dataset_version}.{cfg().task.params}.npz"
+	return f"{pdir}/{params_file}"
+
+def load_merra2_params(runid: str) -> Tuple[Dict,ModelConfig,TaskConfig]:
+	with open(cpfilepath(runid), "rb") as f:
+		ckpt: FMCheckPoint = checkpoint.load(f, FMCheckPoint)
+		return ckpt.params, ckpt.model_config, ckpt.task_config
+
+def save_params( runid: str, params: Dict, modelconfig: ModelConfig, taskconfig: TaskConfig ):
+	pfile = cpfilepath(runid)
+	with open(pfile,"wb") as f:
+		ckpt: FMCheckPoint = FMCheckPoint( params=params, model_config=modelconfig, task_config=taskconfig )
+		checkpoint.dump( f, ckpt )
+		print( f" Saving model weights to file: {pfile}")
+
+def load_era5_params() -> Tuple[Dict,ModelConfig,TaskConfig]:
+	from graphcast.graphcast import CheckPoint
 	root = fmbdir('model')
 	params_file = cfg().task.params
 	pfilepath = f"{root}/params/{params_file}.npz"
 	with open(pfilepath, "rb") as f:
-		ckpt = checkpoint.load(f, CheckPoint)
-		params = ckpt.params
-		state = {}
-		return params, state
+		ckpt: CheckPoint = checkpoint.load(f, CheckPoint)
+		return ckpt.params, ckpt.model_config, ckpt.task_config
+
+def load_params( ptype: str, runid: str = None ) -> Optional[Tuple[Dict,ModelConfig,TaskConfig]]:
+	if ptype.startswith("era"): return load_era5_params()
+	elif ptype.startswith("merra"): return load_merra2_params(runid)
 
 def config_files(**kwargs) -> Tuple[ModelConfig,TaskConfig]:
 	if kwargs.get('checkpoint',False):
