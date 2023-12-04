@@ -37,9 +37,9 @@ class FMCheckPoint:
 
 def cpfilepath() -> str:
     pdir = f"{fmbdir('results')}/params"
-    os.makedirs(os.path.dirname(pdir), mode=0o777, exist_ok=True)
-    params_file =  f"{cfg().task.dataset_version}.{cfg().task.params}"
-    return f"{pdir}/{params_file}.npz"
+    os.makedirs( pdir, mode=0o777, exist_ok=True )
+    params_file =  f"{cfg().task.dataset_version}.{cfg().task.params}.npz"
+    return f"{pdir}/{params_file}"
 
 def load_params() -> Tuple[Dict,ModelConfig,TaskConfig]:
     with open(cpfilepath(), "rb") as f:
@@ -48,8 +48,8 @@ def load_params() -> Tuple[Dict,ModelConfig,TaskConfig]:
 
 def save_params(params: Dict, model_config: ModelConfig, task_config: TaskConfig):
     pfile = cpfilepath()
-    mode = "wb" if os.path.exists(pfile) else "xb"
-    with open(pfile,mode) as f:
+#    mode = "wb" if os.path.exists(pfile) else "xb"
+    with open(pfile,"wb") as f:
         ckpt: FMCheckPoint = FMCheckPoint( params, model_config, task_config )
         checkpoint.dump( f, ckpt )
         print( f" Saving model weights to file: {pfile}")
