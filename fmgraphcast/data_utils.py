@@ -48,7 +48,8 @@ def load_params() -> Tuple[Dict,ModelConfig,TaskConfig]:
 
 def save_params(params: Dict, model_config: ModelConfig, task_config: TaskConfig):
     pfile = cpfilepath()
-    with open(pfile, "w+b") as f:
+    mode = "wb" if os.path.exists(pfile) else "xb"
+    with open(pfile,mode) as f:
         ckpt: FMCheckPoint = FMCheckPoint( params, model_config, task_config )
         checkpoint.dump( f, ckpt )
         print( f" Saving model weights to file: {pfile}")
