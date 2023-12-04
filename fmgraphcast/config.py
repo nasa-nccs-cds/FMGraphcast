@@ -49,8 +49,10 @@ def cpfilepath(runid: str) -> str:
 	return f"{pdir}/{params_file}"
 
 def load_merra2_params(runid: str) -> Tuple[Dict,ModelConfig,TaskConfig]:
-	with open(cpfilepath(runid), "rb") as f:
+	pfile = cpfilepath(runid)
+	with open(pfile, "rb") as f:
 		ckpt: FMCheckPoint = checkpoint.load(f, FMCheckPoint)
+		print(f" Loading model weights from file: {pfile}")
 		return ckpt.params, ckpt.model_config, ckpt.task_config
 
 def save_params( runid: str, params: Dict, modelconfig: ModelConfig, taskconfig: TaskConfig ):
