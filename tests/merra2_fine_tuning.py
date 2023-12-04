@@ -1,5 +1,5 @@
 from fmbase.source.merra2.model import YearMonth, load_batch
-from fmgraphcast.data_utils import load_merra2_norm_data, save_state, load_state
+from fmgraphcast.data_utils import load_merra2_norm_data, save_state, load_params
 from fmgraphcast.config import config_files, load_era5_params
 import xarray as xa
 import functools

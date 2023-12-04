@@ -41,15 +41,17 @@ def cpfilepath() -> str:
     params_file =  f"{cfg().task.dataset_version}.{cfg().task.params}"
     return f"{pdir}/{params_file}.npz"
 
-def load_state() -> Tuple[Dict,ModelConfig,TaskConfig]:
+def load_params() -> Tuple[Dict,ModelConfig,TaskConfig]:
     with open(cpfilepath(), "rb") as f:
         ckpt: FMCheckPoint = checkpoint.load(f, FMCheckPoint)
         return ckpt.params, ckpt.model_config, ckpt.task_config
 
-def save_state(params: Dict, model_config: ModelConfig, task_config: TaskConfig):
-    with open(cpfilepath(), "wb") as f:
+def save_params(params: Dict, model_config: ModelConfig, task_config: TaskConfig):
+    pfile = cpfilepath()
+    with open(pfile, "wb") as f:
         ckpt: FMCheckPoint = FMCheckPoint( params, model_config, task_config )
         checkpoint.dump( f, ckpt )
+        print( f" Saving model weights to file: {pfile}")
 
 def d2xa( dvals: Dict[str,float] ) -> xarray.Dataset:
     return xarray.Dataset( {vn: xarray.DataArray( np.array(dval) ) for vn, dval in dvals.items()} )
