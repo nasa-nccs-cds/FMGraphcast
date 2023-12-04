@@ -3,9 +3,11 @@
 from typing import Any, Mapping, Sequence, Tuple, Union, List, Dict
 from fmbase.util.ops import fmbdir
 from fmbase.util.config import configure, cfg
+from graphcast.graphcast import ModelConfig, TaskConfig
+from graphcast import checkpoint
 import numpy as np
 import pandas as pd
-import xarray
+import xarray, chex, os
 
 TimedeltaLike = Any  # Something convertible to pd.Timedelta.
 TimedeltaStr = str  # A string convertible to pd.Timedelta.
@@ -26,6 +28,28 @@ DAY_PROGRESS = "day_progress"
 YEAR_PROGRESS = "year_progress"
 
 predef_norms = [ 'year_progress', 'year_progress_sin', 'year_progress_cos', 'day_progress', 'day_progress_sin', 'day_progress_cos' ]
+
+@chex.dataclass(frozen=True, eq=True)
+class FMCheckPoint:
+  params: dict[str, Any]
+  model_config: ModelConfig
+  task_config: TaskConfig
+
+def cpfilepath() -> str:
+    pdir = f"{fmbdir('results')}/params"
+    os.makedirs(os.path.dirname(pdir), mode=0o777, exist_ok=True)
+    params_file =  f"{cfg().task.dataset_version}.{cfg().task.params}"
+    return f"{pdir}/{params_file}.npz"
+
+def load_state() -> Tuple[Dict,ModelConfig,TaskConfig]:
+    with open(cpfilepath(), "rb") as f:
+        ckpt: FMCheckPoint = checkpoint.load(f, FMCheckPoint)
+        return ckpt.params, ckpt.model_config, ckpt.task_config
+
+def save_state(params: Dict, model_config: ModelConfig, task_config: TaskConfig):
+    with open(cpfilepath(), "wb") as f:
+        ckpt: FMCheckPoint = FMCheckPoint( params, model_config, task_config )
+        checkpoint.dump( f, ckpt )
 
 def d2xa( dvals: Dict[str,float] ) -> xarray.Dataset:
     return xarray.Dataset( {vn: xarray.DataArray( np.array(dval) ) for vn, dval in dvals.items()} )
