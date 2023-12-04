@@ -169,7 +169,7 @@ for epoch in range(nepochs):
 	mean_grad = np.mean( jax.tree_util.tree_flatten( jax.tree_util.tree_map( lambda x: np.abs(x).mean(), grads ) )[0] )
 	max_grad = np.mean(jax.tree_util.tree_flatten(jax.tree_util.tree_map(lambda x: np.abs(x).max(), grads))[0])
 	params = jax.tree_map(  lambda p, g: p - lr * g, params, grads)
-	print(f"\n ****** EPOCH {epoch}: Loss= {loss:.6f}, Mean/Max |dW|= {lr*mean_grad:.6f} / {lr*max_grad:.6f}, comptime= {time.time()-te:.1f} sec")
+	print(f" * EPOCH {epoch}: Loss= {loss:.6f}, Mean/Max |dW|= {lr*mean_grad:.6f} / {lr*max_grad:.6f}, comptime= {time.time()-te:.1f} sec")
 
 # predictions: xarray.Dataset = rollout.chunked_prediction( run_forward_jitted, rng=jax.random.PRNGKey(0), inputs=eval_inputs,
 # 														        targets_template=eval_targets * np.nan, forcings=eval_forcings)
