@@ -1,5 +1,5 @@
 from fmbase.source.merra2.model import YearMonth, load_batch
-from fmgraphcast.data_utils import load_merra2_norm_data, save_state, load_params
+from fmgraphcast.data_utils import load_merra2_norm_data, save_params, load_params
 from fmgraphcast.config import config_files, load_era5_params
 import xarray as xa
 import functools
@@ -169,7 +169,7 @@ for epoch in range(nepochs):
 	params = jax.tree_map(  lambda p, g: p - lr * g, params, grads)
 	print(f" * EPOCH {epoch}: Loss= {loss:.6f}, Mean/Max |dW|= {lr*mean_grad:.6f} / {lr*max_grad:.6f}, comptime= {time.time()-te:.1f} sec")
 
-save_state( params, model_config, task_config )
+save_params( params, model_config, task_config )
 
 # predictions: xarray.Dataset = rollout.chunked_prediction( run_forward_jitted, rng=jax.random.PRNGKey(0), inputs=eval_inputs,
 # 														        targets_template=eval_targets * np.nan, forcings=eval_forcings)
