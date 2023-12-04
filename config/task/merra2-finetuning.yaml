@@ -6,7 +6,7 @@ eval_steps: 1
 data_timestep: 6
 levels:  [50, 100, 150, 200, 250, 300, 400, 500, 600, 700, 850, 925, 1000]
 lr: 0.0005
-nepochs: 100
+nepochs: 3
 
 coords: { x: "lon", y: "lat", z: "level", t: "time" }
 statnames: { mean: "mean_by_level", std: "stddev_by_level", mean_diff: "diffs_mean_by_level", std_diff: "diffs_stddev_by_level" }
