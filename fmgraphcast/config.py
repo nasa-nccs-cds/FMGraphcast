@@ -53,7 +53,7 @@ def load_merra2_params(**kwargs) -> Tuple[Dict,ModelConfig,TaskConfig]:
 	pfile = cpfilepath(**kwargs)
 	with open(pfile, "rb") as f:
 		ckpt: FMCheckPoint = checkpoint.load(f, FMCheckPoint)
-		print(f" Loading model weights from file: {pfile}")
+		print(f" Loading merra2 model weights from file: {pfile}")
 		return ckpt.params, ckpt.model_config, ckpt.task_config
 
 def save_params( params: Dict, modelconfig: ModelConfig, taskconfig: TaskConfig, **kwargs ):
@@ -67,9 +67,10 @@ def load_era5_params() -> Tuple[Dict,ModelConfig,TaskConfig]:
 	from graphcast.graphcast import CheckPoint
 	root = fmbdir('model')
 	params_file = cfg().task.params
-	pfilepath = f"{root}/params/{params_file}.npz"
-	with open(pfilepath, "rb") as f:
+	pfile = f"{root}/params/{params_file}.npz"
+	with open(pfile, "rb") as f:
 		ckpt: CheckPoint = checkpoint.load(f, CheckPoint)
+		print(f" Loading era5 model weights from file: {pfile}")
 		return ckpt.params, ckpt.model_config, ckpt.task_config
 
 def load_params( ptype: str, **kwargs ) -> Optional[Tuple[Dict,ModelConfig,TaskConfig]]:
