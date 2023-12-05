@@ -74,7 +74,7 @@ def load_era5_params() -> Tuple[Dict,ModelConfig,TaskConfig]:
 
 def load_params( ptype: str, **kwargs ) -> Optional[Tuple[Dict,ModelConfig,TaskConfig]]:
 	(hy_mconfig, hy_tconfig) = hydra_config_files()
-	use_hydra = kwargs.get( "hydra_config", True )
+	use_hydra = kwargs.get( "hydra_config", False )
 	if ptype.startswith("era"):
 		params, mconfig, tconfig = load_era5_params()
 		if use_hydra: mconfig, tconfig = hy_mconfig, hy_tconfig
