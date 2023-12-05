@@ -30,7 +30,8 @@ def dtypes( d: Dict ):
 res,levels,steps = cfg().model.res,  cfg().model.levels,  cfg().model.steps
 year, month, day =  cfg().model.year,  cfg().model.month,  cfg().model.day
 train_steps, eval_steps = cfg().task.train_steps, cfg().task.eval_steps
-(params, model_config, task_config) = load_params("merrra2", runid = "small", hydra_config=True )
+runid = "small"
+(params, model_config, task_config) = load_params("merrra2", runid=runid, hydra_config=False )
 state = {}
 lr = cfg().task.lr
 
@@ -169,7 +170,7 @@ for epoch in range(nepochs):
 	params = jax.tree_map(  lambda p, g: p - lr * g, params, grads)
 	print(f" * EPOCH {epoch}: Loss= {loss:.6f}, Mean/Max |dW|= {lr*mean_grad:.6f} / {lr*max_grad:.6f}, comptime= {time.time()-te:.1f} sec")
 
-save_params( runid, params, model_config, task_config )
+save_params( params, model_config, task_config, runid=runid )
 
 # predictions: xarray.Dataset = rollout.chunked_prediction( run_forward_jitted, rng=jax.random.PRNGKey(0), inputs=eval_inputs,
 # 														        targets_template=eval_targets * np.nan, forcings=eval_forcings)

@@ -83,6 +83,7 @@ def load_params( ptype: str, **kwargs ) -> Optional[Tuple[Dict,ModelConfig,TaskC
 		params, mconfig, tconfig =  load_merra2_params(**kwargs)
 		if use_hydra: mconfig, tconfig = hy_mconfig, hy_tconfig
 	else:
+		print( "Init model with random weights")
 		params, mconfig, tconfig = None, hy_mconfig, hy_tconfig
 	return params, mconfig, tconfig
 
