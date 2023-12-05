@@ -42,21 +42,22 @@ class FMCheckPoint:
 	model_config: ModelConfig
 	task_config: TaskConfig
 
-def cpfilepath(runid: str) -> str:
+def cpfilepath(**kwargs) -> str:
+	runid = kwargs.get('runid', 'default')
 	pdir = f"{fmbdir('results')}/params"
 	os.makedirs( pdir, mode=0o777, exist_ok=True )
 	params_file =  f"{cfg().task.dataset_version}.{runid}.npz"
 	return f"{pdir}/{params_file}"
 
-def load_merra2_params(runid: str) -> Tuple[Dict,ModelConfig,TaskConfig]:
-	pfile = cpfilepath(runid)
+def load_merra2_params(**kwargs) -> Tuple[Dict,ModelConfig,TaskConfig]:
+	pfile = cpfilepath(**kwargs)
 	with open(pfile, "rb") as f:
 		ckpt: FMCheckPoint = checkpoint.load(f, FMCheckPoint)
 		print(f" Loading model weights from file: {pfile}")
 		return ckpt.params, ckpt.model_config, ckpt.task_config
 
-def save_params( runid: str, params: Dict, modelconfig: ModelConfig, taskconfig: TaskConfig ):
-	pfile = cpfilepath(runid)
+def save_params( params: Dict, modelconfig: ModelConfig, taskconfig: TaskConfig, **kwargs ):
+	pfile = cpfilepath(**kwargs)
 	with open(pfile,"wb") as f:
 		ckpt: FMCheckPoint = FMCheckPoint( params=params, model_config=modelconfig, task_config=taskconfig )
 		checkpoint.dump( f, ckpt )
@@ -71,33 +72,28 @@ def load_era5_params() -> Tuple[Dict,ModelConfig,TaskConfig]:
 		ckpt: CheckPoint = checkpoint.load(f, CheckPoint)
 		return ckpt.params, ckpt.model_config, ckpt.task_config
 
-def load_params( ptype: str, runid: str = None ) -> Optional[Tuple[Dict,ModelConfig,TaskConfig]]:
-	if ptype.startswith("era"): return load_era5_params()
-	elif ptype.startswith("merra"): return load_merra2_params(runid)
-
-def config_files(**kwargs) -> Tuple[ModelConfig,TaskConfig]:
-	if kwargs.get('checkpoint',False):
-		root = fmbdir('model')
-		params_file = cfg().task.params
-		pfilepath = f"{root}/params/{params_file}.npz"
-		with open(pfilepath, "rb") as f:
-			ckpt = checkpoint.load(f, CheckPoint)
-			mconfig = ckpt.model_config
-			tconfig = ckpt.task_config
-			print("Model description:\n", ckpt.description, "\n")
-			print(f" >> model_config: {mconfig}")
-			print(f" >> task_config:  {tconfig}")
-			print(f" >> forcing_variables: {[type(fv) for fv in tconfig.forcing_variables]}")
-		return mconfig, tconfig
+def load_params( ptype: str, **kwargs ) -> Optional[Tuple[Dict,ModelConfig,TaskConfig]]:
+	(hy_mconfig, hy_tconfig) = hydra_config_files()
+	use_hydra = kwargs.get( "hydra_config", True )
+	if ptype.startswith("era"):
+		params, mconfig, tconfig = load_era5_params()
+		if use_hydra: mconfig, tconfig = hy_mconfig, hy_tconfig
+	elif ptype.startswith("merra"):
+		params, mconfig, tconfig =  load_merra2_params(**kwargs)
+		if use_hydra: mconfig, tconfig = hy_mconfig, hy_tconfig
 	else:
-		return config_model(**kwargs), config_task(**kwargs)
+		params, mconfig, tconfig = None, hy_mconfig, hy_tconfig
+	return params, mconfig, tconfig
+
+def hydra_config_files(**kwargs) -> Tuple[ModelConfig,TaskConfig]:
+	return config_model(**kwargs), config_task(**kwargs)
 
 class ModelConfiguration:
 	_instance = None
 	_instantiated = None
 
 	def __init__(self):
-		cvals = config_files()
+		cvals = hydra_config_files()
 		self.model_config: ModelConfig = cvals[0]
 		self.task_config: TaskConfig = cvals[1]
 		self.norm_data: Dict[str, xa.Dataset] = load_merra2_norm_data()

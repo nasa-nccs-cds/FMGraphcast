@@ -30,11 +30,9 @@ def dtypes( d: Dict ):
 res,levels,steps = cfg().model.res,  cfg().model.levels,  cfg().model.steps
 year, month, day =  cfg().model.year,  cfg().model.month,  cfg().model.day
 train_steps, eval_steps = cfg().task.train_steps, cfg().task.eval_steps
-(model_config,task_config) = config_files()
+(params, model_config, task_config) = load_params("merrra2", runid = "small", hydra_config=True )
 state = {}
 lr = cfg().task.lr
-runid = "small"
-params, mc0, tc0 = load_params("merra2", runid )
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Load MERRA2 Data
