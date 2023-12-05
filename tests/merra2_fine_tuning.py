@@ -31,7 +31,7 @@ res,levels,steps = cfg().model.res,  cfg().model.levels,  cfg().model.steps
 year, month, day =  cfg().model.year,  cfg().model.month,  cfg().model.day
 train_steps, eval_steps = cfg().task.train_steps, cfg().task.eval_steps
 runid = "small"
-(params, model_config, task_config) = load_params("merrra2", runid=runid, hydra_config=False )
+(params, model_config, task_config) = load_params("era5", runid=runid, hydra_config=False )
 state = {}
 lr = cfg().task.lr
 

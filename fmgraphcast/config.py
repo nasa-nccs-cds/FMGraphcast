@@ -82,9 +82,11 @@ def load_params( ptype: str, **kwargs ) -> Optional[Tuple[Dict,ModelConfig,TaskC
 	elif ptype.startswith("merra"):
 		params, mconfig, tconfig =  load_merra2_params(**kwargs)
 		if use_hydra: mconfig, tconfig = hy_mconfig, hy_tconfig
-	else:
+	elif ptype.startswith("random"):
 		print( "Init model with random weights")
 		params, mconfig, tconfig = None, hy_mconfig, hy_tconfig
+	else:
+		raise Exception( f"Unknown parameters type: {ptype}")
 	return params, mconfig, tconfig
 
 def hydra_config_files(**kwargs) -> Tuple[ModelConfig,TaskConfig]:
