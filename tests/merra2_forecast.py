@@ -1,7 +1,7 @@
 import functools
 from typing import Optional, Dict
 from fmbase.source.merra2.model import YearMonth, load_batch
-from fmgraphcast.config import config_files
+from fmgraphcast.config import hydra_config_files
 from fmgraphcast.model import run_forward, grads_fn, loss_fn
 from fmbase.util.ops import format_timedeltas
 from fmgraphcast import data_utils
@@ -22,7 +22,7 @@ def parse_file_parts(file_name):
 res,levels,steps = cfg().model.res,  cfg().model.levels,  cfg().model.steps
 year, month, day =  cfg().model.year,  cfg().model.month,  cfg().model.day
 train_steps, eval_steps = cfg().task.train_steps, cfg().task.eval_steps
-(model_config,task_config) = config_files()
+(model_config,task_config) = hydra_config_files()
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Load MERRA2 Data

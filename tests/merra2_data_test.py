@@ -1,6 +1,6 @@
 from fmbase.source.merra2.model import YearMonth, load_batch
 from fmgraphcast.data_utils import load_merra2_norm_data
-from fmgraphcast.config import config_files
+from fmgraphcast.config import hydra_config_files
 import xarray as xa
 import functools
 from graphcast import autoregressive
@@ -32,7 +32,7 @@ year, month, day =  cfg().model.year,  cfg().model.month,  cfg().model.day
 
 
 train_steps, eval_steps = cfg().task.train_steps, cfg().task.eval_steps
-(model_config,task_config) = config_files()
+(model_config,task_config) = hydra_config_files()
 ndays = 3
 lr = cfg().task.lr
 
