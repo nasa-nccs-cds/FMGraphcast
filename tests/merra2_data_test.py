@@ -1,4 +1,4 @@
-from fmbase.source.merra2.model import YearMonth, load_batch
+from fmbase.source.merra2.model import load_batch
 from fmgraphcast.data_utils import load_merra2_norm_data
 from fmgraphcast.config import hydra_config_files
 import xarray as xa
@@ -13,7 +13,7 @@ import jax, time
 import numpy as np, pandas as pd
 import xarray
 import hydra, dataclasses
-from fmbase.util.config import configure, cfg
+from fmbase.util.config import configure, cfg, Date
 from typing import List, Union, Tuple, Optional, Dict, Type
 
 hydra.initialize( version_base=None, config_path="../config" )
@@ -26,14 +26,16 @@ def parse_file_parts(file_name):
 def dtypes( d: Dict ):
 	return { k: type(v) for k,v in d.items() }
 
+def date_list( num_days: int )-> List[Date]:
+	year, month, day = cfg().model.year, cfg().model.month, cfg().model.day
+	return [Date(year=year, month=month, day=day1) for day1 in range(day, day + num_days)]
+
 params, state = None, None
 res,levels,steps = cfg().model.res,  cfg().model.levels,  cfg().model.steps
-year, month, day =  cfg().model.year,  cfg().model.month,  cfg().model.day
-
+ndays = 2
 
 train_steps, eval_steps = cfg().task.train_steps, cfg().task.eval_steps
 (model_config,task_config) = hydra_config_files()
-ndays = 3
 lr = cfg().task.lr
 
 print( "\n -- TaskConfig --")
@@ -59,7 +61,7 @@ target_lead_times = slice("6h", f"{train_steps*6}h") # [ f"{iS*dts}h" for iS in 
 eval_lead_times =   slice("6h", f"{eval_steps*6}h") #[ f"{iS*dts}h" for iS in range(1,eval_steps+1) ]
 
 print( "  --------------------- MERRA2 ---------------------")
-example_batch: xa.Dataset = load_batch( year, month, day, ndays, cfg().task )
+example_batch: xa.Dataset = load_batch( date_list(ndays),  cfg().task )
 vtime: List[str] = [str(pd.Timestamp(dt64)) for dt64 in example_batch.coords['time'].values.tolist()]
 print(f"\n -------> batch time: {vtime}\n")
 

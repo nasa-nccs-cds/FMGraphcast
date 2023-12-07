@@ -136,39 +136,6 @@ def featurize_progress( name: str, dims: Sequence[str], progress: np.ndarray ) -
       name + "_cos": xarray.Variable(dims, np.cos(progress_phase)),
   }
 
-
-def add_derived_vars(data: xarray.Dataset) -> None:
-  """Adds year and day progress features to `data` in place.
-
-  NOTE: `toa_incident_solar_radiation` needs to be computed in this function
-  as well.
-
-  Args:
-    data: Xarray dataset to which derived features will be added.
-
-  Raises:
-    ValueError if `datetime` or `lon` are not in `data` coordinates.
-  """
-
-  for coord in ("datetime", "lon"):
-    if coord not in data.coords:
-      raise ValueError(f"'{coord}' must be in `data` coordinates.")
-
-  # Compute seconds since epoch.
-  # Note `data.coords["datetime"].astype("datetime64[s]").astype(np.int64)`
-  # does not work as xarrays always cast dates into nanoseconds!
-  seconds_since_epoch = ( data.coords["datetime"].data.astype("datetime64[s]").astype(np.int64) )
-  batch_dim = ("batch",) if "batch" in data.dims else ()
-
-  # Add year progress features.
-  year_progress = get_year_progress(seconds_since_epoch)
-  data.update( featurize_progress( name=YEAR_PROGRESS, dims=batch_dim + ("time",), progress=year_progress ) )
-
-  # Add day progress features.
-  longitude_coord = data.coords["lon"]
-  day_progress = get_day_progress(seconds_since_epoch, longitude_coord.data)
-  data.update( featurize_progress( name=DAY_PROGRESS, dims=batch_dim + ("time",) + longitude_coord.dims, progress=day_progress ) )
-
 def extract_input_target_times( dataset: xarray.Dataset, input_duration: TimedeltaLike, target_lead_times: TargetLeadTimes ) -> Tuple[xarray.Dataset, xarray.Dataset]:
   """Extracts inputs and targets for prediction, from a Dataset with a time dim.
 
