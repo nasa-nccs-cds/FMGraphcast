@@ -1,4 +1,4 @@
-dataset_version: 'merra2.findtuning1'
+dataset_version: 'merra2.findtuning'
 params: "small"
 input_steps: 2
 train_steps: 1
