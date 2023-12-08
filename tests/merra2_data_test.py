@@ -26,10 +26,6 @@ def parse_file_parts(file_name):
 def dtypes( d: Dict ):
 	return { k: type(v) for k,v in d.items() }
 
-def date_list( num_days: int )-> List[Date]:
-	year, month, day = cfg().model.year, cfg().model.month, cfg().model.day
-	return [Date(year=year, month=month, day=day1) for day1 in range(day, day + num_days)]
-
 params, state = None, None
 res,levels,steps = cfg().model.res,  cfg().model.levels,  cfg().model.steps
 ndays = 2
@@ -61,7 +57,7 @@ target_lead_times = slice("6h", f"{train_steps*6}h") # [ f"{iS*dts}h" for iS in 
 eval_lead_times =   slice("6h", f"{eval_steps*6}h") #[ f"{iS*dts}h" for iS in range(1,eval_steps+1) ]
 
 print( "  --------------------- MERRA2 ---------------------")
-example_batch: xa.Dataset = load_batch( date_list(ndays),  cfg().task )
+example_batch: xa.Dataset = load_batch( Date.days(ndays),  cfg().task )
 vtime: List[str] = [str(pd.Timestamp(dt64)) for dt64 in example_batch.coords['time'].values.tolist()]
 print(f"\n -------> batch time: {vtime}\n")
 

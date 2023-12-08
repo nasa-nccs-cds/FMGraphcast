@@ -1,6 +1,6 @@
 from fmbase.source.merra2.model import load_batch
 from fmgraphcast.data_utils import load_merra2_norm_data
-from fmgraphcast.config import hydra_config_files, load_era5_params, save_params, load_params
+from fmgraphcast.config import save_params, load_params
 import xarray as xa
 import functools
 from graphcast import autoregressive
@@ -14,7 +14,7 @@ import haiku as hk
 import jax, time
 import numpy as np
 import hydra, dataclasses
-from fmbase.util.config import configure, cfg
+from fmbase.util.config import configure, cfg, Date
 from typing import List, Union, Tuple, Optional, Dict, Type
 
 hydra.initialize( version_base=None, config_path="../config" )
@@ -45,7 +45,7 @@ target_lead_times = [ f"{iS*dts}h" for iS in range(1,train_steps+1) ]
 eval_lead_times =   [ f"{iS*dts}h" for iS in range(1,eval_steps+1) ]
 
 print( "  --------------------- MERRA2 ---------------------")
-example_batch: xa.Dataset = load_batch( year, month, day, ndays, cfg().task )
+example_batch: xa.Dataset = load_batch( Date.days(ndays),  cfg().task )
 
 print("Loaded Batch:")
 for vname, dvar in example_batch.data_vars.items():
