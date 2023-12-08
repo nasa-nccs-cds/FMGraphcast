@@ -1,4 +1,4 @@
-from fmbase.source.merra2.model import YearMonth, load_batch
+from fmbase.source.merra2.model import load_batch
 from fmgraphcast.data_utils import load_merra2_norm_data
 from fmgraphcast.config import hydra_config_files, load_era5_params, save_params, load_params
 import xarray as xa
