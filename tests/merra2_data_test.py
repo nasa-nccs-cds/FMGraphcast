@@ -13,7 +13,9 @@ import jax, time
 import numpy as np, pandas as pd
 import xarray
 import hydra, dataclasses
-from fmbase.util.config import configure, cfg, Date
+from fmbase.util.config import configure, cfg
+from datetime import date
+from fmbase.util.dates import date_list
 from typing import List, Union, Tuple, Optional, Dict, Type
 
 hydra.initialize( version_base=None, config_path="../config" )
@@ -27,7 +29,7 @@ def dtypes( d: Dict ):
 	return { k: type(v) for k,v in d.items() }
 
 params, state = None, None
-res,levels,steps = cfg().model.res,  cfg().model.levels,  cfg().model.steps
+start = date( cfg().task.year, cfg().task.month, cfg().task.day )
 ndays = 2
 
 train_steps, eval_steps = cfg().task.train_steps, cfg().task.eval_steps
@@ -57,7 +59,7 @@ target_lead_times = slice("6h", f"{train_steps*6}h") # [ f"{iS*dts}h" for iS in 
 eval_lead_times =   slice("6h", f"{eval_steps*6}h") #[ f"{iS*dts}h" for iS in range(1,eval_steps+1) ]
 
 print( "  --------------------- MERRA2 ---------------------")
-example_batch: xa.Dataset = load_batch( Date.days(ndays),  cfg().task )
+example_batch: xa.Dataset = load_batch( date_list(start,ndays), cfg().task )
 vtime: List[str] = [str(pd.Timestamp(dt64)) for dt64 in example_batch.coords['time'].values.tolist()]
 print(f"\n -------> batch time: {vtime}\n")
 

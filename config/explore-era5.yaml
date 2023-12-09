@@ -1,4 +1,0 @@
-defaults:
-  - platform: explore
-  - model: era5-small
-  - task: era5-small

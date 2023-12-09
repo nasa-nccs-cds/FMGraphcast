@@ -1,4 +1,0 @@
-defaults:
-  - platform: explore
-  - model: merra2-small
-  - task: merra2-test

@@ -14,9 +14,9 @@ import haiku as hk
 import jax, time
 import numpy as np
 import hydra, dataclasses
-from fmbase.util.config import configure, cfg
 from datetime import date
 from fmbase.util.dates import date_list
+from fmbase.util.config import configure, cfg
 from typing import List, Union, Tuple, Optional, Dict, Type
 
 hydra.initialize( version_base=None, config_path="../config" )
@@ -29,7 +29,8 @@ def parse_file_parts(file_name):
 def dtypes( d: Dict ):
 	return { k: type(v) for k,v in d.items() }
 
-year, month, day =  cfg().task.year,  cfg().task.month,  cfg().task.day
+res,levels,steps = cfg().model.res,  cfg().model.levels,  cfg().model.steps
+year, month, day =  cfg().model.year,  cfg().model.month,  cfg().model.day
 train_steps, eval_steps = cfg().task.train_steps, cfg().task.eval_steps
 runid = "small"
 (params, model_config, task_config) = load_params("merra2", runid=runid, hydra_config=False )
