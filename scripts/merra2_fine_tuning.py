@@ -30,7 +30,7 @@ def dtypes( d: Dict ):
 	return { k: type(v) for k,v in d.items() }
 
 res,levels= cfg().model.res,  cfg().task.levels
-year, month, day =  cfg().model.year,  cfg().model.month,  cfg().model.day
+year, month, day =  cfg().task.year,  cfg().task.month,  cfg().task.day
 train_steps, eval_steps = cfg().task.train_steps, cfg().task.eval_steps
 runid = "small"
 (params, model_config, task_config) = load_params("merra2", runid=runid, hydra_config=False )
