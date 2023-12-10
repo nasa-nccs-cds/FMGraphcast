@@ -52,7 +52,8 @@ ndays = 3
 target_lead_times = [ f"{iS*dts}h" for iS in range(1,train_steps+1) ]
 eval_lead_times =   [ f"{iS*dts}h" for iS in range(1,eval_steps+1) ]
 train_dates = date_list( start, 10 )
-nepochs = 10 # cfg().task.nepochs
+nepochs = 2 # cfg().task.nepochs
+niter = 20
 
 fmbatch = FMBatch( cfg().task )
 
@@ -72,12 +73,13 @@ for epoch in range(nepochs):
 		loss_fn_jitted = drop_state(with_params(jax.jit(with_configs(loss_fn.apply))))
 		run_forward_jitted = drop_state(with_params(jax.jit(with_configs(run_forward.apply))))
 
-		te= time.time()
-		loss, diagnostics, next_state, grads = with_params(grads_fn_jitted)( inputs=train_inputs, targets=train_targets, forcings=train_forcings )
-		mean_grad = np.mean( jax.tree_util.tree_flatten( jax.tree_util.tree_map( lambda x: np.abs(x).mean(), grads ) )[0] )
-		max_grad = np.mean(jax.tree_util.tree_flatten(jax.tree_util.tree_map(lambda x: np.abs(x).max(), grads))[0])
-		params = jax.tree_map(  lambda p, g: p - lr * g, params, grads)
-		print(f" * EPOCH {epoch}: Loss= {loss:.6f}, Mean/Max |dW|= {lr*mean_grad:.6f} / {lr*max_grad:.6f}, comptime= {time.time()-te:.1f} sec")
+		for iteration in range(niter):
+			te= time.time()
+			loss, diagnostics, next_state, grads = with_params(grads_fn_jitted)( inputs=train_inputs, targets=train_targets, forcings=train_forcings )
+			mean_grad = np.mean( jax.tree_util.tree_flatten( jax.tree_util.tree_map( lambda x: np.abs(x).mean(), grads ) )[0] )
+			max_grad = np.mean(jax.tree_util.tree_flatten(jax.tree_util.tree_map(lambda x: np.abs(x).max(), grads))[0])
+			params = jax.tree_map(  lambda p, g: p - lr * g, params, grads)
+			print(f" * ITER {epoch}:{iteration}: Loss= {loss:.6f}, Mean/Max |dW|= {lr*mean_grad:.6f} / {lr*max_grad:.6f}, comptime= {time.time()-te:.1f} sec")
 
 save_params( params, model_config, task_config, runid=runid )
 
