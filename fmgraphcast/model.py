@@ -16,7 +16,7 @@ import hydra, dataclasses
 
 def drop_state(fn):
 	return lambda **kw: fn(**kw)[0]
-def construct_wrapped_graphcast( model_config: graphcast.ModelConfig, task_config: graphcast.TaskConfig, norm_data: Dict[str,xa.Dataset]):
+def construct_wrapped_graphcast( model_config: graphcast.ModelConfig, task_config: graphcast.TaskConfig, norms: Dict[str,xa.Dataset]):
 	"""Constructs and wraps the GraphCast Predictor."""
 	# Deeper one-step predictor.
 	predictor = graphcast.GraphCast(model_config, task_config)
@@ -30,17 +30,17 @@ def construct_wrapped_graphcast( model_config: graphcast.ModelConfig, task_confi
 	# BFloat16 happens after applying normalization to the inputs/targets.
 	predictor = normalization.InputsAndResiduals(
 	  predictor,
-	  diffs_stddev_by_level=norm_data['diffs_stddev_by_level'],
-	  mean_by_level=norm_data['mean_by_level'],
-	  stddev_by_level=norm_data['stddev_by_level'])
+	  diffs_stddev_by_level=norms['diffs_stddev_by_level'],
+	  mean_by_level=norms['mean_by_level'],
+	  stddev_by_level=norms['stddev_by_level'])
 
 	# Wraps everything so the one-step model can produce trajectories.
 	predictor = autoregressive.Predictor(predictor, gradient_checkpointing=True)
 	return predictor
 
 @hk.transform_with_state
-def run_forward(model_config: graphcast.ModelConfig, task_config: graphcast.TaskConfig, inputs: xa.Dataset, targets_template: xa.Dataset, forcings: xa.Dataset, norm_data: Dict[str,xa.Dataset]):
-	predictor = construct_wrapped_graphcast(model_config, task_config, norm_data )
+def run_forward(model_config: graphcast.ModelConfig, task_config: graphcast.TaskConfig, norms: Dict[str,xa.Dataset], inputs: xa.Dataset, targets_template: xa.Dataset, forcings: xa.Dataset):
+	predictor = construct_wrapped_graphcast(model_config, task_config, norms )
 	print( f"\n Run forward-> inputs:")
 	for vn, dv in inputs.data_vars.items():
 		print(f" > {vn}{dv.dims}: {dv.shape}")
@@ -50,13 +50,13 @@ def run_forward(model_config: graphcast.ModelConfig, task_config: graphcast.Task
 	return predictor(inputs, targets_template=targets_template, forcings=forcings)
 
 @hk.transform_with_state
-def loss_fn(model_config: graphcast.ModelConfig, task_config: graphcast.TaskConfig, inputs: xa.Dataset, targets: xa.Dataset, forcings: xa.Dataset, norm_data: Dict[str,xa.Dataset]):
-	predictor = construct_wrapped_graphcast(model_config, task_config, norm_data)
+def loss_fn(model_config: graphcast.ModelConfig, task_config: graphcast.TaskConfig, norms: Dict[str,xa.Dataset], inputs: xa.Dataset, targets: xa.Dataset, forcings: xa.Dataset):
+	predictor = construct_wrapped_graphcast(model_config, task_config, norms)
 	loss, diagnostics = predictor.loss(inputs, targets, forcings)
 	return xarray_tree.map_structure(
 	  lambda x: xarray_jax.unwrap_data(x.mean(), require_jax=True), (loss, diagnostics))
 
-def grads_fn(params: Dict, state: Dict, model_config: graphcast.ModelConfig, task_config: graphcast.TaskConfig, inputs: xa.Dataset, targets: xa.Dataset, forcings: xa.Dataset, norms: xa.Dataset):
+def grads_fn(params: Dict, state: Dict, model_config: graphcast.ModelConfig, task_config: graphcast.TaskConfig, norms: xa.Dataset, inputs: xa.Dataset, targets: xa.Dataset, forcings: xa.Dataset):
 	def _aux(params_, state_, i, t, f, n):
 		(loss_, diagnostics_), next_state_ = loss_fn.apply(  params_, state_, jax.random.PRNGKey(0), model_config, task_config, i, t, f, n)
 		return loss_, (diagnostics_, next_state_)

@@ -36,10 +36,7 @@ runid = "small"
 (params, model_config, task_config) = load_params("merra2", runid=runid, hydra_config=False )
 state = {}
 lr = cfg().task.lr
-def with_configs(fn): return functools.partial( fn, model_config=model_config, task_config=task_config)
-def with_params(fn): return functools.partial(fn, params=params, state=state)
-init_jitted = jax.jit(with_configs(run_forward.init))
-grads_fn_jitted = jax.jit(with_configs(grads_fn))
+
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Load MERRA2 Data
@@ -54,7 +51,13 @@ train_dates = date_list( start, 10 )
 nepochs = 2 # cfg().task.nepochs
 niter = 20
 
-fmbatch = FMBatch( cfg().task )
+fmbatch: FMBatch = FMBatch( cfg().task )
+norms: Dict[str, xa.Dataset] = fmbatch.norm_data
+
+def with_configs(fn): return functools.partial( fn, model_config=model_config, task_config=task_config, norms=norms)
+def with_params(fn): return functools.partial(fn, params=params, state=state)
+init_jitted = jax.jit(with_configs(run_forward.init))
+grads_fn_jitted = jax.jit(with_configs(grads_fn))
 
 for epoch in range(nepochs):
 	print(f"\n -------------------------------- Epoch {epoch} -------------------------------- \n")
