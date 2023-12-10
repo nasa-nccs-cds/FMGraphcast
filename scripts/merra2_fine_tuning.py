@@ -8,7 +8,7 @@ import jax, time
 import numpy as np
 import hydra, dataclasses
 from datetime import date
-from fmbase.util.dates import date_list
+from fmbase.util.dates import date_list, year_range
 from fmbase.util.config import configure, cfg
 from typing import List, Union, Tuple, Optional, Dict, Type
 
@@ -36,13 +36,12 @@ lr = cfg().task.lr
 #-----------------
 
 dts         = cfg().task.data_timestep
-start = date(1990,1,1 ) # date( cfg().task.year, cfg().task.month, cfg().task.day )
-ndays = 5
 target_lead_times = [ f"{iS*dts}h" for iS in range(1,train_steps+1) ]
 eval_lead_times =   [ f"{iS*dts}h" for iS in range(1,eval_steps+1) ]
-train_dates = date_list( start, 10 )
-nepochs = 2 # cfg().task.nepochs
-niter = 5
+train_dates = year_range( *cfg().task.year_range )
+nepochs = cfg().task.nepoch
+niter = cfg().task.niter
+batch_days = cfg().task.input_steps + cfg().task.train_steps
 
 fmbatch: FMBatch = FMBatch( cfg().task )
 norms: Dict[str, xa.Dataset] = fmbatch.norm_data
@@ -55,8 +54,8 @@ grads_fn_jitted = jax.jit(with_configs(grads_fn))
 for epoch in range(nepochs):
 	print(f"\n -------------------------------- Epoch {epoch} -------------------------------- \n")
 	for forecast_date in train_dates:
-		print(f"\n Forecast date: {forecast_date}")
-		example_batch: xa.Dataset = fmbatch.load_batch( date_list(forecast_date,ndays) )
+		print( "\n" + ("\t"*8) + f"Forecast date: {forecast_date}")
+		example_batch: xa.Dataset = fmbatch.load_batch( date_list(forecast_date,batch_days) )
 		itf = data_utils.extract_inputs_targets_forcings( example_batch, target_lead_times=target_lead_times, **dataclasses.asdict(task_config) )
 		train_inputs, train_targets, train_forcings = itf
 
