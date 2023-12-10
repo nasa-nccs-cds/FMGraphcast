@@ -29,7 +29,7 @@ def parse_file_parts(file_name):
 def dtypes( d: Dict ):
 	return { k: type(v) for k,v in d.items() }
 
-res,levels,steps = cfg().model.res,  cfg().task.levels,  cfg().model.steps
+res,levels= cfg().model.res,  cfg().task.levels
 year, month, day =  cfg().model.year,  cfg().model.month,  cfg().model.day
 train_steps, eval_steps = cfg().task.train_steps, cfg().task.eval_steps
 runid = "small"
