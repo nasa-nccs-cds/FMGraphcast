@@ -56,9 +56,9 @@ def loss_fn(model_config: graphcast.ModelConfig, task_config: graphcast.TaskConf
 	return xarray_tree.map_structure(
 	  lambda x: xarray_jax.unwrap_data(x.mean(), require_jax=True), (loss, diagnostics))
 
-def grads_fn(params: Dict, state: Dict, model_config: graphcast.ModelConfig, task_config: graphcast.TaskConfig, inputs: xa.Dataset, targets: xa.Dataset, forcings: xa.Dataset):
-	def _aux(params_, state_, i, t, f):
-		(loss_, diagnostics_), next_state_ = loss_fn.apply(  params_, state_, jax.random.PRNGKey(0), model_config, task_config, i, t, f)
+def grads_fn(params: Dict, state: Dict, model_config: graphcast.ModelConfig, task_config: graphcast.TaskConfig, inputs: xa.Dataset, targets: xa.Dataset, forcings: xa.Dataset, norms: xa.Dataset):
+	def _aux(params_, state_, i, t, f, n):
+		(loss_, diagnostics_), next_state_ = loss_fn.apply(  params_, state_, jax.random.PRNGKey(0), model_config, task_config, i, t, f, n)
 		return loss_, (diagnostics_, next_state_)
-	(loss, (diagnostics, next_state)), grads = jax.value_and_grad( _aux, has_aux=True)(params, state, inputs, targets, forcings)
+	(loss, (diagnostics, next_state)), grads = jax.value_and_grad( _aux, has_aux=True)(params, state, inputs, targets, forcings, norms)
 	return loss, diagnostics, next_state, grads
