@@ -11,14 +11,12 @@ import jax
 import numpy as np
 import xarray as xa
 import hydra, dataclasses
-from fmbase.util.config import configure, cfg
-from fmgraphcast.config import model_config, task_config, norm_data, cparms
 
 # Build jitted functions, and possibly initialize random weights
 
 def drop_state(fn):
 	return lambda **kw: fn(**kw)[0]
-def construct_wrapped_graphcast( model_config: graphcast.ModelConfig, task_config: graphcast.TaskConfig):
+def construct_wrapped_graphcast( model_config: graphcast.ModelConfig, task_config: graphcast.TaskConfig, norm_data: Dict[str,xa.Dataset]):
 	"""Constructs and wraps the GraphCast Predictor."""
 	# Deeper one-step predictor.
 	predictor = graphcast.GraphCast(model_config, task_config)
@@ -41,8 +39,8 @@ def construct_wrapped_graphcast( model_config: graphcast.ModelConfig, task_confi
 	return predictor
 
 @hk.transform_with_state
-def run_forward(model_config, task_config, inputs, targets_template, forcings):
-	predictor = construct_wrapped_graphcast(model_config, task_config)
+def run_forward(model_config: graphcast.ModelConfig, task_config: graphcast.TaskConfig, inputs: xa.Dataset, targets_template: xa.Dataset, forcings: xa.Dataset, norm_data: Dict[str,xa.Dataset]):
+	predictor = construct_wrapped_graphcast(model_config, task_config, norm_data )
 	print( f"\n Run forward-> inputs:")
 	for vn, dv in inputs.data_vars.items():
 		print(f" > {vn}{dv.dims}: {dv.shape}")
@@ -52,15 +50,15 @@ def run_forward(model_config, task_config, inputs, targets_template, forcings):
 	return predictor(inputs, targets_template=targets_template, forcings=forcings)
 
 @hk.transform_with_state
-def loss_fn(model_config, task_config, inputs, targets, forcings):
-	predictor = construct_wrapped_graphcast(model_config, task_config)
+def loss_fn(model_config: graphcast.ModelConfig, task_config: graphcast.TaskConfig, inputs: xa.Dataset, targets: xa.Dataset, forcings: xa.Dataset, norm_data: Dict[str,xa.Dataset]):
+	predictor = construct_wrapped_graphcast(model_config, task_config, norm_data)
 	loss, diagnostics = predictor.loss(inputs, targets, forcings)
 	return xarray_tree.map_structure(
 	  lambda x: xarray_jax.unwrap_data(x.mean(), require_jax=True), (loss, diagnostics))
 
-def grads_fn(params, state, model_config, task_config, inputs, targets, forcings):
-	def _aux(params, state, i, t, f):
-		(loss, diagnostics), next_state = loss_fn.apply(  params, state, jax.random.PRNGKey(0), model_config, task_config, i, t, f)
-		return loss, (diagnostics, next_state)
+def grads_fn(params: Dict, state: Dict, model_config: graphcast.ModelConfig, task_config: graphcast.TaskConfig, inputs: xa.Dataset, targets: xa.Dataset, forcings: xa.Dataset):
+	def _aux(params_, state_, i, t, f):
+		(loss_, diagnostics_), next_state_ = loss_fn.apply(  params_, state_, jax.random.PRNGKey(0), model_config, task_config, i, t, f)
+		return loss_, (diagnostics_, next_state_)
 	(loss, (diagnostics, next_state)), grads = jax.value_and_grad( _aux, has_aux=True)(params, state, inputs, targets, forcings)
 	return loss, diagnostics, next_state, grads
