@@ -16,27 +16,33 @@ from fmgraphcast.config import model_config, task_config, norm_data, cparms
 
 # Build jitted functions, and possibly initialize random weights
 
-def construct_wrapped_graphcast( **kwargs ):
+def drop_state(fn):
+	return lambda **kw: fn(**kw)[0]
+def construct_wrapped_graphcast( model_config: graphcast.ModelConfig, task_config: graphcast.TaskConfig):
 	"""Constructs and wraps the GraphCast Predictor."""
 	# Deeper one-step predictor.
-	predictor = graphcast.GraphCast( kwargs['model_config'], kwargs['task_config'])
+	predictor = graphcast.GraphCast(model_config, task_config)
 
 	# Modify inputs/outputs to `graphcast.GraphCast` to handle conversion to
 	# from/to float32 to/from BFloat16.
 	predictor = casting.Bfloat16Cast(predictor)
+#	print( f"\n **** Norm (std) Data vars = {list(stddev_by_level.data_vars.keys())}")
 
 	# Modify inputs/outputs to `casting.Bfloat16Cast` so the casting to/from
 	# BFloat16 happens after applying normalization to the inputs/targets.
-	# print( f"\n **** Norm (std) Data vars = {list(norm_data['stddev_by_level'].data_vars.keys())}")
-	predictor = normalization.InputsAndResiduals( predictor, **kwargs['norm_data'] )
+	predictor = normalization.InputsAndResiduals(
+	  predictor,
+	  diffs_stddev_by_level=norm_data['diffs_stddev_by_level'],
+	  mean_by_level=norm_data['mean_by_level'],
+	  stddev_by_level=norm_data['stddev_by_level'])
 
 	# Wraps everything so the one-step model can produce trajectories.
 	predictor = autoregressive.Predictor(predictor, gradient_checkpointing=True)
 	return predictor
 
 @hk.transform_with_state
-def run_forward(inputs: xa.Dataset, targets_template: xa.Dataset, forcings: xa.Dataset, **kwargs ):
-	predictor = construct_wrapped_graphcast(**kwargs)
+def run_forward(model_config, task_config, inputs, targets_template, forcings):
+	predictor = construct_wrapped_graphcast(model_config, task_config)
 	print( f"\n Run forward-> inputs:")
 	for vn, dv in inputs.data_vars.items():
 		print(f" > {vn}{dv.dims}: {dv.shape}")
@@ -45,47 +51,16 @@ def run_forward(inputs: xa.Dataset, targets_template: xa.Dataset, forcings: xa.D
 		print(f" > {vn}{dv.dims}: {dv.shape}")
 	return predictor(inputs, targets_template=targets_template, forcings=forcings)
 
-
 @hk.transform_with_state
-def loss_fn(inputs: xa.Dataset, targets: xa.Dataset, forcings: xa.Dataset, **kwargs):
-	predictor = construct_wrapped_graphcast(**kwargs)
+def loss_fn(model_config, task_config, inputs, targets, forcings):
+	predictor = construct_wrapped_graphcast(model_config, task_config)
 	loss, diagnostics = predictor.loss(inputs, targets, forcings)
 	return xarray_tree.map_structure(
 	  lambda x: xarray_jax.unwrap_data(x.mean(), require_jax=True), (loss, diagnostics))
 
-@jax.jit
-def grads_fn(inputs: xa.Dataset, targets: xa.Dataset, forcings: xa.Dataset, **kwargs ):
-	def _aux(i, t, f, **kw):
-		(loss1, diagnostics1), next_state1 = loss_fn.apply( kw['params'], kw['state'], jax.random.PRNGKey(0), i, t, f, **kw)
-		return loss1, (diagnostics1, next_state1)
-	(loss, (diagnostics, next_state)), grads = jax.value_and_grad( _aux, has_aux=True)(inputs, targets, forcings, **kwargs)
+def grads_fn(params, state, model_config, task_config, inputs, targets, forcings):
+	def _aux(params, state, i, t, f):
+		(loss, diagnostics), next_state = loss_fn.apply(  params, state, jax.random.PRNGKey(0), model_config, task_config, i, t, f)
+		return loss, (diagnostics, next_state)
+	(loss, (diagnostics, next_state)), grads = jax.value_and_grad( _aux, has_aux=True)(params, state, inputs, targets, forcings)
 	return loss, diagnostics, next_state, grads
-
-def with_configs(fn):
-	return functools.partial( fn, model_config=model_config, task_config=task_config, norm_data=norm_data )
-
-# Always pass params and state, so the usage below are simpler
-def with_params(fn):
-	return functools.partial(fn, params=params, state=state)
-@jax.jit
-def update_fn( inputs: xa.Dataset, targets: xa.Dataset, forcings: xa.Dataset, **kwargs ):
-	lr = cfg().task.lr
-	grads_fn_jitted = with_params(jax.jit(with_configs(grads_fn)))
-	loss1, diagnostics1, next_state, grads = grads_fn_jitted(inputs=inputs,targets=targets,forcings=forcings)
-	mean_grad = np.mean(jax.tree_util.tree_flatten(jax.tree_util.tree_map(lambda x: np.abs(x).mean(), grads))[0])
-	mean_loss = np.mean(jax.tree_util.tree_flatten(jax.tree_util.tree_map(lambda x: np.abs(x).mean(), loss1))[0])
-	next_params = jax.tree_map(  lambda p, g: p - lr * g, kwargs['params'], grads)
-	print( f" Update: mean_grad = {mean_grad}, mean_loss = {mean_loss}")
-	return next_params, next_state
-
-def train_model( inputs: xa.Dataset, targets: xa.Dataset, forcings: xa.Dataset ):
-	nepochs = cfg().task.nepochs
-	params, state = run_forward.init(rng=jax.random.PRNGKey(0), inputs=inputs, targets_template=targets, forcings=forcings, **cparms())
-	for epoch in range(nepochs):
-		params, state = update_fn( inputs, targets, forcings, params=params, state=state, **cparms())
-
-
-# Our models aren't stateful, so the state is always empty, so just return the
-# predictions. This is requiredy by our rollout code, and generally simpler.
-def drop_state(fn):
-	return lambda **kw: fn(**kw)[0]
