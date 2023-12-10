@@ -3,7 +3,6 @@ from fmbase.util.ops import fmbdir
 from graphcast import checkpoint
 from typing import Any, Mapping, Sequence, Tuple, Union, Dict, Optional
 from graphcast.graphcast import ModelConfig, TaskConfig, CheckPoint
-from fmgraphcast.data_utils import load_merra2_norm_data
 import xarray as xa, os, chex
 
 def config_model( **kwargs ) -> ModelConfig:
@@ -100,7 +99,6 @@ class ModelConfiguration:
 		cvals = hydra_config_files()
 		self.model_config: ModelConfig = cvals[0]
 		self.task_config: TaskConfig = cvals[1]
-		self.norm_data: Dict[str, xa.Dataset] = load_merra2_norm_data()
 
 	@classmethod
 	def init(cls):
