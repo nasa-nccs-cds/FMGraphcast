@@ -3,14 +3,7 @@ from fmgraphcast.config import save_params, load_params
 from fmgraphcast.model import run_forward, loss_fn, grads_fn, drop_state
 import xarray as xa
 import functools
-from graphcast import autoregressive
-from graphcast import casting
 from fmgraphcast import data_utils
-from graphcast import graphcast
-from graphcast import normalization
-from graphcast import xarray_jax
-from graphcast import xarray_tree
-import haiku as hk
 import jax, time
 import numpy as np
 import hydra, dataclasses
@@ -44,12 +37,12 @@ lr = cfg().task.lr
 
 dts         = cfg().task.data_timestep
 start = date(1990,1,1 ) # date( cfg().task.year, cfg().task.month, cfg().task.day )
-ndays = 3
+ndays = 5
 target_lead_times = [ f"{iS*dts}h" for iS in range(1,train_steps+1) ]
 eval_lead_times =   [ f"{iS*dts}h" for iS in range(1,eval_steps+1) ]
 train_dates = date_list( start, 10 )
 nepochs = 2 # cfg().task.nepochs
-niter = 20
+niter = 5
 
 fmbatch: FMBatch = FMBatch( cfg().task )
 norms: Dict[str, xa.Dataset] = fmbatch.norm_data
@@ -62,6 +55,7 @@ grads_fn_jitted = jax.jit(with_configs(grads_fn))
 for epoch in range(nepochs):
 	print(f"\n -------------------------------- Epoch {epoch} -------------------------------- \n")
 	for forecast_date in train_dates:
+		print(f"\n Forecast date: {forecast_date}")
 		example_batch: xa.Dataset = fmbatch.load_batch( date_list(forecast_date,ndays) )
 		itf = data_utils.extract_inputs_targets_forcings( example_batch, target_lead_times=target_lead_times, **dataclasses.asdict(task_config) )
 		train_inputs, train_targets, train_forcings = itf
