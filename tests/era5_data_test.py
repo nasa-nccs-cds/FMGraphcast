@@ -39,7 +39,7 @@ with open(pfilepath, "rb") as f:
 	print_dict( "model_config", model_config )
 	print_dict("task_config", task_config )
 
-res,levels,steps = cfg().model.res,  cfg().model.levels,  cfg().model.steps
+res,levels,steps = cfg().model.res,  cfg().task.levels,  cfg().model.steps
 month, day =  cfg().model.month,  cfg().model.day
 dataset_file = f"{root}/data/era5/res-{res}_levels-{levels}_steps-{steps:0>2}/{year}-{month:0>2}-{day:0>2}.nc"
 
