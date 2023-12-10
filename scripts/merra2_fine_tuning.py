@@ -1,5 +1,4 @@
 from fmbase.source.merra2.model import FMBatch
-from fmgraphcast.data_utils import load_merra2_norm_data
 from fmgraphcast.config import save_params, load_params
 from fmgraphcast.model import run_forward, loss_fn, grads_fn, drop_state
 import xarray as xa
