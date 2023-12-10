@@ -57,8 +57,8 @@ def loss_fn(model_config: graphcast.ModelConfig, task_config: graphcast.TaskConf
 	  lambda x: xarray_jax.unwrap_data(x.mean(), require_jax=True), (loss, diagnostics))
 
 def grads_fn(params: Dict, state: Dict, model_config: graphcast.ModelConfig, task_config: graphcast.TaskConfig, norms: xa.Dataset, inputs: xa.Dataset, targets: xa.Dataset, forcings: xa.Dataset):
-	def _aux(params_, state_, i, t, f, n):
-		(loss_, diagnostics_), next_state_ = loss_fn.apply(  params_, state_, jax.random.PRNGKey(0), model_config, task_config, i, t, f, n)
+	def _aux(params_, state_, i, t, f):
+		(loss_, diagnostics_), next_state_ = loss_fn.apply(  params_, state_, jax.random.PRNGKey(0), model_config, task_config, norms, i, t, f)
 		return loss_, (diagnostics_, next_state_)
-	(loss, (diagnostics, next_state)), grads = jax.value_and_grad( _aux, has_aux=True)(params, state, inputs, targets, forcings, norms)
+	(loss, (diagnostics, next_state)), grads = jax.value_and_grad( _aux, has_aux=True)(params, state, inputs, targets, forcings)
 	return loss, diagnostics, next_state, grads
