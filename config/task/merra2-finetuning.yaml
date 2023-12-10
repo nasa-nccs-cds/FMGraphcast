@@ -1,7 +1,7 @@
 dataset_version: 'merra2.findtuning'
 params: "small"
 
-year_range: [1985,2021,1]
+year_range: [1985,2021]
 year: 1985
 month: 1
 day: 1
