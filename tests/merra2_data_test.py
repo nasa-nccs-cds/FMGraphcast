@@ -6,6 +6,7 @@ from fmgraphcast.model import run_forward, loss_fn, grads_fn, drop_state
 import xarray as xa
 import functools
 from fmgraphcast import data_utils
+from graphcast import model_utils
 import jax, time
 import numpy as np
 import hydra, dataclasses
@@ -55,6 +56,7 @@ grads_fn_jitted = jax.jit(with_configs(grads_fn))
 example_batch: xa.Dataset = fmbatch.load_batch( date_list(forecast_date,batch_days) )
 itf = data_utils.extract_inputs_targets_forcings( example_batch, target_lead_times=target_lead_times, **dataclasses.asdict(task_config) )
 train_inputs, train_targets, train_forcings = itf
+stacked_inputs: xa.DataArray = model_utils.dataset_to_stacked(train_inputs)
 
 print( "\n -- TaskConfig --")
 print( f" * input_variables   = {task_config.input_variables}")
@@ -75,7 +77,7 @@ print("Train Inputs:  ", train_inputs.dims.mapping)
 print("Train Targets: ", train_targets.dims.mapping)
 print("Train Forcings:", train_forcings.dims.mapping)
 
-for (title,dset) in [ ('train',train_inputs), ('target',train_targets), ('forcing',train_forcings) ]:
+for (title,dset) in [ ('train',train_inputs), ('target',train_targets), ('forcing',train_forcings), ('stacked',stacked_inputs) ]:
 	nfeatures = 0
 	print(f"\n{title} inputs:   ")
 	for vname in dset.data_vars.keys():
