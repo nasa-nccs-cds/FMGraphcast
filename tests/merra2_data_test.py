@@ -77,7 +77,7 @@ print("Train Inputs:  ", train_inputs.dims.mapping)
 print("Train Targets: ", train_targets.dims.mapping)
 print("Train Forcings:", train_forcings.dims.mapping)
 
-for (title,dset) in [ ('train',train_inputs), ('target',train_targets), ('forcing',train_forcings), ('stacked',stacked_inputs) ]:
+for (title,dset) in [ ('train',train_inputs), ('target',train_targets), ('forcing',train_forcings) ]:
 	nfeatures = 0
 	print(f"\n{title} inputs:   ")
 	for vname in dset.data_vars.keys():
@@ -86,6 +86,9 @@ for (title,dset) in [ ('train',train_inputs), ('target',train_targets), ('forcin
 		nfeatures = nfeatures + (ndvar.shape[2] if (ndvar.ndim == 5) else 1)
 		print(f" > {vname}{dvar.dims}: shape: {dvar.shape}, dtype: {dvar.dtype}, range: ({ndvar.min():.3f},{ndvar.max():.3f}), mean,std: ({ndvar.mean():.3f},{ndvar.std():.3f})")
 	print( f" ---------- N Features: {nfeatures}  ---------- ")
+
+ndvar: np.ndarray = stacked_inputs.values
+print(f"\n** STACKED INPUTS {stacked_inputs.dims}: shape: {stacked_inputs.shape}, dtype: {stacked_inputs.dtype}, range: ({ndvar.min():.3f},{ndvar.max():.3f}), mean,std: ({ndvar.mean():.3f},{ndvar.std():.3f})")
 
 coords = train_inputs.data_vars['temperature'].coords
 
