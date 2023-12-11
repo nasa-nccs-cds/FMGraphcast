@@ -91,10 +91,10 @@ ndvar: np.ndarray = stacked_inputs.values
 lat, lon = stacked_inputs.coords['lat'].values, stacked_inputs.coords['lon'].values
 latf, lonf = np.cos( lat*(np.pi/90.0) ), np.sin( lon*(np.pi/90.0) )
 print( f"\n ** STACKED INPUTS {stacked_inputs.dims}: shape: {stacked_inputs.shape}, dtype: {stacked_inputs.dtype}, range: ({ndvar.min():.3f},{ndvar.max():.3f}), mean,std: ({ndvar.mean():.3f},{ndvar.std():.3f})")
-print( f"\n ---------- lat:  {lat}"  )
-print( f"\n ---------- latf: {latf}" )
-print( f"\n ---------- lon:  {lon}"  )
-print( f"\n ---------- lonf: {lonf}" )
+print( f"\n ---------- lat{lat.shape}:  {lat}"  )
+print( f"\n ---------- latf{latf.shape}: {latf}" )
+print( f"\n ---------- lon{lon.shape}:  {lon}"  )
+print( f"\n ---------- lonf{lonf.shape}: {lonf}" )
 
 
 
