@@ -89,7 +89,8 @@ for (title,dset) in [ ('train',train_inputs), ('target',train_targets), ('forcin
 stacked_inputs: xa.DataArray = model_utils.dataset_to_stacked( train_inputs ).squeeze()
 ndvar: np.ndarray = stacked_inputs.values
 lat, lon = stacked_inputs.coords['lat'].values, stacked_inputs.coords['lon'].values
-latf, lonf = np.cos( lat*(np.pi/90.0) ), np.sin( lon*(np.pi/90.0) )
+phi = np.pi/180.0
+latf, lonf = np.cos( lat*phi ), np.sin( lon*phi )
 print( f"\n ** STACKED INPUTS {stacked_inputs.dims}: shape: {stacked_inputs.shape}, dtype: {stacked_inputs.dtype}, range: ({ndvar.min():.3f},{ndvar.max():.3f}), mean,std: ({ndvar.mean():.3f},{ndvar.std():.3f})")
 print( f"\n ---------- lat{lat.shape}:  {lat}"  )
 print( f"\n ---------- latf{latf.shape}: {[f'{v:.2f}' for v in latf]}" )
