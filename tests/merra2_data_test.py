@@ -56,7 +56,6 @@ grads_fn_jitted = jax.jit(with_configs(grads_fn))
 example_batch: xa.Dataset = fmbatch.load_batch( date_list(forecast_date,batch_days) )
 itf = data_utils.extract_inputs_targets_forcings( example_batch, target_lead_times=target_lead_times, **dataclasses.asdict(task_config) )
 train_inputs, train_targets, train_forcings = itf
-stacked_inputs: xa.DataArray = model_utils.dataset_to_stacked(train_inputs)
 
 print( "\n -- TaskConfig --")
 print( f" * input_variables   = {task_config.input_variables}")
@@ -87,6 +86,7 @@ for (title,dset) in [ ('train',train_inputs), ('target',train_targets), ('forcin
 		print(f" > {vname}{dvar.dims}: shape: {dvar.shape}, dtype: {dvar.dtype}, range: ({ndvar.min():.3f},{ndvar.max():.3f}), mean,std: ({ndvar.mean():.3f},{ndvar.std():.3f})")
 	print( f" ---------- N Features: {nfeatures}  ---------- ")
 
+stacked_inputs: xa.DataArray = model_utils.dataset_to_stacked( train_inputs ).squeeze()
 ndvar: np.ndarray = stacked_inputs.values
 print(f"\n** STACKED INPUTS {stacked_inputs.dims}: shape: {stacked_inputs.shape}, dtype: {stacked_inputs.dtype}, range: ({ndvar.min():.3f},{ndvar.max():.3f}), mean,std: ({ndvar.mean():.3f},{ndvar.std():.3f})")
 
