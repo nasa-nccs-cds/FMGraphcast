@@ -83,7 +83,7 @@ for epoch in range(nepochs):
 				traceback.print_exc()
 				break
 
-save_params( params, model_config, task_config, runid=runid )
+	save_params( params, model_config, task_config, runid=runid )
 
 # predictions: xarray.Dataset = rollout.chunked_prediction( run_forward_jitted, rng=jax.random.PRNGKey(0), inputs=eval_inputs,
 # 														        targets_template=eval_targets * np.nan, forcings=eval_forcings)
