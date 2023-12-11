@@ -1,3 +1,5 @@
+import traceback
+
 from fmbase.source.merra2.model import FMBatch
 from fmgraphcast.config import save_params, load_params
 from fmgraphcast.model import run_forward, loss_fn, grads_fn, drop_state
@@ -69,12 +71,17 @@ for epoch in range(nepochs):
 		run_forward_jitted = drop_state(with_params(jax.jit(with_configs(run_forward.apply))))
 
 		for iteration in range(niter):
-			te= time.time()
-			loss, diagnostics, next_state, grads = with_params(grads_fn_jitted)( inputs=train_inputs, targets=train_targets, forcings=train_forcings )
-			mean_grad = np.mean( jax.tree_util.tree_flatten( jax.tree_util.tree_map( lambda x: np.abs(x).mean(), grads ) )[0] )
-			max_grad = np.mean(jax.tree_util.tree_flatten(jax.tree_util.tree_map(lambda x: np.abs(x).max(), grads))[0])
-			params = jax.tree_map(  lambda p, g: p - lr * g, params, grads)
-			print(f" * ITER {epoch}:{iteration}: Loss= {loss:.6f}, Mean/Max |dW|= {lr*mean_grad:.6f} / {lr*max_grad:.6f}, comptime= {time.time()-te:.1f} sec")
+			try:
+				te= time.time()
+				loss, diagnostics, next_state, grads = with_params(grads_fn_jitted)( inputs=train_inputs, targets=train_targets, forcings=train_forcings )
+				mean_grad = np.mean( jax.tree_util.tree_flatten( jax.tree_util.tree_map( lambda x: np.abs(x).mean(), grads ) )[0] )
+				max_grad = np.mean(jax.tree_util.tree_flatten(jax.tree_util.tree_map(lambda x: np.abs(x).max(), grads))[0])
+				params = jax.tree_map(  lambda p, g: p - lr * g, params, grads)
+				print(f" * ITER {epoch}:{iteration}: Loss= {loss:.6f}, Mean/Max |dW|= {lr*mean_grad:.6f} / {lr*max_grad:.6f}, comptime= {time.time()-te:.1f} sec")
+			except Exception as err:
+				print( f"\n\n ABORT @ {epoch}:{iteration}")
+				traceback.print_exc()
+				break
 
 save_params( params, model_config, task_config, runid=runid )
 
