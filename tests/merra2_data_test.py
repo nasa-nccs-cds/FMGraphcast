@@ -90,16 +90,11 @@ stacked_inputs: xa.DataArray = model_utils.dataset_to_stacked( train_inputs ).sq
 ndvar: np.ndarray = stacked_inputs.values
 lat, lon = stacked_inputs.coords['lat'].values, stacked_inputs.coords['lon'].values
 latf, lonf = np.cos( lat*(np.pi/90.0) ), np.sin( lon*(np.pi/90.0) )
-print(f"\n** STACKED INPUTS {stacked_inputs.dims}: shape: {stacked_inputs.shape}, dtype: {stacked_inputs.dtype}, range: ({ndvar.min():.3f},{ndvar.max():.3f}), mean,std: ({ndvar.mean():.3f},{ndvar.std():.3f})")
-print( f" ---------- lat:  {lat}"  )
-print( f" ---------- latf: {latf}" )
-print( f" ---------- lon:  {lon}"  )
-print( f" ---------- lonf: {lonf}" )
+print( f"\n ** STACKED INPUTS {stacked_inputs.dims}: shape: {stacked_inputs.shape}, dtype: {stacked_inputs.dtype}, range: ({ndvar.min():.3f},{ndvar.max():.3f}), mean,std: ({ndvar.mean():.3f},{ndvar.std():.3f})")
+print( f"\n ---------- lat:  {lat}"  )
+print( f"\n ---------- latf: {latf}" )
+print( f"\n ---------- lon:  {lon}"  )
+print( f"\n ---------- lonf: {lonf}" )
 
-coords = train_inputs.data_vars['temperature'].coords
 
-print( f"\n Coords: ")
-print( f"\n ---> Lat:   {coords['lat'].values.tolist()}")
-print( f"\n ---> Lon:   {coords['lon'].values.tolist()}")
-print( f"\n ---> Level: {coords['level'].values.tolist()}")
 
