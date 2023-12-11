@@ -56,7 +56,7 @@ grads_fn_jitted = jax.jit(with_configs(grads_fn))
 for epoch in range(nepochs):
 	print(f"\n -------------------------------- Epoch {epoch} -------------------------------- \n")
 	for forecast_date in train_dates:
-		print( "\n" + ("\t"*8) + f"Forecast date: {forecast_date}")
+		print( "\n" + ("\t"*8) + f"EPOCH {epoch} *** Forecast date: {forecast_date}")
 		example_batch: xa.Dataset = fmbatch.load_batch( date_list(forecast_date,batch_days) )
 		itf = data_utils.extract_inputs_targets_forcings( example_batch, target_lead_times=target_lead_times, **dataclasses.asdict(task_config) )
 		train_inputs, train_targets, train_forcings = itf
@@ -77,7 +77,7 @@ for epoch in range(nepochs):
 				mean_grad = np.mean( jax.tree_util.tree_flatten( jax.tree_util.tree_map( lambda x: np.abs(x).mean(), grads ) )[0] )
 				max_grad = np.mean(jax.tree_util.tree_flatten(jax.tree_util.tree_map(lambda x: np.abs(x).max(), grads))[0])
 				params = jax.tree_map(  lambda p, g: p - lr * g, params, grads)
-				print(f" * ITER {epoch}:{iteration}: Loss= {loss:.6f}, Mean/Max |dW|= {lr*mean_grad:.6f} / {lr*max_grad:.6f}, comptime= {time.time()-te:.1f} sec")
+				print(f" * ITER {iteration}: Loss= {loss:.6f}, Mean/Max |dW|= {lr*mean_grad:.6f} / {lr*max_grad:.6f}, comptime= {time.time()-te:.1f} sec")
 			except Exception as err:
 				print( f"\n\n ABORT @ {epoch}:{iteration}")
 				traceback.print_exc()
