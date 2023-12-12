@@ -1,5 +1,4 @@
 import traceback
-
 from fmbase.source.merra2.model import FMBatch
 from fmgraphcast.config import save_params, load_params
 from fmgraphcast.model import run_forward, loss_fn, grads_fn, drop_state
@@ -32,7 +31,6 @@ runid = "small"
 state = {}
 lr = cfg().task.lr
 
-
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Load MERRA2 Data
 #-----------------
@@ -40,7 +38,7 @@ lr = cfg().task.lr
 dts         = cfg().task.data_timestep
 target_lead_times = [ f"{iS*dts}h" for iS in range(1,train_steps+1) ]
 eval_lead_times =   [ f"{iS*dts}h" for iS in range(1,eval_steps+1) ]
-train_dates = year_range( *cfg().task.year_range )
+train_dates = year_range( *cfg().task.year_range, randomize=True )
 nepochs = cfg().task.nepoch
 niter = cfg().task.niter
 batch_days = cfg().task.input_steps + cfg().task.train_steps
@@ -55,7 +53,7 @@ grads_fn_jitted = jax.jit(with_configs(grads_fn))
 
 for epoch in range(nepochs):
 	print(f"\n -------------------------------- Epoch {epoch} -------------------------------- \n")
-	for forecast_date in train_dates:
+	for date_index, forecast_date in enumerate(train_dates):
 		print( "\n" + ("\t"*8) + f"EPOCH {epoch} *** Forecast date: {forecast_date}")
 		example_batch: xa.Dataset = fmbatch.load_batch( date_list(forecast_date,batch_days) )
 		itf = data_utils.extract_inputs_targets_forcings( example_batch, target_lead_times=target_lead_times, **dataclasses.asdict(task_config) )
@@ -83,7 +81,9 @@ for epoch in range(nepochs):
 				traceback.print_exc()
 				break
 
-	save_params( params, model_config, task_config, runid=runid )
+		if date_index % 50 == 0: save_params(params, model_config, task_config, runid=runid)
+
+save_params( params, model_config, task_config, runid=runid )
 
 # predictions: xarray.Dataset = rollout.chunked_prediction( run_forward_jitted, rng=jax.random.PRNGKey(0), inputs=eval_inputs,
 # 														        targets_template=eval_targets * np.nan, forcings=eval_forcings)
