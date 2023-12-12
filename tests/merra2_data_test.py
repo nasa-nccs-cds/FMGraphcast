@@ -97,5 +97,8 @@ print( f"\n ---------- latf{latf.shape}: {[f'{v:.2f}' for v in latf]}" )
 print( f"\n ---------- lon{lon.shape}:  {lon}"  )
 print( f"\n ---------- lonf{lonf.shape}: {[f'{v:.2f}' for v in lonf]}" )
 
+loss, diagnostics, next_state, grads = with_params(grads_fn_jitted)(inputs=train_inputs, targets=train_targets, forcings=train_forcings)
+
+
 
 
