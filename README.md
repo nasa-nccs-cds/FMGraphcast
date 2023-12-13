@@ -10,14 +10,14 @@ Integration of GraphCast into the ILab Foundation Model Framework
 ## Conda Environment Setup
 
 #### Create Base Environment
-    > conda create -n fmgc -c conda-forge 
-    > conda activate fmgc
-    > pip install cuda-python
+    > conda create -n jax -c conda-forge 
+    > conda activate jax
+    > conda install -c nvidia cuda-python=12.2
     > pip install --upgrade "jax[cuda12_pip]" -f https://storage.googleapis.com/jax-releases/jax_cuda_releases.html
-    > conda install -c conda-forge ipython ipywidgets numpy xarray hvplot dask matplotlib scipy netCDF4 cartopy chex pandas dm-haiku jraph rtree tree trimesh typing_extensions 
+    > conda install -c conda-forge ipykernel ipython  ipywidgets numpy xarray hvplot dask scipy netCDF4 chex pandas dm-haiku jraph rtree tree trimesh typing_extensions 
     > pip install hydra-core --upgrade
     > pip install dm-tree
-    > python -m ipykernel install --user --name=fmgc
+    > python -m ipykernel install --user --name=jax
 
 
 #### Install FMBase
