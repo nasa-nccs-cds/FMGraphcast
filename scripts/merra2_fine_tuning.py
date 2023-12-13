@@ -53,7 +53,6 @@ init_jitted = jax.jit(with_configs(run_forward.init))
 grads_fn_jitted = jax.jit(with_configs(grads_fn))
 
 for epoch in range(nepochs):
-	print(f"\n -------------------------------- Epoch {epoch} -------------------------------- \n")
 	for date_index, forecast_date in enumerate(train_dates):
 		print( "\n" + ("\t"*8) + f"EPOCH {epoch} *** Forecast date[{date_index}]: {forecast_date}")
 		example_batch: xa.Dataset = fmbatch.load_batch( date_list(forecast_date,batch_days) )
