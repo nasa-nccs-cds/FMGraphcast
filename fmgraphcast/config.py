@@ -60,7 +60,7 @@ def save_params( params: Dict, modelconfig: ModelConfig, taskconfig: TaskConfig,
 	with open(pfile,"wb") as f:
 		ckpt: FMCheckPoint = FMCheckPoint( params=params, model_config=modelconfig, task_config=taskconfig )
 		checkpoint.dump( f, ckpt )
-		print( f" Saving model weights to file: {pfile}")
+		print( f" -------------------------------- \n Saving model weights to file: {pfile}\n ")
 
 def load_era5_params() -> Tuple[Dict,ModelConfig,TaskConfig]:
 	from graphcast.graphcast import CheckPoint

@@ -204,7 +204,7 @@ def extract_input_target_times( dataset: xarray.Dataset, input_duration: Timedel
 
 def _process_target_lead_times_and_get_duration( target_lead_times: TargetLeadTimes) -> TimedeltaLike:
   """Returns the minimum duration for the target lead times."""
-  print( f"process_target_lead_times: {target_lead_times}")
+  # print( f"process_target_lead_times: {target_lead_times}")
   if isinstance(target_lead_times, slice):
     # A slice of lead times. xarray already accepts timedelta-like values for
     # the begin/end/step of the slice.
