@@ -30,6 +30,7 @@ runid = "small"
 (params, model_config, task_config) = load_params("merra2", runid=runid, hydra_config=False )
 state = {}
 lr = cfg().task.lr
+output_period = 50
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Load MERRA2 Data
@@ -54,7 +55,7 @@ grads_fn_jitted = jax.jit(with_configs(grads_fn))
 for epoch in range(nepochs):
 	print(f"\n -------------------------------- Epoch {epoch} -------------------------------- \n")
 	for date_index, forecast_date in enumerate(train_dates):
-		print( "\n" + ("\t"*8) + f"EPOCH {epoch} *** Forecast date: {forecast_date}")
+		print( "\n" + ("\t"*8) + f"EPOCH {epoch} *** Forecast date[{date_index}]: {forecast_date}")
 		example_batch: xa.Dataset = fmbatch.load_batch( date_list(forecast_date,batch_days) )
 		itf = data_utils.extract_inputs_targets_forcings( example_batch, target_lead_times=target_lead_times, **dataclasses.asdict(task_config) )
 		train_inputs, train_targets, train_forcings = itf
@@ -81,7 +82,7 @@ for epoch in range(nepochs):
 				traceback.print_exc()
 				break
 
-		if date_index % 50 == 0: save_params(params, model_config, task_config, runid=runid)
+		if date_index % output_period == 0: save_params(params, model_config, task_config, runid=runid)
 
 save_params( params, model_config, task_config, runid=runid )
 
