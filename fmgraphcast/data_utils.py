@@ -186,7 +186,7 @@ def extract_input_target_times( dataset: xarray.Dataset, input_duration: Timedel
   # forming the target period which needs to be predicted.
   # This means the time coordinates are now forecast lead times.
   time = dataset.coords["time"]
-  ftime = time.values.astype(np.int64)/1e15 - 47.6
+  # ftime = time.values.astype(np.int64)/1e15 - 47.6
   # print(f"\n --> Slice out targets: target_lead_times={target_lead_times}, time({time.dtype})={ftime.tolist()}")
   dataset = dataset.assign_coords(time=time + target_duration - time[-1])
   rtime: xarray.DataArray = dataset.coords["time"]
@@ -211,9 +211,7 @@ def _process_target_lead_times_and_get_duration( target_lead_times: TargetLeadTi
     if target_lead_times.start is None:
       # If the start isn't specified, we assume it starts at the next timestep
       # after lead time 0 (lead time 0 is the final input timestep):
-      target_lead_times = slice(
-          pd.Timedelta(1, "ns"), target_lead_times.stop, target_lead_times.step
-      )
+      target_lead_times = slice( pd.Timedelta(1, "ns"), target_lead_times.stop, target_lead_times.step )
     target_duration = pd.Timedelta(target_lead_times.stop)
   else:
     if not isinstance(target_lead_times, (list, tuple, set)):

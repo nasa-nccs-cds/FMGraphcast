@@ -7,6 +7,7 @@ import functools
 from fmgraphcast import data_utils
 import jax, time
 import numpy as np
+import random
 import hydra, dataclasses
 from datetime import date
 from fmbase.util.dates import date_list, year_range
@@ -42,8 +43,6 @@ eval_lead_times =   [ f"{iS*dts}h" for iS in range(1,eval_steps+1) ]
 train_dates = year_range( *cfg().task.year_range, randomize=True )
 nepochs = cfg().task.nepoch
 niter = cfg().task.niter
-batch_days = cfg().task.input_steps + cfg().task.train_steps
-
 fmbatch: FMBatch = FMBatch( cfg().task )
 norms: Dict[str, xa.Dataset] = fmbatch.norm_data
 
@@ -55,31 +54,29 @@ grads_fn_jitted = jax.jit(with_configs(grads_fn))
 for epoch in range(nepochs):
 	for date_index, forecast_date in enumerate(train_dates):
 		print( "\n" + ("\t"*8) + f"EPOCH {epoch} *** Forecast date[{date_index}]: {forecast_date}")
-		example_batch: xa.Dataset = fmbatch.load_batch( date_list(forecast_date,batch_days) )
-		itf = data_utils.extract_inputs_targets_forcings( example_batch, target_lead_times=target_lead_times, **dataclasses.asdict(task_config) )
-		train_inputs, train_targets, train_forcings = itf
-
-		itf = data_utils.extract_inputs_targets_forcings( example_batch, target_lead_times=eval_lead_times, **dataclasses.asdict(task_config) )
-		eval_inputs, eval_targets, eval_forcings = itf
-
-		if params is None:
-			params, state = init_jitted( rng=jax.random.PRNGKey(0), inputs=train_inputs, targets_template=train_targets, forcings=train_forcings)
-
-		loss_fn_jitted = drop_state(with_params(jax.jit(with_configs(loss_fn.apply))))
-		run_forward_jitted = drop_state(with_params(jax.jit(with_configs(run_forward.apply))))
-
+		fmbatch.load_batch( forecast_date )
 		for iteration in range(niter):
-			try:
-				te= time.time()
-				loss, diagnostics, next_state, grads = with_params(grads_fn_jitted)( inputs=train_inputs, targets=train_targets, forcings=train_forcings )
-				mean_grad = np.mean( jax.tree_util.tree_flatten( jax.tree_util.tree_map( lambda x: np.abs(x).mean(), grads ) )[0] )
-				max_grad = np.mean(jax.tree_util.tree_flatten(jax.tree_util.tree_map(lambda x: np.abs(x).max(), grads))[0])
-				params = jax.tree_map(  lambda p, g: p - lr * g, params, grads)
-				print(f" * ITER {iteration}: Loss= {loss:.6f}, Mean/Max |dW|= {lr*mean_grad:.6f} / {lr*max_grad:.6f}, comptime= {time.time()-te:.1f} sec")
-			except Exception as err:
-				print( f"\n\n ABORT @ {epoch}:{iteration}")
-				traceback.print_exc()
-				break
+			for day_offset in range(0,4):
+				train_data: xa.Dataset = fmbatch.get_train_data( day_offset )
+				itf = data_utils.extract_inputs_targets_forcings( train_data, target_lead_times=target_lead_times, **dataclasses.asdict(task_config) )
+				train_inputs, train_targets, train_forcings = itf
+				itf = data_utils.extract_inputs_targets_forcings( train_data, target_lead_times=eval_lead_times, **dataclasses.asdict(task_config) )
+				eval_inputs, eval_targets, eval_forcings = itf
+
+				if params is None:
+					params, state = init_jitted( rng=jax.random.PRNGKey(0), inputs=train_inputs, targets_template=train_targets, forcings=train_forcings)
+
+				try:
+					te= time.time()
+					loss, diagnostics, next_state, grads = with_params(grads_fn_jitted)( inputs=train_inputs, targets=train_targets, forcings=train_forcings )
+					mean_grad = np.mean( jax.tree_util.tree_flatten( jax.tree_util.tree_map( lambda x: np.abs(x).mean(), grads ) )[0] )
+					max_grad = np.mean(jax.tree_util.tree_flatten(jax.tree_util.tree_map(lambda x: np.abs(x).max(), grads))[0])
+					params = jax.tree_map(  lambda p, g: p - lr * g, params, grads)
+					print(f" * ITER {day_offset}:{iteration}>> Loss= {loss:.6f}, Mean/Max |dW|= {lr*mean_grad:.6f} / {lr*max_grad:.6f}, comptime= {time.time()-te:.1f} sec")
+				except Exception as err:
+					print( f"\n\n ABORT @ {epoch}:{iteration}")
+					traceback.print_exc()
+					break
 
 		if date_index % output_period == 0: save_params(params, model_config, task_config, runid=runid)
 
