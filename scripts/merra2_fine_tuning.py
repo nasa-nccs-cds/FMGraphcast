@@ -55,6 +55,7 @@ for epoch in range(nepochs):
 	for date_index, forecast_date in enumerate(train_dates):
 		print( "\n" + ("\t"*8) + f"EPOCH {epoch} *** Forecast date[{date_index}]: {forecast_date}")
 		fmbatch.load_batch( forecast_date )
+		losses = {}
 		for iteration in range(niter):
 			for day_offset in range(0,4):
 				train_data: xa.Dataset = fmbatch.get_train_data( day_offset )
@@ -69,14 +70,14 @@ for epoch in range(nepochs):
 				try:
 					te= time.time()
 					loss, diagnostics, next_state, grads = with_params(grads_fn_jitted)( inputs=train_inputs, targets=train_targets, forcings=train_forcings )
-					mean_grad = np.mean( jax.tree_util.tree_flatten( jax.tree_util.tree_map( lambda x: np.abs(x).mean(), grads ) )[0] )
-					max_grad = np.mean(jax.tree_util.tree_flatten(jax.tree_util.tree_map(lambda x: np.abs(x).max(), grads))[0])
 					params = jax.tree_map(  lambda p, g: p - lr * g, params, grads)
-					print(f" * ITER {day_offset}:{iteration}>> Loss= {loss:.6f}, Mean/Max |dW|= {lr*mean_grad:.6f} / {lr*max_grad:.6f}, comptime= {time.time()-te:.1f} sec")
+					losses.setdefault( day_offset, [] ).append( loss )
 				except Exception as err:
 					print( f"\n\n ABORT @ {epoch}:{iteration}")
 					traceback.print_exc()
 					break
+		for day_offset in range(0, 4):
+			print(f" * LOSS[{day_offset}]= {[f'{L:.2f}' for L in losses[day_offset]]}")
 
 		if date_index % output_period == 0: save_params(params, model_config, task_config, runid=runid)
 
