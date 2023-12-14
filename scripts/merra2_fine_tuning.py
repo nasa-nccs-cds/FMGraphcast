@@ -77,7 +77,7 @@ for epoch in range(nepochs):
 					traceback.print_exc()
 					break
 		for day_offset in range(0, 4):
-			print(f" * LOSS[{day_offset}]= {[f'{L:.3f}' for L in losses[day_offset]]}")
+			print(f" * LOSS[{day_offset}]= {[f'{L:.3f}' for L in losses[day_offset]]} ")
 
 		if date_index % output_period == 0: save_params(params, model_config, task_config, runid=runid)
 
