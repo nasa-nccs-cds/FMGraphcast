@@ -62,3 +62,6 @@ def grads_fn(params: Dict, state: Dict, model_config: graphcast.ModelConfig, tas
 		return loss_, (diagnostics_, next_state_)
 	(loss, (diagnostics, next_state)), grads = jax.value_and_grad( _aux, has_aux=True)(params, state, inputs, targets, forcings)
 	return loss, diagnostics, next_state, grads
+
+def forecast(params, state: Dict, model_config: graphcast):
+	reference
