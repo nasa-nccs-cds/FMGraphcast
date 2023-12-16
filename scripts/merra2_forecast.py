@@ -36,11 +36,7 @@ state = {}
 #-----------------
 
 dts         = cfg().task.data_timestep
-target_lead_times = [ f"{iS*dts}h" for iS in range(1,train_steps+1) ]
 eval_lead_times =   [ f"{iS*dts}h" for iS in range(1,eval_steps+1) ]
-train_dates = year_range( *cfg().task.year_range, randomize=True )
-nepochs = cfg().task.nepoch
-niter = cfg().task.niter
 fmbatch: FMBatch = FMBatch( cfg().task )
 norms: Dict[str, xa.Dataset] = fmbatch.norm_data
 reference_date = date( year, month, day )
@@ -52,8 +48,8 @@ def with_params(fn): return functools.partial(fn, params=params, state=state)
 run_forward_jitted = drop_state(with_params(jax.jit(with_configs(run_forward.apply))))
 fmbatch.load_batch(reference_date)
 
-train_data: xa.Dataset = fmbatch.get_train_data(ref_day_offset)
-itf = data_utils.extract_inputs_targets_forcings(train_data, target_lead_times=eval_lead_times, **dataclasses.asdict(task_config))
+eval_data: xa.Dataset = fmbatch.get_train_data(ref_day_offset)
+itf = data_utils.extract_inputs_targets_forcings(eval_data, target_lead_times=eval_lead_times, **dataclasses.asdict(task_config))
 eval_inputs, eval_targets, eval_forcings = itf
 
 predictions: xa.Dataset = rollout.chunked_prediction( run_forward_jitted, rng=jax.random.PRNGKey(0), inputs=eval_inputs,
