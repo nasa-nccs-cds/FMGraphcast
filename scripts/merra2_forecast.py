@@ -26,7 +26,7 @@ def dtypes( d: Dict ):
 	return { k: type(v) for k,v in d.items() }
 
 year, month, day =  cfg().task.year,  cfg().task.month,  cfg().task.day
-train_steps, eval_steps = cfg().task.train_steps, cfg().task.eval_steps
+forecast_steps = 4
 runid = "small"
 (params, model_config, task_config) = load_params("merra2", runid=runid, hydra_config=False )
 state = {}
@@ -36,7 +36,7 @@ state = {}
 #-----------------
 
 dts         = cfg().task.data_timestep
-eval_lead_times =   [ f"{iS*dts}h" for iS in range(1,eval_steps+1) ]
+eval_lead_times =   [ f"{iS*dts}h" for iS in range(1,forecast_steps+1) ]
 fmbatch: FMBatch = FMBatch( cfg().task )
 norms: Dict[str, xa.Dataset] = fmbatch.norm_data
 reference_date = date( year, month, day )
