@@ -53,12 +53,13 @@ init_jitted = jax.jit(with_configs(run_forward.init))
 grads_fn_jitted = jax.jit(with_configs(grads_fn))
 
 for epoch in range(nepochs):
+	divergents = set()
 	for date_index, forecast_date in enumerate(train_dates):
 		print( "\n" + ("\t"*8) + f"EPOCH {epoch} *** Forecast date[{date_index}]: {forecast_date}")
 		fmbatch.load_batch( forecast_date )
 		for day_offset in range(0,4):
 			losses = []
-			for iteration in range(max_iter):
+			for iteration in range(100000):
 				train_data: xa.Dataset = fmbatch.get_train_data( day_offset )
 				itf = data_utils.extract_inputs_targets_forcings( train_data, target_lead_times=target_lead_times, **dataclasses.asdict(task_config) )
 				train_inputs, train_targets, train_forcings = itf
@@ -73,7 +74,11 @@ for epoch in range(nepochs):
 					loss, diagnostics, next_state, grads = with_params(grads_fn_jitted)( inputs=train_inputs, targets=train_targets, forcings=train_forcings )
 					params = jax.tree_map(  lambda p, g: p - lr * g, params, grads)
 					losses.append( loss )
-					if loss < error_threshold: break
+					if loss < error_threshold:
+						break
+					elif iteration == max_iter:
+						divergents.add( forecast_date )
+						break
 				except Exception as err:
 					print( f"\n\n ABORT @ {epoch}:{iteration}")
 					traceback.print_exc()
