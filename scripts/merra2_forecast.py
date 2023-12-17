@@ -33,7 +33,7 @@ runid = "small"
 (params, model_config, task_config) = load_params("merra2", runid=runid, hydra_config=False )
 state = {}
 lr = cfg().task.lr
-output_period = 50
+reference_date = date( year, month, day )
 day_offset = 0
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -46,9 +46,11 @@ eval_leadtimes =   [ f"{iS*dts}h" for iS in range(1,eval_steps+1) ]
 train_dates = year_range( *cfg().task.year_range, randomize=True )
 nepochs = cfg().task.nepoch
 max_iter = cfg().task.max_iter
+
 fmbatch: FMBatch = FMBatch( cfg().task )
 norms: Dict[str, xa.Dataset] = fmbatch.norm_data
 error_threshold = cfg().task.error_threshold
+fmbatch.load_batch( reference_date )
 
 def with_configs(fn): return functools.partial( fn, model_config=model_config, task_config=task_config, norms=norms)
 def with_params(fn): return functools.partial(fn, params=params, state=state)
