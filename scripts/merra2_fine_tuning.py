@@ -42,9 +42,10 @@ target_lead_times = [ f"{iS*dts}h" for iS in range(1,train_steps+1) ]
 eval_lead_times =   [ f"{iS*dts}h" for iS in range(1,eval_steps+1) ]
 train_dates = year_range( *cfg().task.year_range, randomize=True )
 nepochs = cfg().task.nepoch
-niter = cfg().task.niter
+max_iter = cfg().task.max_iter
 fmbatch: FMBatch = FMBatch( cfg().task )
 norms: Dict[str, xa.Dataset] = fmbatch.norm_data
+error_threshold = cfg().task.error_threshold
 
 def with_configs(fn): return functools.partial( fn, model_config=model_config, task_config=task_config, norms=norms)
 def with_params(fn): return functools.partial(fn, params=params, state=state)
@@ -55,9 +56,9 @@ for epoch in range(nepochs):
 	for date_index, forecast_date in enumerate(train_dates):
 		print( "\n" + ("\t"*8) + f"EPOCH {epoch} *** Forecast date[{date_index}]: {forecast_date}")
 		fmbatch.load_batch( forecast_date )
-		losses = {}
-		for iteration in range(niter):
-			for day_offset in range(0,4):
+		for day_offset in range(0,4):
+			losses = []
+			for iteration in range(max_iter):
 				train_data: xa.Dataset = fmbatch.get_train_data( day_offset )
 				itf = data_utils.extract_inputs_targets_forcings( train_data, target_lead_times=target_lead_times, **dataclasses.asdict(task_config) )
 				train_inputs, train_targets, train_forcings = itf
@@ -71,13 +72,14 @@ for epoch in range(nepochs):
 					te= time.time()
 					loss, diagnostics, next_state, grads = with_params(grads_fn_jitted)( inputs=train_inputs, targets=train_targets, forcings=train_forcings )
 					params = jax.tree_map(  lambda p, g: p - lr * g, params, grads)
-					losses.setdefault( day_offset, [] ).append( loss )
+					losses.append( loss )
+					if loss < error_threshold: break
 				except Exception as err:
 					print( f"\n\n ABORT @ {epoch}:{iteration}")
 					traceback.print_exc()
 					break
-		for day_offset in range(0, 4):
-			print(f" * LOSS[{day_offset}]= {[f'{L:.3f}' for L in losses[day_offset]]} ")
+
+			print(f" * LOSS[{day_offset}]= {[f'{L:.3f}' for L in losses]} ")
 
 		if date_index % output_period == 0: save_params(params, model_config, task_config, runid=runid)
 
