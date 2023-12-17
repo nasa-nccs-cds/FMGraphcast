@@ -68,6 +68,9 @@ eval_inputs, eval_targets, eval_forcings = itf
 if params is None:
 	params, state = init_jitted( rng=jax.random.PRNGKey(0), inputs=train_inputs, targets_template=train_targets, forcings=train_forcings)
 
+print( f"Running prediction, template variables:")
+for vname, dvar in eval_targets.data_vars.items():
+	print( f" > {vname}{dvar.dims}: {dvar.shape}")
 
 predictions: xa.Dataset = rollout.chunked_prediction( run_forward_jitted, rng=jax.random.PRNGKey(0), inputs=eval_inputs,
 														        targets_template=eval_targets * np.nan, forcings=eval_forcings)
