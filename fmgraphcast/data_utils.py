@@ -251,7 +251,7 @@ def extract_inputs_targets_forcings(
   # `datetime` is needed by add_derived_vars but breaks autoregressive rollouts.
   dataset = dataset.drop_vars("datetime")
   inputs, targets = extract_input_target_times( dataset, input_duration=input_duration, target_lead_times=target_lead_times )
-  print( f"Extract Inputs & Targets: input times: {get_timedeltas(inputs)}, target times: {get_timedeltas(targets)}")
+  print( f"\nExtract Inputs & Targets: input times: {get_timedeltas(inputs)}, target times: {get_timedeltas(targets)}")
 
   if set(forcing_variables) & set(target_variables):
     raise ValueError( f"Forcing variables {forcing_variables} should not overlap with target variables {target_variables}." )

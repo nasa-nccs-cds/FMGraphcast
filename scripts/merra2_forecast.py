@@ -60,14 +60,16 @@ train_data: xa.Dataset = fmbatch.get_train_data( day_offset )
 itf = data_utils.extract_inputs_targets_forcings( train_data, target_lead_times=eval_leadtimes, **dataclasses.asdict(task_config) )
 eval_inputs, eval_targets, eval_forcings = itf
 
+print( f"\nForecast Targets, target leadtimes={eval_leadtimes}, Variables:")
+for vname, dvar in eval_targets.data_vars.items():
+	ndvar: np.ndarray = dvar.values
+	print( f" > {vname}{dvar.dims}: {dvar.shape}")
+	print(f"   --> dtype: {dvar.dtype}, range: ({ndvar.min():.3f},{ndvar.max():.3f}), mean,std: ({ndvar.mean():.3f},{ndvar.std():.3f})")
+
 if params is None:
 	itf = data_utils.extract_inputs_targets_forcings(train_data, target_lead_times=target_leadtimes, **dataclasses.asdict(task_config))
 	train_inputs, train_targets, train_forcings = itf
 	params, state = init_jitted( rng=jax.random.PRNGKey(0), inputs=train_inputs, targets_template=train_targets, forcings=train_forcings)
-
-print( f"\nRunning prediction, eval_leadtimes={eval_leadtimes}, template variables:")
-for vname, dvar in eval_targets.data_vars.items():
-	print( f" > {vname}{dvar.dims}: {dvar.shape}")
 
 ts=time.time()
 predictions: xa.Dataset = rollout.chunked_prediction( run_forward_jitted, rng=jax.random.PRNGKey(0), inputs=eval_inputs,
