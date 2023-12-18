@@ -1,6 +1,6 @@
 import traceback
 
-from fmbase.source.merra2.model import FMBatch
+from fmbase.source.merra2.model import FMBatch, BatchType
 from fmgraphcast.config import save_params, load_params
 from fmgraphcast.model import run_forward, loss_fn, grads_fn, drop_state
 import xarray as xa
@@ -45,7 +45,7 @@ train_dates = year_range( *cfg().task.year_range )
 forecast_date = date( cfg().task.year, cfg().task.month, cfg().task.day )
 batch_days = cfg().task.input_steps + cfg().task.train_steps
 
-fmbatch: FMBatch = FMBatch( cfg().task )
+fmbatch: FMBatch = FMBatch( cfg().task, BatchType.Training )
 norms: Dict[str, xa.Dataset] = fmbatch.norm_data
 
 def with_configs(fn): return functools.partial( fn, model_config=model_config, task_config=task_config, norms=norms)

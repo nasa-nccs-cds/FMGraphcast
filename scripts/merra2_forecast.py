@@ -1,5 +1,5 @@
 import traceback
-from fmbase.source.merra2.model import FMBatch
+from fmbase.source.merra2.model import FMBatch, BatchType
 from fmgraphcast.config import save_params, load_params
 from fmgraphcast.model import run_forward, loss_fn, grads_fn, drop_state
 import xarray as xa
@@ -44,7 +44,7 @@ dts         = cfg().task.data_timestep
 target_leadtimes = [ f"{iS*dts}h" for iS in range(1,train_steps+1) ]
 eval_leadtimes =   [ f"{iS*dts}h" for iS in range(1,eval_steps+1) ]
 
-fmbatch: FMBatch = FMBatch( cfg().task, target_steps = eval_steps )
+fmbatch: FMBatch = FMBatch( cfg().task, BatchType.Forecast )
 norms: Dict[str, xa.Dataset] = fmbatch.norm_data
 error_threshold = cfg().task.error_threshold
 fmbatch.load_batch( reference_date )
