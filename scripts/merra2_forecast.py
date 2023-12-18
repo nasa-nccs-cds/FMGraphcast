@@ -65,7 +65,7 @@ eval_inputs, eval_targets, eval_forcings = itf
 if params is None:
 	params, state = init_jitted( rng=jax.random.PRNGKey(0), inputs=train_inputs, targets_template=train_targets, forcings=train_forcings)
 
-print( f"Running prediction, eval_leadtimes={eval_leadtimes}, template variables:")
+print( f"\nRunning prediction, eval_leadtimes={eval_leadtimes}, template variables:")
 for vname, dvar in eval_targets.data_vars.items():
 	print( f" > {vname}{dvar.dims}: {dvar.shape}")
 
@@ -73,7 +73,7 @@ ts=time.time()
 predictions: xa.Dataset = rollout.chunked_prediction( run_forward_jitted, rng=jax.random.PRNGKey(0), inputs=eval_inputs,
 														        targets_template=eval_targets * np.nan, forcings=eval_forcings)
 
-print( f" ***** Completed forecast in {time.time()-ts:.3f} sec, result variables:  ")
+print( f"\n ***** Completed forecast in {time.time()-ts:.3f} sec, result variables:  ")
 for vname, dvar in predictions.data_vars.items():
 	print( f" > {vname}{dvar.dims}: {dvar.shape}")
 	ndvar: np.ndarray = dvar.values
