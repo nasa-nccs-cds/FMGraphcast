@@ -43,11 +43,8 @@ day_offset = 0
 dts         = cfg().task.data_timestep
 target_leadtimes = [ f"{iS*dts}h" for iS in range(1,train_steps+1) ]
 eval_leadtimes =   [ f"{iS*dts}h" for iS in range(1,eval_steps+1) ]
-train_dates = year_range( *cfg().task.year_range, randomize=True )
-nepochs = cfg().task.nepoch
-max_iter = cfg().task.max_iter
 
-fmbatch: FMBatch = FMBatch( cfg().task )
+fmbatch: FMBatch = FMBatch( cfg().task, target_steps = eval_steps )
 norms: Dict[str, xa.Dataset] = fmbatch.norm_data
 error_threshold = cfg().task.error_threshold
 fmbatch.load_batch( reference_date )
