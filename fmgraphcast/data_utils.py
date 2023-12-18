@@ -30,7 +30,8 @@ YEAR_PROGRESS = "year_progress"
 predef_norms = [ 'year_progress', 'year_progress_sin', 'year_progress_cos', 'day_progress', 'day_progress_sin', 'day_progress_cos' ]
 
 def get_timedeltas( dset: xarray.Dataset ) -> List[int]:
-    return [ td.astype('timedelta64[h]').astype(np.int32) for td in dset.coords['time'].values.tolist() ]
+    time: np.ndarray = dset.coords["time"].values.astype(np.int64)/1e15 - 47.6
+    return time.tolist()
 
 def d2xa( dvals: Dict[str,float] ) -> xarray.Dataset:
     return xarray.Dataset( {vn: xarray.DataArray( np.array(dval) ) for vn, dval in dvals.items()} )
