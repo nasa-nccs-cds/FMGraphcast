@@ -29,6 +29,9 @@ YEAR_PROGRESS = "year_progress"
 
 predef_norms = [ 'year_progress', 'year_progress_sin', 'year_progress_cos', 'day_progress', 'day_progress_sin', 'day_progress_cos' ]
 
+def get_timedeltas( dset: xarray.Dataset ) -> List[int]:
+    return [ td.astype('timedelta64[h]').astype(np.int32) for td in dset.coords['time'].values.tolist() ]
+
 def d2xa( dvals: Dict[str,float] ) -> xarray.Dataset:
     return xarray.Dataset( {vn: xarray.DataArray( np.array(dval) ) for vn, dval in dvals.items()} )
 
@@ -246,9 +249,8 @@ def extract_inputs_targets_forcings(
 
   # `datetime` is needed by add_derived_vars but breaks autoregressive rollouts.
   dataset = dataset.drop_vars("datetime")
-
   inputs, targets = extract_input_target_times( dataset, input_duration=input_duration, target_lead_times=target_lead_times)
-  print( f"Extract Inputs & Targets: input times: {inputs.coords['time'].values.tolist()}, target times: {targets.coords['time'].values.tolist()}")
+  print( f"Extract Inputs & Targets: input times: {get_timedeltas(inputs)}, target times: {get_timedeltas(targets)}")
 
   if set(forcing_variables) & set(target_variables):
     raise ValueError( f"Forcing variables {forcing_variables} should not overlap with target variables {target_variables}." )
