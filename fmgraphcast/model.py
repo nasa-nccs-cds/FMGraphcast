@@ -41,12 +41,12 @@ def construct_wrapped_graphcast( model_config: graphcast.ModelConfig, task_confi
 @hk.transform_with_state
 def run_forward(model_config: graphcast.ModelConfig, task_config: graphcast.TaskConfig, norms: Dict[str,xa.Dataset], inputs: xa.Dataset, targets_template: xa.Dataset, forcings: xa.Dataset):
 	predictor = construct_wrapped_graphcast(model_config, task_config, norms )
-	print( f"\n Run forward-> inputs:")
-	for vn, dv in inputs.data_vars.items():
-		print(f" > {vn}{dv.dims}: {dv.shape}")
-	print( f"\n Run forward-> targets_template:")
-	for vn, dv in targets_template.data_vars.items():
-		print(f" > {vn}{dv.dims}: {dv.shape}")
+	# print( f"\n Run forward-> inputs:")
+	# for vn, dv in inputs.data_vars.items():
+	# 	print(f" > {vn}{dv.dims}: {dv.shape}")
+	# print( f"\n Run forward-> targets_template:")
+	# for vn, dv in targets_template.data_vars.items():
+	# 	print(f" > {vn}{dv.dims}: {dv.shape}")
 	return predictor(inputs, targets_template=targets_template, forcings=forcings)
 
 @hk.transform_with_state
