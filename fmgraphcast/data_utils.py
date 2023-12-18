@@ -5,6 +5,7 @@ from fmbase.util.ops import fmbdir
 from fmbase.util.config import configure, cfg
 from graphcast.graphcast import ModelConfig, TaskConfig
 from graphcast import checkpoint
+from fmbase.util.ops import format_timedeltas, print_dict
 import numpy as np
 import pandas as pd
 import xarray, chex, os
@@ -29,9 +30,8 @@ YEAR_PROGRESS = "year_progress"
 
 predef_norms = [ 'year_progress', 'year_progress_sin', 'year_progress_cos', 'day_progress', 'day_progress_sin', 'day_progress_cos' ]
 
-def get_timedeltas( dset: xarray.Dataset ) -> List[int]:
-    time: np.ndarray = dset.coords["time"].values.astype(np.int64)/1e15 - 47.6
-    return time.tolist()
+def get_timedeltas( dset: xarray.Dataset ):
+    return format_timedeltas( dset.coords["time"] )
 
 def d2xa( dvals: Dict[str,float] ) -> xarray.Dataset:
     return xarray.Dataset( {vn: xarray.DataArray( np.array(dval) ) for vn, dval in dvals.items()} )
