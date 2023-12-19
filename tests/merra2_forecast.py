@@ -78,4 +78,3 @@ for vname, dvar in predictions.data_vars.items():
 	print(f"   --> dtype: {dvar.dtype}, range: ({ndvar.min():.3f},{ndvar.max():.3f}), mean,std: ({ndvar.mean():.3f},{ndvar.std():.3f}), time: {format_timedeltas(tvar)}")
 
 target_vars = cfg().task.target_variables
-plot( predictions, target_vars[0] )
