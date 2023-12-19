@@ -1,7 +1,6 @@
-import traceback
 from fmbase.source.merra2.model import FMBatch, BatchType
-from fmgraphcast.config import save_params, load_params
-from fmgraphcast.model import run_forward, loss_fn, grads_fn, drop_state
+from fmgraphcast.config import load_params
+from fmgraphcast.model import run_forward, grads_fn, drop_state
 import xarray as xa
 import functools
 from fmgraphcast import data_utils
@@ -9,10 +8,8 @@ from fmbase.util.ops import format_timedeltas
 from graphcast import rollout
 import jax, time
 import numpy as np
-import random
 import hydra, dataclasses
 from datetime import date
-from fmbase.util.dates import date_list, year_range
 from fmbase.util.config import configure, cfg
 from typing import List, Union, Tuple, Optional, Dict, Type
 
