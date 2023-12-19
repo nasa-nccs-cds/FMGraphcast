@@ -69,7 +69,7 @@ for vname, dvar in eval_targets.data_vars.items():
 if params is None:
 	itf = data_utils.extract_inputs_targets_forcings(train_data, target_lead_times=target_leadtimes, **dataclasses.asdict(task_config))
 	train_inputs, train_targets, train_forcings = itf
-	params, state = init_jitted( rng=jax.random.PRNGKey(0), inputs=train_inputs, targets_template=train_targets, forcings=train_forcings)
+	params, state = init_jitted( rng=jax.random.PRNGKey(0), inputs=train_inputs, targets_template=train_targets, forcings=train_forcings )
 
 ts=time.time()
 predictions: xa.Dataset = rollout.chunked_prediction( run_forward_jitted, rng=jax.random.PRNGKey(0), inputs=eval_inputs,
