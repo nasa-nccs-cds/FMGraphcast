@@ -2,3 +2,5 @@ defaults:
   - platform: explore
   - model: merra2-finetuning
   - task: merra2-finetuning
+
+cid: merra2-finetuning
