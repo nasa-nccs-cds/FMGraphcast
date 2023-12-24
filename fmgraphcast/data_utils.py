@@ -190,13 +190,14 @@ def extract_input_target_times( dataset: xarray.Dataset, input_duration: Timedel
   # forming the target period which needs to be predicted.
   # This means the time coordinates are now forecast lead times.
   time: xarray.DataArray = dataset.coords["time"]
-  print(f" ----> input dataset=> {dataset.dims.mapping} {dataset.sizes.mapping}")
+  vnames = list(dataset.data_vars.keys())
+  print(f" ----> input dataset=> {dataset.dims.mapping}")
   # ftime = time.values.astype(np.int64)/1e15 - 47.6
   # print(f"\n --> Slice out targets: target_lead_times={target_lead_times}, time({time.dtype})={ftime.tolist()}")
   dataset = dataset.assign_coords(time=time + target_duration - time[-1])
   rtime: xarray.DataArray = dataset.coords["time"]
   targets: xarray.Dataset = dataset.sel({"time": target_lead_times})
-  print(f" ----> target_lead_times({target_lead_times})=> {targets.dims.mapping} {targets.sizes.mapping}")
+  print(f" ----> target_lead_times({target_lead_times})=> {targets.dims.mapping}")
 
   input_duration = pd.Timedelta(input_duration)
   # Both endpoints are inclusive with label-based slicing, so we offset by a
@@ -204,7 +205,16 @@ def extract_input_target_times( dataset: xarray.Dataset, input_duration: Timedel
   zero = pd.Timedelta(0)
   epsilon = pd.Timedelta(1, "ns")
   inputs: xarray.Dataset = dataset.sel({"time": slice(-input_duration + epsilon, zero)})
-  print(f" ----> input_duration({input_duration})=> {inputs.dims} {inputs.sizes}")
+  print(f" ----> input_duration({input_duration})=> {inputs.dims.mapping}")
+
+  ttest_array: xarray.DataArray = targets.data_vars[vnames[0]]
+  tdata  = ttest_array.isel( lon=100, lat=100, time=0 ).squeeze().values.tolist()
+  print(f" ----> target data column => {vnames[0]}: {tdata}")
+
+  itest_array: xarray.DataArray = inputs.data_vars[vnames[0]]
+  idata  = itest_array.isel( lon=100, lat=100, time=0 ).squeeze().values.tolist()
+  print(f" ----> input data column => {vnames[0]}: {idata}")
+
   return inputs, targets
 
 
