@@ -206,15 +206,6 @@ def extract_input_target_times( dataset: xarray.Dataset, input_duration: Timedel
   epsilon = pd.Timedelta(1, "ns")
   inputs: xarray.Dataset = dataset.sel({"time": slice(-input_duration + epsilon, zero)})
   print(f" ----> input_duration({input_duration})=> {inputs.dims.mapping}")
-
-  ttest_array: xarray.DataArray = targets.data_vars[vnames[0]]
-  tdata  = ttest_array.isel( lon=100, lat=100, time=0 ).squeeze().values.tolist()
-  print(f" ----> target data column => {vnames[0]}: {tdata}")
-
-  itest_array: xarray.DataArray = inputs.data_vars[vnames[0]]
-  idata  = itest_array.isel( lon=100, lat=100, time=0 ).squeeze().values.tolist()
-  print(f" ----> input data column => {vnames[0]}: {idata}")
-
   return inputs, targets
 
 
