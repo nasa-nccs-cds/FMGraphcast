@@ -10,8 +10,8 @@ Integration of GraphCast into the ILab Foundation Model Framework
 ## Conda Environment Setup
 
 #### Create Base Environment
-    > conda create -n holojax -c conda-forge 
-    > conda activate holojax
+    > conda create -n fmjax -c conda-forge 
+    > conda activate fmjax
   #  > conda install -c nvidia cuda-python=12.2
   #  > pip install --upgrade "jax[cuda12_pip]" -f https://storage.googleapis.com/jax-releases/jax_cuda_releases.html
     > conda install jaxlib=*=*cuda* jax cuda-nvcc -c conda-forge -c nvidia
