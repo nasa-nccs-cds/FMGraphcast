@@ -14,7 +14,7 @@ Integration of GraphCast into the ILab Foundation Model Framework
     > conda activate fmjax
   #  > conda install -c nvidia cuda-python=12.2
   #  > pip install --upgrade "jax[cuda12_pip]" -f https://storage.googleapis.com/jax-releases/jax_cuda_releases.html
-    > conda install jaxlib=*=*cuda* jax cuda-nvcc -c conda-forge -c nvidia
+    > conda install jaxlib=*=*cuda* jax=0.4.23 cuda-nvcc -c conda-forge -c nvidia
     > conda install -c conda-forge seaborn ipympl jupyterlab ipykernel ipython ipywidgets numpy xarray dask scipy netCDF4 chex pandas dm-haiku jraph rtree tree trimesh typing_extensions 
     > pip install hydra-core --upgrade
     > pip install dm-tree
