@@ -45,17 +45,6 @@ def run_forward(model_config: graphcast.ModelConfig, task_config: graphcast.Task
 
 @hk.transform_with_state
 def loss_fn(model_config: graphcast.ModelConfig, task_config: graphcast.TaskConfig, norms: Dict[str,xa.Dataset], inputs: xa.Dataset, targets: xa.Dataset, forcings: xa.Dataset):
-	from graphcast.losses import is_tracer
-	print(f"\n --------------------------- loss_fn: --------------------------- ")
-	print( f" *** inputs ({type(inputs)}):")
-	for vn, dv in inputs.data_vars.items():
-		print(f" > {vn}{dv.dims}: {dv.shape}, is_tracer = {is_tracer(dv)}")
-	print( f" *** targets ({type(targets)}):")
-	for vn, dv in targets.data_vars.items():
-		print(f" > {vn}{dv.dims}: {dv.shape}, is_tracer = {is_tracer(dv)}")
-	print( f" *** forcings ({type(forcings)}):")
-	for vn, dv in forcings.data_vars.items():
-		print(f" > {vn}{dv.dims}: {dv.shape}, is_tracer = {is_tracer(dv)}")
 	predictor = construct_wrapped_graphcast(model_config, task_config, norms)
 	loss, diagnostics = predictor.loss(inputs, targets, forcings)
 	return xarray_tree.map_structure( lambda x: xarray_jax.unwrap_data(x,require_jax=True).mean(), (loss, diagnostics))
