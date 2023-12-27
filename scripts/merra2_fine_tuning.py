@@ -61,6 +61,7 @@ for epoch in range(nepochs):
 		for day_offset in range(0,4):
 			losses = []
 			for iteration in range(100000):
+				print( f" ** Iteration {iteration}: day offset {day_offset}" )
 				train_data: xa.Dataset = fmbatch.get_train_data( day_offset )
 				itf = data_utils.extract_inputs_targets_forcings( train_data, target_lead_times=target_lead_times, **dataclasses.asdict(task_config) )
 				train_inputs, train_targets, train_forcings = itf
