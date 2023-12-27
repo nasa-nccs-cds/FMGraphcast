@@ -73,7 +73,7 @@ for epoch in range(nepochs):
 					loss, diagnostics, next_state, grads = with_params(grads_fn_jitted)( inputs=train_inputs, targets=train_targets, forcings=train_forcings )
 					params = jax.tree_map(  lambda p, g: p - lr * g, params, grads)
 					losses.append( loss )
-					print(f" ** Iteration {iteration}, day offset {day_offset}: loss {loss:.4f}")
+				#	print(f" ** Iteration {iteration}, day offset {day_offset}: loss {loss:.4f}")
 					if loss < error_threshold:
 						break
 					elif iteration == max_iter:
