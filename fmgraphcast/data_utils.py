@@ -191,13 +191,13 @@ def extract_input_target_times( dataset: xarray.Dataset, input_duration: Timedel
   # This means the time coordinates are now forecast lead times.
   time: xarray.DataArray = dataset.coords["time"]
   vnames = list(dataset.data_vars.keys())
-  print(f" ----> input dataset=> {dataset.dims.mapping}")
+  # print(f" ----> input dataset=> {dataset.dims.mapping}")
   # ftime = time.values.astype(np.int64)/1e15 - 47.6
   # print(f"\n --> Slice out targets: target_lead_times={target_lead_times}, time({time.dtype})={ftime.tolist()}")
   dataset = dataset.assign_coords(time=time + target_duration - time[-1])
   rtime: xarray.DataArray = dataset.coords["time"]
   targets: xarray.Dataset = dataset.sel({"time": target_lead_times})
-  print(f" ----> target_lead_times({target_lead_times})=> {targets.dims.mapping}")
+  # print(f" ----> target_lead_times({target_lead_times})=> {targets.dims.mapping}")
 
   input_duration = pd.Timedelta(input_duration)
   # Both endpoints are inclusive with label-based slicing, so we offset by a
@@ -205,7 +205,7 @@ def extract_input_target_times( dataset: xarray.Dataset, input_duration: Timedel
   zero = pd.Timedelta(0)
   epsilon = pd.Timedelta(1, "ns")
   inputs: xarray.Dataset = dataset.sel({"time": slice(-input_duration + epsilon, zero)})
-  print(f" ----> input_duration({input_duration})=> {inputs.dims.mapping}")
+  # print(f" ----> input_duration({input_duration})=> {inputs.dims.mapping}")
   return inputs, targets
 
 
@@ -254,7 +254,7 @@ def extract_inputs_targets_forcings(
   # `datetime` is needed by add_derived_vars but breaks autoregressive rollouts.
   dataset = dataset.drop_vars("datetime")
   inputs, targets = extract_input_target_times( dataset, input_duration=input_duration, target_lead_times=target_lead_times )
-  print( f"\nExtract Inputs & Targets: input times: {get_timedeltas(inputs)}, target times: {get_timedeltas(targets)}")
+  # print( f"\nExtract Inputs & Targets: input times: {get_timedeltas(inputs)}, target times: {get_timedeltas(targets)}")
 
   if set(forcing_variables) & set(target_variables):
     raise ValueError( f"Forcing variables {forcing_variables} should not overlap with target variables {target_variables}." )
