@@ -60,8 +60,7 @@ for epoch in range(nepochs):
 		fmbatch.load_batch( forecast_date )
 		for day_offset in range(0,4):
 			losses = []
-			for iteration in range(100000):
-				print( f" ** Iteration {iteration}: day offset {day_offset}" )
+			for iteration in range(8):
 				train_data: xa.Dataset = fmbatch.get_train_data( day_offset )
 				itf = data_utils.extract_inputs_targets_forcings( train_data, target_lead_times=target_lead_times, **dataclasses.asdict(task_config) )
 				train_inputs, train_targets, train_forcings = itf
@@ -74,6 +73,7 @@ for epoch in range(nepochs):
 					loss, diagnostics, next_state, grads = with_params(grads_fn_jitted)( inputs=train_inputs, targets=train_targets, forcings=train_forcings )
 					params = jax.tree_map(  lambda p, g: p - lr * g, params, grads)
 					losses.append( loss )
+					print(f" ** Iteration {iteration}, day offset {day_offset}: loss {loss:.4f}")
 					if loss < error_threshold:
 						break
 					elif iteration == max_iter:
