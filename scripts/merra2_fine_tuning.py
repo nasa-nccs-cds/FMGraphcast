@@ -2,6 +2,7 @@ import traceback
 from fmbase.source.merra2.model import FMBatch, BatchType
 from fmgraphcast.config import save_params, load_params
 from fmgraphcast.model import run_forward, loss_fn, grads_fn, drop_state
+from fmbase.util.logging import lgm, exception_handled, log_timing
 import xarray as xa
 import functools
 from fmgraphcast import data_utils
@@ -52,6 +53,7 @@ init_jitted = jax.jit(with_configs(run_forward.init))
 grads_fn_jitted = jax.jit(with_configs(grads_fn))
 
 for epoch in range(nepochs):
+	lgm().log( f"Epoch {epoch}:")
 	divergents = set()
 	for date_index, forecast_date in enumerate(train_dates):
 		print( "\n" + ("\t"*8) + f"EPOCH {epoch} *** Forecast date[{date_index}]: {forecast_date}")
