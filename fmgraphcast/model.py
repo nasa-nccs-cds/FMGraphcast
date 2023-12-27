@@ -58,8 +58,7 @@ def loss_fn(model_config: graphcast.ModelConfig, task_config: graphcast.TaskConf
 		print(f" > {vn}{dv.dims}: {dv.shape}, is_tracer = {is_tracer(dv)}")
 	predictor = construct_wrapped_graphcast(model_config, task_config, norms)
 	loss, diagnostics = predictor.loss(inputs, targets, forcings)
-	return xarray_tree.map_structure(
-	  lambda x: xarray_jax.unwrap_data(x.mean(), require_jax=True), (loss, diagnostics))
+	return xarray_tree.map_structure( lambda x: xarray_jax.unwrap_data(x,require_jax=True).mean(), (loss, diagnostics))
 
 def grads_fn(params: Dict, state: Dict, model_config: graphcast.ModelConfig, task_config: graphcast.TaskConfig, norms: xa.Dataset, inputs: xa.Dataset, targets: xa.Dataset, forcings: xa.Dataset):
 	def _aux(params_, state_, i, t, f):
