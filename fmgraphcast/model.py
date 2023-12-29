@@ -1,5 +1,4 @@
 import functools
-import traceback
 from typing import Optional, Dict, List
 from graphcast import autoregressive
 from graphcast import casting
@@ -16,10 +15,12 @@ import hydra, dataclasses
 # Build jitted functions, and possibly initialize random weights
 
 def drop_state(fn):
+	return lambda **kw: fn(**kw)[0]
+
+def drop_state1(fn):
 	def ds(*args, **kwargs):
 		p,s = fn(*args, **kwargs)
 		print( f"\n drop_state: {type(s)}\n")
-		traceback.print_stack()
 		return p
 	return ds
 def construct_wrapped_graphcast( model_config: graphcast.ModelConfig, task_config: graphcast.TaskConfig, norms: Dict[str,xa.Dataset]):
