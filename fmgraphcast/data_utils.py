@@ -190,24 +190,15 @@ def extract_input_target_times( dataset: xarray.Dataset, input_duration: Timedel
   # forming the target period which needs to be predicted.
   # This means the time coordinates are now forecast lead times.
   time: xarray.DataArray = dataset.coords["time"]
-  vnames = list(dataset.data_vars.keys())
-  # print(f" ----> input dataset=> {dataset.dims.mapping}")
-  # ftime = time.values.astype(np.int64)/1e15 - 47.6
-  # print(f"\n --> Slice out targets: target_lead_times={target_lead_times}, time({time.dtype})={ftime.tolist()}")
   dataset = dataset.assign_coords(time=time + target_duration - time[-1])
-  rtime: xarray.DataArray = dataset.coords["time"]
   targets: xarray.Dataset = dataset.sel({"time": target_lead_times})
-  # print(f" ----> target_lead_times({target_lead_times})=> {targets.dims.mapping}")
-
   input_duration = pd.Timedelta(input_duration)
   # Both endpoints are inclusive with label-based slicing, so we offset by a
   # small epsilon to make one of the endpoints non-inclusive:
   zero = pd.Timedelta(0)
   epsilon = pd.Timedelta(1, "ns")
   inputs: xarray.Dataset = dataset.sel({"time": slice(-input_duration + epsilon, zero)})
-  # print(f" ----> input_duration({input_duration})=> {inputs.dims.mapping}")
   return inputs, targets
-
 
 def _process_target_lead_times_and_get_duration( target_lead_times: TargetLeadTimes) -> TimedeltaLike:
   """Returns the minimum duration for the target lead times."""
