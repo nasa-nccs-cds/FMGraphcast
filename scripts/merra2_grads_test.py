@@ -54,4 +54,4 @@ itf = data_utils.extract_inputs_targets_forcings( train_data, target_lead_times=
 train_inputs, train_targets, train_forcings = itf
 
 loss, diagnostics, next_state, grads = with_params(grads_fn_jitted)( inputs=train_inputs, targets=train_targets, forcings=train_forcings )
-print(f" ** loss {loss:.4f}, diagnostics: {diagnostics}, next_state: {next_state}")
+print(f" ** loss {loss:.4f}, diagnostics: {type(diagnostics)}, next_state: {type(next_state)}")
