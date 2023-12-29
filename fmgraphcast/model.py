@@ -15,7 +15,10 @@ import hydra, dataclasses
 # Build jitted functions, and possibly initialize random weights
 
 def drop_state(fn):
-	return lambda **kw: fn(**kw)[0]
+	def ds(*args, **kwargs):
+		print( f"\nDropping {fn.__name__}\n")
+		return fn(*args, **kwargs)[0]
+	return ds
 def construct_wrapped_graphcast( model_config: graphcast.ModelConfig, task_config: graphcast.TaskConfig, norms: Dict[str,xa.Dataset]):
 	"""Constructs and wraps the GraphCast Predictor."""
 	# Deeper one-step predictor.
