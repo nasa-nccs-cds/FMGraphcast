@@ -1,4 +1,5 @@
 import functools
+import traceback
 from typing import Optional, Dict, List
 from graphcast import autoregressive
 from graphcast import casting
@@ -16,8 +17,10 @@ import hydra, dataclasses
 
 def drop_state(fn):
 	def ds(*args, **kwargs):
-		print( f"\nDropping {fn.__name__}\n")
-		return fn(*args, **kwargs)[0]
+		p,s = fn(*args, **kwargs)
+		print( f"\n drop_state: {type(s)}\n")
+		traceback.print_stack()
+		return p
 	return ds
 def construct_wrapped_graphcast( model_config: graphcast.ModelConfig, task_config: graphcast.TaskConfig, norms: Dict[str,xa.Dataset]):
 	"""Constructs and wraps the GraphCast Predictor."""
