@@ -64,6 +64,7 @@ for epoch in range(nepochs):
 				train_data: xa.Dataset = fmbatch.get_train_data( day_offset )
 				itf = data_utils.extract_inputs_targets_forcings( train_data, target_lead_times=target_lead_times, **dataclasses.asdict(task_config) )
 				train_inputs, train_targets, train_forcings = itf
+				print( f"\n\n ~~~~~~~~ train_inputs: dims={train_inputs.dims}" )
 
 				if params is None:
 					params, state = init_jitted( rng=jax.random.PRNGKey(0), inputs=train_inputs, targets_template=train_targets, forcings=train_forcings)
